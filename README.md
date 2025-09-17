@@ -159,8 +159,11 @@ A plataforma integra dados de duas fontes principais:
 
 <img width="487" height="299" alt="image" src="https://github.com/user-attachments/assets/e40ed652-a60d-4447-bc6c-0cb4f6fffec5" />
 
+# UML
 
+## Diagrama de Casos de Uso
 
+<img width="487" height="299" alt="image" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowAnalytics.png" />
 
 
 
