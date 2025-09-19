@@ -165,7 +165,11 @@ A plataforma integra dados de duas fontes principais:
 
 <img width="487" height="299" alt="image" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowAnalytics.png" />
 
+# Design
 
+## Painel
+
+<img width="487" height="299" alt="image" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/design_figma.png" />
 
 
 
