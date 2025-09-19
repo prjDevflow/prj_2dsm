@@ -8,7 +8,7 @@ const PageContainer = styled.div`
   flex: 1;
   width: 100%;
   padding: 1.5rem;
-  background-color: #f3f4f6;
+  background-color: #f6f3f3ff;
 `;
 
 // Título
@@ -30,7 +30,7 @@ const Table = styled.table`
 `;
 
 const Th = styled.th`
-  text-align: left;
+  text-align: center;
   padding: 0.75rem 1rem;
   background-color: #2563eb;
   color: white;
@@ -39,7 +39,7 @@ const Th = styled.th`
 
 const Td = styled.td`
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5ebe6ff;
   color: #374151;
 `;
 

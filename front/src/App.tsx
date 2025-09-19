@@ -1,10 +1,12 @@
+// src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import theme from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";
-import SimaPage from "./pages/SimaPage";
 import BarraBrasil from "./components/BarraBrasil";
 import MenuBar from "./components/MenuBar";
+import Sidebar from "./components/SideBar";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -14,11 +16,32 @@ function App() {
         <Router>
           <BarraBrasil />
           <MenuBar />
-          <div className="flex-1 w-full">
+
+          {}
+          <Sidebar logoSrc="/public/Logo-2.png" />
+
+          {/* Conteúdo principal:
+              - minHeight = 100vh menos header (3rem) e footer (56px)
+              - paddingBottom garante que nada fique coberto pelo footer
+          */}
+          <div
+            className="flex-1 w-full"
+            style={{
+              minHeight: "calc(100vh - 3rem - 56px)",
+              paddingTop: "1rem",
+              paddingLeft: "1rem",
+              paddingRight: "1rem",
+              paddingBottom: "72px", // espaço extra para o footer e para scroll
+            }}
+          >
             <Routes>
-              <Route path="/sima" element={<SimaPage />} />
+              <Route path="/sima" element={<div />} />
+              {/* adicione outras rotas aqui */}
             </Routes>
           </div>
+
+          {/* Footer fixo; sua altura deve ser a mesma usada no Sidebar bottom */}
+          <Footer />
         </Router>
       </div>
     </ThemeProvider>
