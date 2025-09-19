@@ -169,7 +169,7 @@ A plataforma integra dados de duas fontes principais:
 
 ## Painel
 
-<img width="487" height="299" alt="image" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/design_figma.png" />
+<img width="487" height="299" alt="image" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/imagem_2025-09-18_211738787.png" />
 
 
 
