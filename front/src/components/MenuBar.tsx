@@ -1,113 +1,169 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import styled from "styled-components";
+
+const HEADER_HEIGHT = "4.5rem"; // 72px - conforme imagem
 
 const Nav = styled.nav`
   background-color: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => theme.colors.text.inverse};
   width: 100%;
   box-shadow: ${({ theme }) => theme.shadows.small};
+  position: fixed;
+  top: 32px;
+  left: 0;
+  z-index: 1100;
 `;
 
-const Container = styled.div`
+const TopContainer = styled.div`
+  height: ${HEADER_HEIGHT};
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 3rem;
-  width: 100%;
-  padding: 0 ${({ theme }) => theme.spacing(4)};
+  justify-content: space-between;
+  padding: 0 ${({ theme }) => theme.spacing(6)};
+  gap: 1rem;
 `;
 
-const Title = styled.div`
-  font-size: ${({ theme }) => theme.fonts.size.large};
-  font-weight: ${({ theme }) => theme.fonts.weight.bold};
+/* Logo + title (à esquerda) */
+const Brand = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 `;
 
+/* Título ao lado da logo */
+const BrandTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  color: ${({ theme }) => theme.colors.text.inverse};
+`;
+
+const AppName = styled.div`
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.2px;
+`;
+
+const AppSubtitle = styled.div`
+  font-size: 0.8rem;
+  opacity: 0.95;
+`;
+
+/* Menu desktop (à direita) */
 const DesktopMenu = styled.div`
   display: none;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(5)};
 
   @media (min-width: 768px) {
     display: flex;
-    gap: ${({ theme }) => theme.spacing(6)};
+  }
+`;
+
+const MenuItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryDark};
   }
 `;
 
 const StyledLink = styled(Link)`
-  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(3)}`};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  transition: background 0.2s;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primaryDark};
-  }
+  color: ${({ theme }) => theme.colors.text.inverse};
+  text-decoration: none;
+  font-weight: 700;
 `;
 
+/* Botão hamburguer (mobile) */
 const MobileButton = styled.button`
   display: block;
   padding: ${({ theme }) => theme.spacing(2)};
   background: none;
   border: none;
   cursor: pointer;
+  color: ${({ theme }) => theme.colors.text.inverse};
 
   @media (min-width: 768px) {
     display: none;
   }
 `;
 
+/* Menu mobile (aparece abaixo do header quando aberto) */
 const MobileMenu = styled.div`
   background-color: ${({ theme }) => theme.colors.primaryDark};
+  color: ${({ theme }) => theme.colors.text.inverse};
   width: 100%;
   display: flex;
   flex-direction: column;
+  padding: 0.5rem 0;
 `;
 
 const MobileLink = styled(Link)`
-  padding: ${({ theme }) => `${theme.spacing(2)} ${theme.spacing(4)}`};
-  transition: background 0.2s;
+  padding: 0.75rem 1.25rem;
+  text-decoration: none;
+  color: ${({ theme }) => theme.colors.text.inverse};
+  font-weight: 700;
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.primary};
+    background: ${({ theme }) => theme.colors.primary};
   }
 `;
 
-function MenuBar() {
+export default function MenuBar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Nav>
-      <Container>
-        <Title>Meu Projeto</Title>
+      <TopContainer>
+        <Brand>
+          <BrandTitle>
+            <AppName>DevFlow Analytics</AppName>
+            <AppSubtitle></AppSubtitle>
+          </BrandTitle>
+        </Brand>
 
-        {/* Menu desktop */}
         <DesktopMenu>
-          <StyledLink to="/sima">Sima</StyledLink>
-          <StyledLink to="/about">Sobre</StyledLink>
-          <StyledLink to="/contact">Contato</StyledLink>
+          <MenuItem>
+            <StyledLink to="/sima">TABELAS</StyledLink>
+            <ChevronDown size={16} />
+          </MenuItem>
+
+          <MenuItem>
+            <StyledLink to="/graficos">GRAFICOS</StyledLink>
+            <ChevronDown size={16} />
+          </MenuItem>
+
+          <MenuItem>
+            <StyledLink to="/about">SOBRE</StyledLink>
+          </MenuItem>
+
+          <MenuItem>
+            <StyledLink to="/contact">CONTATO</StyledLink>
+          </MenuItem>
         </DesktopMenu>
 
-        {/* Botão hambúrguer */}
-        <MobileButton onClick={() => setIsOpen(!isOpen)}>
+        <MobileButton onClick={() => setIsOpen((s) => !s)} aria-label="Abrir menu">
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </MobileButton>
-      </Container>
+      </TopContainer>
 
-      {/* Menu mobile */}
       {isOpen && (
         <MobileMenu>
-          <MobileLink to="/sima" onClick={() => setIsOpen(false)}>
-            Sima
-          </MobileLink>
-          <MobileLink to="/about" onClick={() => setIsOpen(false)}>
-            Sobre
-          </MobileLink>
-          <MobileLink to="/contact" onClick={() => setIsOpen(false)}>
-            Contato
-          </MobileLink>
+          <MobileLink to="/sima" onClick={() => setIsOpen(false)}>TABELAS</MobileLink>
+          <MobileLink to="/graficos" onClick={() => setIsOpen(false)}>GRAFICOS</MobileLink>
+          <MobileLink to="/about" onClick={() => setIsOpen(false)}>SOBRE</MobileLink>
+          <MobileLink to="/contact" onClick={() => setIsOpen(false)}>CONTATO</MobileLink>
         </MobileMenu>
       )}
     </Nav>
   );
 }
-
-export default MenuBar;
