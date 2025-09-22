@@ -137,39 +137,139 @@ A plataforma integra dados de duas fontes principais:
 - Tooltips mostram timestamp e valor exato ao passar o cursor.
 </details>
 
+<details>
+<summary><b>RF06 — Diagrama: Casos de Uso</b></summary>
 
-# Burndown Chart
+**Como** X  
+**Quero** Y  
+**Para que** Z
 
-## Sprint 1 — Poker Planning Tarefas e Story Points
+**Critérios de Aceitação**
+- Escrever
+</details>
 
-- **T1.1** — Inicializar repositórios e pipeline CI: **2**
-- **T1.2** — Modelagem de dados (migrations + seeds): **3**
-- **T1.3** — API: listagem de parâmetros com filtros: **5**
-- **T1.4** — Frontend: layout base do painel: **3**
-- **T1.5** — Frontend: componente de filtros integrado à API: **3**
-- **T2.1** — Endpoint tabelado paginado e ordenável (GET /api/coletas): **5**
-- **T2.2** — Frontend: tabela com paginação e ordenação: **5**
-- **T3.1** — Endpoint export CSV (síncrono para pequenos volumes): **3**
-- **T3.3** — Frontend: botão “Exportar CSV” (opção page/all): **1**
-- **TS.1** — Autenticação & autorização básica: **5**
-- **TS.4** — Documentação mínima da API (OpenAPI): **2**
-- **T1.7** — Auditoria de consultas (logs de filtros / usuário): **3**
+<details>
+<summary><b>RF07 — Diagrama: Classe</b></summary>
 
-### Total de Story Points (Sprint 1): **40**
+**Como** X  
+**Quero** Y  
+**Para que** Z
 
-<img width="487" height="299" alt="image" src="https://github.com/user-attachments/assets/e40ed652-a60d-4447-bc6c-0cb4f6fffec5" />
+**Critérios de Aceitação**
+- Escrever
+</details>
 
-# UML
+<details>
+<summary><b>RF08 — Diagrama: Sequência</b></summary>
+
+**Como** X  
+**Quero** Y  
+**Para que** Z
+
+**Critérios de Aceitação**
+- Escrever
+</details>
+
+<details>
+<summary><b>RF09 — Testes unitários</b></summary>
+
+**Como** X  
+**Quero** Y  
+**Para que** Z
+
+**Critérios de Aceitação**
+- Escrever
+</details>
+
+<details>
+<summary><b>RF10 — Junção de Tabelas</b></summary>
+
+**Como** analista de dados do INPE  
+**Quero** aplicar junções entre tabelas do banco limnologia_db (parâmetros, reservatórios, instituições e campanhas)  
+**Para que** seja possível gerar relatórios que combinem informações relevantes e respondam perguntas práticas sobre as coletas.
+
+**Critérios de Aceitação**
+- Criar 5 consultas SQL utilizando JOIN entre as tabelas do banco.
+- Cada consulta deve responder a uma questão prática do INPE, incluindo:
+  - Relacionar parâmetros coletados com seus respectivos reservatórios.
+  - Relacionar campanhas realizadas e as instituições responsáveis.
+  - Relacionar séries temporais do SIMA com parâmetros correspondentes.
+  - Relacionar localizações de coleta (georreferenciadas) com dados coletados.
+  - Listar todos os parâmetros coletados por cada instituição.
+- Cada consulta deve ser validada, retornando dados consistentes e prontos para uso em relatórios.
+</details>
+
+<details>
+<summary><b>RF11 — Funções Agrupadoras</b></summary>
+
+**Como** X  
+**Quero** Y  
+**Para que** Z
+
+**Critérios de Aceitação**
+- Escrever
+</details>
+
+<details>
+<summary><b>RF12 — Stored Procedure</b></summary>
+
+**Como** X  
+**Quero** Y  
+**Para que** Z
+
+**Critérios de Aceitação**
+- Escrever
+</details>
+
+<details>
+<summary><b>RF12 — Triggers</b></summary>
+
+**Como** X  
+**Quero** Y  
+**Para que** Z
+
+**Critérios de Aceitação**
+- Escrever
+</details>
+
+# 📊 Burndown Chart
+
+## Sprint 1 — Planejamento (Poker Planning)
+
+### Estimativa de Tarefas e Story Points
+
+| Código | Tarefa | Story Points |
+|--------|--------|--------------|
+| **T1.1** | Inicializar repositórios e pipeline CI | **2** |
+| **T1.2** | Modelagem de dados (migrations + seeds) | **3** |
+| **T1.3** | API: listagem de parâmetros com filtros | **5** |
+| **T1.4** | Frontend: layout base do painel | **3** |
+| **T1.5** | Frontend: componente de filtros integrado à API | **3** |
+| **T2.1** | Endpoint tabelado paginado e ordenável (`GET /api/coletas`) | **5** |
+| **T2.2** | Frontend: tabela com paginação e ordenação | **5** |
+| **T3.1** | Endpoint export CSV (síncrono, pequenos volumes) | **3** |
+| **T3.3** | Frontend: botão **Exportar CSV** (opção page/all) | **1** |
+| **TS.1** | Autenticação & autorização básica | **5** |
+| **TS.4** | Documentação mínima da API (OpenAPI) | **2** |
+| **T1.7** | Auditoria de consultas (logs de filtros / usuário) | **3** |
+
+🔹 **Total de Story Points (Sprint 1): 40**
+
+### Burndown Chart
+<img width="487" height="299" alt="Burndown Chart Sprint 1" src="https://github.com/user-attachments/assets/e40ed652-a60d-4447-bc6c-0cb4f6fffec5" />
+
+---
+
+# 📝 UML
 
 ## Diagrama de Casos de Uso
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowAnalytics.png" />
 
-<img width="487" height="299" alt="image" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowAnalytics.png" />
+---
 
-# Design
+# 🎨 Design
 
-## Painel
-
-<img width="487" height="299" alt="image" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/imagem_2025-09-18_211738787.png" />
-
+## Protótipo do Painel
+<img width="487" height="299" alt="Protótipo do Painel" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/imagem_2025-09-18_211738787.png" />
 
 
