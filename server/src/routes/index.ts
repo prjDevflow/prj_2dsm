@@ -3,6 +3,7 @@ import balcar from "./balcar";
 import furnas from "./furnas";
 import sima from "./sima";
 import exportar from "./exportarcsv";
+import { getCoordinatesController } from "../controllers/getCoordinates/controller";
 
 const router = express.Router();
 
