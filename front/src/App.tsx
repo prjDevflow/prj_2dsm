@@ -7,6 +7,7 @@ import BarraBrasil from "./components/BarraBrasil";
 import MenuBar from "./components/MenuBar";
 import Sidebar from "./components/SideBar";
 import Footer from "./components/Footer";
+import Map from "./components/Map";
 
 function App() {
   return (
