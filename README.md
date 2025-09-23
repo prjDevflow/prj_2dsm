@@ -249,7 +249,7 @@ A plataforma integra dados de duas fontes principais:
 🔹 **Total de Story Points (Sprint 1): 42**
 
 ### Burndown Chart
-<img width="487" height="299" alt="Burndown Chart Sprint 1" src="https://github.com/user-attachments/assets/e40ed652-a60d-4447-bc6c-0cb4f6fffec5" />
+<img width="487" height="299" alt="Burndown Chart Sprint 1" src= "https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/burndown_sprint1.png" />
 
 ---
 
