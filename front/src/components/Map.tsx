@@ -20,7 +20,7 @@ export default function Map() {
   useEffect(() => {
     const fetchColetas = async () => {
       try {
-        const response = await api.get<Coletas[]>("/coletas"); 
+        const response = await api.get<Coletas[]>("/coletas");
         setColetas(response.data);
       } catch (error) {
         console.error("❌ Erro ao buscar coletas:", error);
@@ -38,10 +38,7 @@ export default function Map() {
 
   return (
     <MapContainer center={position} zoom={6} scrollWheelZoom={true} className="map-container">
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer url="https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}" attribution="© Google" />
 
       {coletas.map((ponto) => (
         <Marker key={ponto.id} position={[ponto.latitude, ponto.longitude]}>
