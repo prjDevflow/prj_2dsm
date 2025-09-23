@@ -240,20 +240,13 @@ A plataforma integra dados de duas fontes principais:
 
 | Código | Tarefa | Story Points |
 |--------|--------|--------------|
-| **T1.1** | Inicializar repositórios e pipeline CI | **2** |
-| **T1.2** | Modelagem de dados (migrations + seeds) | **3** |
-| **T1.3** | API: listagem de parâmetros com filtros | **5** |
-| **T1.4** | Frontend: layout base do painel | **3** |
-| **T1.5** | Frontend: componente de filtros integrado à API | **3** |
-| **T2.1** | Endpoint tabelado paginado e ordenável (`GET /api/coletas`) | **5** |
-| **T2.2** | Frontend: tabela com paginação e ordenação | **5** |
-| **T3.1** | Endpoint export CSV (síncrono, pequenos volumes) | **3** |
-| **T3.3** | Frontend: botão **Exportar CSV** (opção page/all) | **1** |
-| **TS.1** | Autenticação & autorização básica | **5** |
-| **TS.4** | Documentação mínima da API (OpenAPI) | **2** |
-| **T1.7** | Auditoria de consultas (logs de filtros / usuário) | **3** |
+| **RF-01** | Painel Interativo de Parametros | **13** |
+| **RF-03** | Exportar CSV | **8** |
+| **RF-04** | Mapa interativo de localização | **13** |
+| **RF-06** | Diagrama: Casos de Uso | **3** |
+| **RF-09** | Junções de Tabelas | **5** |
 
-🔹 **Total de Story Points (Sprint 1): 40**
+🔹 **Total de Story Points (Sprint 1): 42**
 
 ### Burndown Chart
 <img width="487" height="299" alt="Burndown Chart Sprint 1" src="https://github.com/user-attachments/assets/e40ed652-a60d-4447-bc6c-0cb4f6fffec5" />
