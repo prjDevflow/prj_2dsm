@@ -3,6 +3,7 @@ CREATE OR REPLACE FUNCTION listar_co2(
  p_data_ini TIMESTAMP,
  p_data_fim TIMESTAMP
 )
+
 RETURNS TABLE(datahora TIMESTAMP, co2_low FLOAT, co2_high FLOAT) AS $$
 BEGIN
  RETURN QUERY

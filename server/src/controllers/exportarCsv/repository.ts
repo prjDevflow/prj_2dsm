@@ -1,5 +1,5 @@
-export const exportCsvRepository= {
-async getDataFurnas(){
+export const exportCsvRepository = {
+  async getDataFurnas() {
     const query = `
      SELECT 
     f.idabioticocoluna AS idfluxoinpe,
@@ -45,8 +45,8 @@ ORDER BY f.datamedida DESC, f.horamedida DESC
 LIMIT 100;
 
     `;
-},
-async getDataBalcar(){
+  },
+  async getDataBalcar() {
     const query = `
      SELECT
     f.idfluxoinpe,
@@ -108,9 +108,9 @@ LIMIT 100;
 
 
     `;
-},
+  },
 
-async getDataSima(){
+  async getDataSima() {
     const query = `
      SELECT
     e.idestacao,
@@ -173,12 +173,5 @@ LIMIT 100;
 
 
     `;
-},
-
-}
-
-
-
-
-
-
+  },
+};

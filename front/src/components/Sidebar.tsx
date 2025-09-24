@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { Sliders, ChevronLeft, ChevronDown } from "lucide-react";
@@ -31,14 +30,16 @@ const SidebarWrapper = styled.aside<{ open: boolean }>`
   width: ${SIDEBAR_WIDTH}px;
   max-width: 95vw;
   transform: translateX(${(p) => (p.open ? "0" : `-${SIDEBAR_WIDTH}px`)});
-  transition: transform 280ms cubic-bezier(.2,.9,.2,1), box-shadow 200ms;
+  transition:
+    transform 280ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    box-shadow 200ms;
   background: linear-gradient(180deg, #007fce 0%, #006bb3 100%);
   color: ${({ theme }) => theme?.colors?.text?.inverse ?? "#fff"};
   z-index: 1200;
-  display:flex;
-  flex-direction:column;
-  border-right: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 4px 0 24px rgba(2,6,23,0.18);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 4px 0 24px rgba(2, 6, 23, 0.18);
   @media (max-width: 640px) {
     width: 85vw;
     border-radius: 0 12px 12px 0;
@@ -54,15 +55,21 @@ const ToggleHandle = styled.button<{ open: boolean }>`
   height: 98px;
   border-radius: 0 12px 12px 0;
   border: none;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  background: linear-gradient(180deg, rgba(11,156,255,0.95), rgba(11,156,255,0.9));
-  box-shadow: 0 6px 18px rgba(3,10,30,0.25);
-  transition: transform 180ms ease, box-shadow 180ms;
-  &:hover { transform: translateY(-50%) scale(1.02); }
-  &:focus { outline: 3px solid rgba(255,255,255,0.12); }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(11, 156, 255, 0.95), rgba(11, 156, 255, 0.9));
+  box-shadow: 0 6px 18px rgba(3, 10, 30, 0.25);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms;
+  &:hover {
+    transform: translateY(-50%) scale(1.02);
+  }
+  &:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.12);
+  }
 `;
 
 const LogoFullWrap = styled.div`
@@ -81,19 +88,27 @@ const LogoFullImg = styled.img<{ open: boolean }>`
   display: block;
   background: transparent;
   border: none;
-  transition: height 280ms ease, filter 280ms ease;
+  transition:
+    height 280ms ease,
+    filter 280ms ease;
   ${(p) => !p.open && `filter: brightness(0.9) contrast(0.95);`}
-  @media (max-width: 640px) { height: 160px; }
+  @media (max-width: 640px) {
+    height: 160px;
+  }
 `;
 
 const SidebarContent = styled.div`
   padding: 1.25rem;
   overflow-y: auto;
   flex: 1;
-  &::-webkit-scrollbar { width: 10px; }
-  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 99px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -101,87 +116,98 @@ const SidebarContent = styled.div`
 `;
 
 const FiltersButton = styled.button`
-  margin-top: .25rem;
-  width:100%;
-  display:flex;
-  gap:.6rem;
-  align-items:center;
-  padding:.6rem .9rem;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  margin-top: 0.25rem;
+  width: 100%;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.6rem 0.9rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: inherit;
-  font-weight:700;
-  border-radius:8px;
-  cursor:pointer;
-  transition: transform 140ms, box-shadow 140ms;
-  &:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(2,6,23,0.12); }
-  &:focus { outline: 3px solid rgba(255,255,255,0.12); }
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    transform 140ms,
+    box-shadow 140ms;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.12);
+  }
+  &:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.12);
+  }
 `;
 
 const Section = styled.div`
-  margin-top:1rem;
-  background: rgba(255,255,255,0.03);
-  border-radius:8px;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 `;
 
 const SectionHeader = styled.button`
   width: 100%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: .75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
   border: none;
   background: transparent;
   color: inherit;
   cursor: pointer;
-  font-weight:700;
-  font-size: .9rem;
-  &:focus { outline: 3px solid rgba(255,255,255,0.08); }
+  font-weight: 700;
+  font-size: 0.9rem;
+  &:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.08);
+  }
 `;
 
 const SectionBody = styled.div<{ open: boolean }>`
-  padding: .75rem;
+  padding: 0.75rem;
   max-height: ${(p) => (p.open ? "400px" : "0")};
-  transition: max-height 300ms cubic-bezier(.2,.9,.2,1), padding 200ms;
+  transition:
+    max-height 300ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    padding 200ms;
   padding-top: ${(p) => (p.open ? ".75rem" : "0")};
   padding-bottom: ${(p) => (p.open ? ".75rem" : "0")};
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent);
 `;
 
 const Row = styled.label`
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding: .45rem 0;
-  color: rgba(255,255,255,0.95);
-  font-weight:500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
   user-select: none;
 `;
 
 const DateRow = styled.div`
-  display:flex;
-  gap:.5rem;
-  margin-top:.6rem;
-  align-items:center;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  align-items: center;
   width: 100%;
 `;
 
 const Rotating = styled.span<{ open: boolean }>`
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 220ms ease;
   transform: rotate(${(p) => (p.open ? "180deg" : "0deg")});
 `;
 
 const Hint = styled.div`
-  margin-top:.75rem;
-  font-size:.82rem;
-  color: rgba(255,255,255,0.85);
-  opacity:.95;
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 0.95;
 `;
 
 export default function Sidebar({ logoSrc }: SidebarProps) {
@@ -208,7 +234,9 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
     if (open) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = prev; };
+      return () => {
+        document.body.style.overflow = prev;
+      };
     }
     return;
   }, [open]);
@@ -226,8 +254,7 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
-  const toggleSection = (key: string) =>
-    setOpenSection((s) => ({ ...s, [key]: !s[key] }));
+  const toggleSection = (key: string) => setOpenSection((s) => ({ ...s, [key]: !s[key] }));
 
   return (
     <>
@@ -243,7 +270,10 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
           <ChevronLeft
             color="white"
             size={20}
-            style={{ transform: open ? "rotate(0deg)" : "rotate(180deg)", transition: "transform 180ms" }}
+            style={{
+              transform: open ? "rotate(0deg)" : "rotate(180deg)",
+              transition: "transform 180ms",
+            }}
           />
         </ToggleHandle>
 
@@ -258,15 +288,22 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
             aria-controls="filters-area"
           >
             <Sliders size={16} /> Filtros
-            <span style={{ marginLeft: "auto", opacity: 0.9 }}>{filtersOpen ? "Ocultar" : "Mostrar"}</span>
+            <span style={{ marginLeft: "auto", opacity: 0.9 }}>
+              {filtersOpen ? "Ocultar" : "Mostrar"}
+            </span>
           </FiltersButton>
 
           {filtersOpen && (
             <>
               <Section id="filters-area" aria-live="polite">
-                <SectionHeader onClick={() => toggleSection("instituicao")} aria-expanded={!!openSection.instituicao}>
+                <SectionHeader
+                  onClick={() => toggleSection("instituicao")}
+                  aria-expanded={!!openSection.instituicao}
+                >
                   <span>1. INSTITUIÇÃO</span>
-                  <Rotating open={!!openSection.instituicao}><ChevronDown color="white" size={16} /></Rotating>
+                  <Rotating open={!!openSection.instituicao}>
+                    <ChevronDown color="white" size={16} />
+                  </Rotating>
                 </SectionHeader>
                 <SectionBody open={!!openSection.instituicao}>
                   <Row className="row">
@@ -281,9 +318,14 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
               </Section>
 
               <Section>
-                <SectionHeader onClick={() => toggleSection("reservatorio")} aria-expanded={!!openSection.reservatorio}>
+                <SectionHeader
+                  onClick={() => toggleSection("reservatorio")}
+                  aria-expanded={!!openSection.reservatorio}
+                >
                   <span>2. RESERVATÓRIO</span>
-                  <Rotating open={!!openSection.reservatorio}><ChevronDown color="white" size={16} /></Rotating>
+                  <Rotating open={!!openSection.reservatorio}>
+                    <ChevronDown color="white" size={16} />
+                  </Rotating>
                 </SectionHeader>
                 <SectionBody open={!!openSection.reservatorio}>
                   <Row className="row">
@@ -298,9 +340,14 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
               </Section>
 
               <Section>
-                <SectionHeader onClick={() => toggleSection("periodo")} aria-expanded={!!openSection.periodo}>
+                <SectionHeader
+                  onClick={() => toggleSection("periodo")}
+                  aria-expanded={!!openSection.periodo}
+                >
                   <span>3. PERÍODO DE TEMPO</span>
-                  <Rotating open={!!openSection.periodo}><ChevronDown color="white" size={16} /></Rotating>
+                  <Rotating open={!!openSection.periodo}>
+                    <ChevronDown color="white" size={16} />
+                  </Rotating>
                 </SectionHeader>
                 <SectionBody open={!!openSection.periodo}>
                   <DateRow>
@@ -317,5 +364,3 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
     </>
   );
 }
-
-

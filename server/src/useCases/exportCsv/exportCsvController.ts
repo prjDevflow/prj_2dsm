@@ -13,9 +13,9 @@ export class ExportCsvController {
       res.attachment("dados_completos.csv");
       res.send(csv);
     } catch (error: Error | any) {
-        console.log(error);
-        logger.error(`Erro ao exportar CSV: ${error || error}`);
-        res.status(500).json({ error: "Erro ao exportar CSV", detail: error.message });
+      console.log(error);
+      logger.error(`Erro ao exportar CSV: ${error || error}`);
+      res.status(500).json({ error: "Erro ao exportar CSV", detail: error.message });
     }
   }
 }

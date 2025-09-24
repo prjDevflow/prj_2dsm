@@ -57,11 +57,8 @@ export const exportPrincipaisComCampos = async (req: Request, res: Response): Pr
     res.header("Content-Type", "text/csv; charset=utf-8");
     res.attachment("dados_completos.csv");
     res.send(csvUtf8);
-
   } catch (error: any) {
     logger.error(`Erro ao exportar CSV: ${error.message || error}`);
     res.status(500).json({ error: "Erro ao exportar CSV", detail: error.message });
   }
 };
-
-

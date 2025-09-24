@@ -158,10 +158,18 @@ export default function MenuBar() {
 
       {isOpen && (
         <MobileMenu>
-          <MobileLink to="/sima" onClick={() => setIsOpen(false)}>TABELAS</MobileLink>
-          <MobileLink to="/graficos" onClick={() => setIsOpen(false)}>GRAFICOS</MobileLink>
-          <MobileLink to="/about" onClick={() => setIsOpen(false)}>SOBRE</MobileLink>
-          <MobileLink to="/contact" onClick={() => setIsOpen(false)}>CONTATO</MobileLink>
+          <MobileLink to="/sima" onClick={() => setIsOpen(false)}>
+            TABELAS
+          </MobileLink>
+          <MobileLink to="/graficos" onClick={() => setIsOpen(false)}>
+            GRAFICOS
+          </MobileLink>
+          <MobileLink to="/about" onClick={() => setIsOpen(false)}>
+            SOBRE
+          </MobileLink>
+          <MobileLink to="/contact" onClick={() => setIsOpen(false)}>
+            CONTATO
+          </MobileLink>
         </MobileMenu>
       )}
     </Nav>

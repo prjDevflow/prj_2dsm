@@ -14,7 +14,7 @@ const FooterBar = styled.footer`
   justify-content: center;
   z-index: 1000;
   font-weight: 700;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.08);
 `;
 
 export default function Footer() {

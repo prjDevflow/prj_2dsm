@@ -1,7 +1,7 @@
 import { ISimaRepository } from "../../repositories/ISimaRepository";
-import { IBalcarRepository } from '../../repositories/IBalcarRepository';
-import { IFurnasRepository } from '../../repositories/IFurnasRepository';
-import { IGetCoordinatesDTO } from './GetCoordinatesDTO';
+import { IBalcarRepository } from "../../repositories/IBalcarRepository";
+import { IFurnasRepository } from "../../repositories/IFurnasRepository";
+import { IGetCoordinatesDTO } from "./GetCoordinatesDTO";
 
 export class GetCoordinatesUseCase {
   constructor(
