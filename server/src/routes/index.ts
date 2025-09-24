@@ -7,9 +7,10 @@ import { getCoordinatesController } from "../controllers/getCoordinates/controll
 
 const router = express.Router();
 
-router.use("/balcar", balcar);
-router.use("/furnas", furnas);
-router.use("/sima", sima);
-router.use("/export", exportar);
+// router.use("/balcar", balcar);
+// router.use("/furnas", furnas);
+// router.use("/sima", sima);
+// router.use("/export", exportar);
+router.get("/get-coordinates", getCoordinatesController);
 
 export default router;
