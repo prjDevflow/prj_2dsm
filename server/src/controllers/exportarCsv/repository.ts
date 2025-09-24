@@ -1,7 +1,7 @@
 // export const exportCsvRepository = {
 //   async getDataFurnas() {
 //     const query = `
-//      SELECT 
+//      SELECT
 //     f.idabioticocoluna AS idfluxoinpe,
 //     f.datamedida,
 //     f.horamedida,
@@ -106,7 +106,6 @@
 // ORDER BY f.datamedida DESC
 // LIMIT 100;
 
-
 //     `;
 //   },
 
@@ -169,8 +168,6 @@
 
 // ORDER BY sima.datahora DESC
 // LIMIT 100;
-
-
 
 //     `;
 //   },
