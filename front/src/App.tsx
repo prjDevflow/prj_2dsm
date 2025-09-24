@@ -5,7 +5,7 @@ import theme from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";
 import BarraBrasil from "./components/BarraBrasil";
 import MenuBar from "./components/MenuBar";
-import Sidebar from "./components/SideBar";
+import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import Map from "./components/Map";
 
@@ -37,7 +37,7 @@ function App() {
           >
             <Routes>
               <Route path="/sima" element={<div />} />
-              {/* adicione outras rotas aqui */}
+              {<Route path="/mapa" element={<Map />} />}
             </Routes>
           </div>
 

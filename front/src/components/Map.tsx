@@ -20,8 +20,9 @@ export default function Map() {
   useEffect(() => {
     const fetchColetas = async () => {
       try {
-        const response = await api.get<Coletas[]>("/coletas"); 
+        const response = await api.get("/get-coordinates");
         setColetas(response.data);
+        console.log (response.data.data)
       } catch (error) {
         console.error("❌ Erro ao buscar coletas:", error);
       } finally {

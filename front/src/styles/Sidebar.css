@@ -1,0 +1,57 @@
+
+.row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: .45rem 0;
+  color: rgba(255,255,255,0.95);
+  font-weight:500;
+}
+.row-label {
+  font-weight:600;
+}
+
+/* checkbox estilizado */
+.fancy-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 2px solid rgba(255,255,255,0.18);
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.fancy-checkbox:focus {
+  outline: 3px solid rgba(255,255,255,0.12);
+  outline-offset: 2px;
+}
+
+.fancy-checkbox:hover { transform: translateY(-1px); }
+
+.fancy-checkbox:checked {
+  background: linear-gradient(90deg,#12c2e9,#007fce);
+  border-color: transparent;
+  box-shadow: 0 6px 14px rgba(2,6,23,0.2);
+}
+
+/* checkmark: pseudo-element na checkbox (moderno, funciona nos navegadores atuais) */
+.fancy-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* small responsive tweak */
+@media (max-width: 640px) {
+  .fancy-checkbox { width:16px; height:16px; }
+}
