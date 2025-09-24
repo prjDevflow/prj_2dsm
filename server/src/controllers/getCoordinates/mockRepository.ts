@@ -1,5 +1,5 @@
 import { IGetCoordinates } from "./interface";
-import { simaPool } from "../../configs/db";
+// import { simaPool } from "../../configs/db";
 
 export const GetCoordinatesRepository = {
   async getCoordinatesBalcar(): Promise<IGetCoordinates[]> {
