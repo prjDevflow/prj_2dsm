@@ -386,3 +386,84 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
+-- =========================
+-- TODAS AS INFORMAÇÕES
+-- =========================
+CREATE OR REPLACE FUNCTION buscar_todas_informacoes(
+    rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 20
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
+    co2_low FLOAT,
+    co2_high FLOAT,
+    tempag1 FLOAT,
+    tempag2 FLOAT,
+    tempag3 FLOAT,
+    tempag4 FLOAT,
+    tempar FLOAT,
+    tempar_r FLOAT,
+    sonda_do FLOAT,
+    sonda_dosat FLOAT,
+    sonda_ph FLOAT,
+    sonda_chl FLOAT,
+    sonda_nh4 FLOAT,
+    sonda_no3 FLOAT,
+    sonda_cond FLOAT,
+    sonda_turb FLOAT,
+    radincid FLOAT,
+    radrefl FLOAT,
+    dirvt FLOAT,
+    intensvt FLOAT,
+    u_vel FLOAT,
+    v_vel FLOAT,
+    corr_norte FLOAT,
+    corr_leste FLOAT,
+    precipitacao FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        s.datahora,
+        s.co2_low,
+        s.co2_high,
+        s.tempag1,
+        s.tempag2,
+        s.tempag3,
+        s.tempag4,
+        s.tempar,
+        s.tempar_r,
+        s.sonda_do,
+        s.sonda_dosat,
+        s.sonda_ph,
+        s.sonda_chl,
+        s.sonda_nh4,
+        s.sonda_no3,
+        s.sonda_cond,
+        s.sonda_turb,
+        s.radincid,
+        s.radrefl,
+        s.dirvt,
+        s.intensvt,
+        s.u_vel,
+        s.v_vel,
+        s.corr_norte,
+        s.corr_leste,
+        s.precipitacao,
+        e.rotulo
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE (rotulo IS NULL OR e.rotulo ILIKE '%' || rotulo || '%')
+      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+      AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param
+    LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
