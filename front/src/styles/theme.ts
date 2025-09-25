@@ -2,12 +2,13 @@ import type { DefaultTheme } from "styled-components";
 
 const theme: DefaultTheme = {
   colors: {
+    muted: "#6b7280", // cor cinza/neutral para textos secundários
     primary: "#007fce",
     primaryDark: "#007fce",
     background: "#f9fafb",
     text: {
       base: "#111827",
-      inverse: "#ffffff", // <-- agora existe
+      inverse: "#ffffff",
     },
   },
   fonts: {

@@ -5,6 +5,7 @@ import "../styles/Sidebar.css"; // <-- importe o css externo que segue no arquiv
 
 interface SidebarProps {
   logoSrc?: string;
+  variant?: "sima" | "furnas" | "balcar";
 }
 
 const SIDEBAR_WIDTH = 300;
@@ -210,15 +211,22 @@ const Hint = styled.div`
   opacity: 0.95;
 `;
 
-export default function Sidebar({ logoSrc }: SidebarProps) {
+export default function Sidebar({ logoSrc, variant }: SidebarProps) {
   const [open, setOpen] = useState(false);
-  // filtros começam fechados
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [openSection, setOpenSection] = useState<Record<string, boolean>>({
-    instituicao: false,
-    reservatorio: false,
-    periodo: false,
-  });
+
+  // decidir se filtros começam abertos por variant (exemplo)
+  const defaultFiltersOpen = variant === "sima" ? true : false;
+  const [filtersOpen, setFiltersOpen] = useState<boolean>(defaultFiltersOpen);
+
+  // posso préabrir seções diferentes por variant
+  const initialSections: Record<string, boolean> = {
+    instituicao: variant === "furnas", // abrir instituicao pra furnas, só exemplo
+    reservatorio: variant === "balcar",
+    periodo: variant === "sima",
+  };
+  const [openSection, setOpenSection] = useState<Record<string, boolean>>(initialSections);
+
+  // ... resto do componente permanece igual (todos os useEffect e JSX)
 
   const sidebarRef = useRef<HTMLElement | null>(null);
 
@@ -307,12 +315,24 @@ export default function Sidebar({ logoSrc }: SidebarProps) {
                 </SectionHeader>
                 <SectionBody open={!!openSection.instituicao}>
                   <Row className="row">
-                    <span className="row-label">Opção A</span>
+                    <span className="row-label">IIE</span>
                     <input className="fancy-checkbox" type="checkbox" aria-label="Opção A" />
                   </Row>
                   <Row className="row">
-                    <span className="row-label">Opção B</span>
+                    <span className="row-label">INPE</span>
                     <input className="fancy-checkbox" type="checkbox" aria-label="Opção B" />
+                  </Row>
+                  <Row className="row">
+                    <span className="row-label">UFJF</span>
+                    <input className="fancy-checkbox" type="checkbox" aria-label="Opção C" />
+                  </Row>
+                  <Row className="row">
+                    <span className="row-label">UFRJ</span>
+                    <input className="fancy-checkbox" type="checkbox" aria-label="Opção D" />
+                  </Row>
+                  <Row className="row">
+                    <span className="row-label">Furnas</span>
+                    <input className="fancy-checkbox" type="checkbox" aria-label="Opção E" />
                   </Row>
                 </SectionBody>
               </Section>
