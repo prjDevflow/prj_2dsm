@@ -8,7 +8,7 @@ export class GetCoordinatesController {
       const coordinates = await this.getCoordinatesUseCase.execute();
       res.status(200).json({
         message: "Coordenadas recuperadas com sucesso",
-        data: coordinates,
+        markers: coordinates,
       });
     } catch (error) {
       console.log(error);

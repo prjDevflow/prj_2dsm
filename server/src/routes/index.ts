@@ -1,16 +1,18 @@
-import express from "express";
-// import balcar from "./balcar";
-// import furnas from "./furnas";
-// import sima from "./sima";
-// import exportar from "./exportarcsv";
-import { getCoordinatesController } from "../controllers/getCoordinates/controller";
+import express, { Request, Response } from "express";
+import { getCoordinatesController } from "../useCases/getCoordinates/index";
+import { getAllSimaController } from "../useCases/getAllSima";
+import { exportCsvController } from "../useCases/exportCsv";
 
 const router = express.Router();
 
-// router.use("/balcar", balcar);
-// router.use("/furnas", furnas);
-// router.use("/sima", sima);
-// router.use("/export", exportar);
-router.get("/get-coordinates", getCoordinatesController);
+router.get("/export-csv", (req: Request, res: Response) => {
+  return exportCsvController.handle(req, res);
+});
+router.get("/get-coordinates", (req: Request, res: Response) => {
+  return getCoordinatesController.handle(req, res);
+});
+router.get("/sima", (req: Request, res: Response) => {
+  return getAllSimaController.handle(req, res);
+});
 
 export default router;
