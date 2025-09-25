@@ -10,7 +10,7 @@ export default function SimaPage() {
 
       {/* Conteúdo principal da página */}
       <main className="flex-1 p-6">
-        <h1 className="text-2xl font-bold mb-4">Conteúdo SIMA</h1>
+        <h1 className="text-2xl font-bold mb-4">Conteúdo Furnas</h1>
         <Map /* props caso precise */ />
         {/* demais componentes específicos da página */}
       </main>
