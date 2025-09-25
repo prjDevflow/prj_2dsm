@@ -11,6 +11,7 @@ import FurnasPage from "./pages/FurnasPage";
 import BalcarPage from "./pages/BalcarPage";
 import LandingPage from "./pages/LandingPage";
 import Map from "./components/Map";
+// import { Table, TableHead, TableHeader } from "@/components/ui/table";
 
 function App() {
   return (
