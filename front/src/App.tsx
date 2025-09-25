@@ -8,6 +8,7 @@ import MenuBar from "./components/MenuBar";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import Map from "./components/Map";
+// import { Table, TableHead, TableHeader } from "@/components/ui/table";
 
 function App() {
   return (
