@@ -140,9 +140,9 @@ A plataforma integra dados de duas fontes principais:
 <details> 
 <summary><b>RF06 — Diagrama: Casos de Uso</b></summary>
 
-**Como** Analista de Requisitos / Desenvolvedor
-**Quero** visualizar e manter um diagrama de casos de uso do sistema
-**Para** que eu possa entender as interações entre os atores e as funcionalidades, garantindo alinhamento entre time de desenvolvimento e stakeholders.
+**Como** Analista de Requisitos / Desenvolvedor  
+**Quero** visualizar e manter um diagrama de casos de uso do sistema  
+**Para que** eu possa entender as interações entre os atores e as funcionalidades, garantindo alinhamento entre time de desenvolvimento e stakeholders.
 
 **Critérios de Aceitação**
 - O diagrama deve representar todos os atores relevantes e seus relacionamentos com o sistema.
@@ -155,9 +155,9 @@ A plataforma integra dados de duas fontes principais:
 <details> 
 <summary><b>RF07 — Diagrama: Classe</b></summary>
 
-**Como** Desenvolvedor / Arquiteto de Software
-**Quero** visualizar e manter um diagrama de classes do sistema
-**Para** que eu possa compreender a estrutura interna, atributos, métodos e relacionamentos entre entidades, facilitando manutenção e evolução do sistema.
+**Como** Analista de Requisitos / Desenvolvedor  
+**Quero** visualizar e manter um diagrama de classes do sistema  
+**Para que** eu possa compreender a estrutura interna, atributos, métodos e relacionamentos entre entidades, facilitando manutenção e evolução do sistema.
 
 **Critérios de Aceitação**
 - O diagrama deve conter todas as principais classes, seus atributos e métodos essenciais.
@@ -169,9 +169,9 @@ A plataforma integra dados de duas fontes principais:
 <details>
 <summary><b>RF08 — Diagrama: Sequência</b></summary>
 
-**Como** Desenvolvedor / Analista Técnico
-**Quero** visualizar e manter diagramas de sequência do sistema
-**Para** que eu possa compreender o fluxo de mensagens e interações entre objetos/atores em cenários específicos, garantindo a correta implementação de processos.
+**Como** Desenvolvedor / Analista Técnico  
+**Quero** visualizar e manter diagramas de sequência do sistema  
+**Para que** eu possa compreender o fluxo de mensagens e interações entre objetos/atores em cenários específicos, garantindo a correta implementação de processos.
 
 **Critérios de Aceitação**
 - O diagrama deve representar os principais fluxos de interação do sistema (ex.: consulta de dados, geração de relatórios).
@@ -184,9 +184,9 @@ A plataforma integra dados de duas fontes principais:
 <details> 
 <summary><b>RF09 — Testes unitários</b></summary>
 
-**Como** Desenvolvedor
-**Quero** implementar testes unitários para os principais módulos do sistema
-**Para** que eu possa validar automaticamente o comportamento esperado das funções e garantir maior confiabilidade no código.
+**Como** Desenvolvedor  
+**Quero** implementar testes unitários para os principais módulos do sistema  
+**Para que** que eu possa validar automaticamente o comportamento esperado das funções e garantir maior confiabilidade no código.
 
 **Critérios de Aceitação**
 - Cada função crítica deve possuir pelo menos um teste unitário associado.
