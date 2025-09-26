@@ -137,48 +137,64 @@ A plataforma integra dados de duas fontes principais:
 - Tooltips mostram timestamp e valor exato ao passar o cursor.
 </details>
 
-<details>
+<details> 
 <summary><b>RF06 — Diagrama: Casos de Uso</b></summary>
 
-**Como** X  
-**Quero** Y  
-**Para que** Z
+**Como** Analista de Requisitos / Desenvolvedor
+**Quero** visualizar e manter um diagrama de casos de uso do sistema
+**Para** que eu possa entender as interações entre os atores e as funcionalidades, garantindo alinhamento entre time de desenvolvimento e stakeholders.
 
 **Critérios de Aceitação**
-- Escrever
+- O diagrama deve representar todos os atores relevantes e seus relacionamentos com o sistema.
+- Cada caso de uso deve estar nomeado de forma clara e consistente com os requisitos funcionais.
+- O diagrama deve estar disponível no repositório (formato editável e imagem).
+- O diagrama deve refletir fielmente os requisitos levantados e atualizados até o momento.
+
 </details>
 
-<details>
+<details> 
 <summary><b>RF07 — Diagrama: Classe</b></summary>
 
-**Como** X  
-**Quero** Y  
-**Para que** Z
+**Como** Desenvolvedor / Arquiteto de Software
+**Quero** visualizar e manter um diagrama de classes do sistema
+**Para** que eu possa compreender a estrutura interna, atributos, métodos e relacionamentos entre entidades, facilitando manutenção e evolução do sistema.
 
 **Critérios de Aceitação**
-- Escrever
-</details>
+- O diagrama deve conter todas as principais classes, seus atributos e métodos essenciais.
+- Relacionamentos entre classes (associação, herança, agregação, composição) devem estar representados corretamente.
+- Nomes das classes e atributos devem estar consistentes com a modelagem do banco e código-fonte.
+- O diagrama deve estar disponível no repositório em formato editável e imagem.
 
+</details>
 <details>
 <summary><b>RF08 — Diagrama: Sequência</b></summary>
 
-**Como** X  
-**Quero** Y  
-**Para que** Z
+**Como** Desenvolvedor / Analista Técnico
+**Quero** visualizar e manter diagramas de sequência do sistema
+**Para** que eu possa compreender o fluxo de mensagens e interações entre objetos/atores em cenários específicos, garantindo a correta implementação de processos.
 
 **Critérios de Aceitação**
-- Escrever
+- O diagrama deve representar os principais fluxos de interação do sistema (ex.: consulta de dados, geração de relatórios).
+- Objetos envolvidos devem estar claramente identificados.
+- A sequência de mensagens deve estar representada de forma cronológica e coerente com os requisitos.
+- O diagrama deve estar disponível no repositório em formato editável e imagem.
+
 </details>
 
-<details>
+<details> 
 <summary><b>RF09 — Testes unitários</b></summary>
 
-**Como** X  
-**Quero** Y  
-**Para que** Z
+**Como** Desenvolvedor
+**Quero** implementar testes unitários para os principais módulos do sistema
+**Para** que eu possa validar automaticamente o comportamento esperado das funções e garantir maior confiabilidade no código.
 
 **Critérios de Aceitação**
-- Escrever
+- Cada função crítica deve possuir pelo menos um teste unitário associado.
+- Testes devem cobrir casos de sucesso, falha e exceções previstas.
+- Os testes devem ser executáveis via ferramenta padrão de testes (ex.: pytest, JUnit, etc.).
+- Relatório de cobertura deve estar disponível e acessível no repositório.
+- A execução dos testes deve ser incluída no fluxo de CI/CD (quando aplicável).
+
 </details>
 
 <details>
@@ -262,10 +278,28 @@ A plataforma integra dados de duas fontes principais:
 
 # 🎨 Design
 
-## Protótipo do Painel
-<img width="487" height="299" alt="Protótipo do Painel" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/imagem_2025-09-18_211738787.png" />
+## Protótipos do Sistema
 
-## Protótipo dos Graficos e Tabelas
-<img width="487" height="299" alt="Protótipo do Painel" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowDesign.png" />
+<table>
+  <tr>
+    <td align="center">
+      <b>Protótipo do Painel</b><br>
+      <img src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/imagem_2025-09-18_211738787.png" width="400"/>
+    </td>
+    <td align="center">
+      <b>Protótipo dos Gráficos e Tabelas</b><br>
+      <img src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowDesign.png" width="400"/>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <b>Protótipo do Portal</b><br>
+      <img src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowPortal.png" width="600"/>
+    </td>
+  </tr>
+</table>
+
+
+
 
 
