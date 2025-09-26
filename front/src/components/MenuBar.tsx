@@ -1,3 +1,4 @@
+// src/components/MenuBar.tsx
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -88,8 +89,6 @@ const MenuItem = styled.div`
     box-shadow 180ms ease,
     background 180ms ease;
   position: relative;
-
-  /* background leve por padrão para separar do topo */
   background: transparent;
 
   &:hover {
@@ -99,7 +98,6 @@ const MenuItem = styled.div`
     animation: ${pop} 350ms ease;
   }
 
-  /* foco acessível */
   &:focus-within {
     outline: 3px solid rgba(255, 255, 255, 0.06);
     outline-offset: 4px;
@@ -132,6 +130,31 @@ const StyledLink = styled(Link)`
 
   ${MenuItem}:hover &::after {
     transform: scaleX(1);
+  }
+`;
+
+/* Botão de inicio estilizado (visível no desktop) */
+const HomeButton = styled(Link)`
+  color: ${({ theme }) => theme.colors.text.inverse};
+  text-decoration: none;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+  padding: 0.05rem 0.125rem;
+
+  &:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.12));
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+    border-radius: 2px;
+    opacity: 0.9;
   }
 `;
 
@@ -224,6 +247,11 @@ export default function MenuBar({ title }: { title?: string }) {
         </Brand>
 
         <DesktopMenu>
+          {/* Botão INÍCIO — volta para a Landing Page */}
+          <HomeButton to="/" aria-label="Ir para a página inicial">
+            INÍCIO
+          </HomeButton>
+
           <MenuItem role="button" tabIndex={0} aria-label="Tabelas menu">
             <StyledLink to="/sima">TABELAS</StyledLink>
             <ChevronDown size={16} />
@@ -250,6 +278,11 @@ export default function MenuBar({ title }: { title?: string }) {
 
       {isOpen && (
         <MobileMenu>
+          {/* INÍCIO no topo do menu mobile */}
+          <MobileLink to="/" onClick={() => setIsOpen(false)}>
+            INÍCIO
+          </MobileLink>
+
           <MobileLink to="/sima" onClick={() => setIsOpen(false)}>
             TABELAS
           </MobileLink>
