@@ -5,8 +5,7 @@ export class MockSimaRepository implements ISimaRepository {
   async getCoordinates(): Promise<
     { id: string; name: string; latitude: number; longitude: number }[]
   > {
-    const coordinates = [{ id: "1", name: "Ponto A", latitude: -3.10719, longitude: -60.0261 }];
-    return coordinates;
+    return [{ id: "1", name: "Ponto A", latitude: -3.10719, longitude: -60.0261 }];
   }
 
   async getAll(params: {
@@ -24,42 +23,33 @@ export class MockSimaRepository implements ISimaRepository {
 
       registers.push(
         new Sima({
-          idsima: index,
-          idestacao: 1,
           datahora: new Date(),
-          regno: index,
-          nofsamples: 5,
-          proamag: Math.random() * 10,
-          dirvt: Math.random() * 360,
-          intensvt: Math.random() * 5,
-          u_vel: Math.random(),
-          v_vel: Math.random(),
-          tempag1: 25 + Math.random() * 5,
-          tempag2: 25 + Math.random() * 5,
-          tempag3: 25 + Math.random() * 5,
-          tempag4: 25 + Math.random() * 5,
-          tempar: 25 + Math.random() * 5,
-          ur: Math.random() * 100,
-          tempar_r: 25 + Math.random() * 5,
-          pressatm: 1013,
+          co2_low: Math.random() * 10,
+          co2_high: Math.random() * 20,
+          tempag1: 25 + Math.random(),
+          tempag2: 25 + Math.random(),
+          tempag3: 25 + Math.random(),
+          tempag4: 25 + Math.random(),
+          tempar: 28 + Math.random(),
+          tempar_r: 28 + Math.random(),
+          sonda_do: Math.random() * 5,
+          sonda_dosat: Math.random() * 100,
+          sonda_ph: 7 + Math.random() * 0.5,
+          sonda_chl: Math.random() * 50,
+          sonda_nh4: Math.random(),
+          sonda_no3: Math.random(),
+          sonda_cond: 100 + Math.random() * 10,
+          sonda_turb: Math.random() * 5,
           radincid: Math.random() * 1000,
           radrefl: Math.random() * 500,
-          bateria: 100,
-          sonda_temp: 25,
-          sonda_cond: 1,
-          sonda_DOsat: 90,
-          sonda_DO: 8,
-          sonda_pH: 7,
-          sonda_NH4: 0.5,
-          sonda_NO3: 1,
-          sonda_turb: 5,
-          sonda_chl: 2,
-          sonda_bateria: 100,
+          dirvt: Math.random() * 360,
+          intensvt: Math.random() * 10,
+          u_vel: Math.random() * 2,
+          v_vel: Math.random() * 2,
           corr_norte: Math.random(),
           corr_leste: Math.random(),
-          co2_low: 400,
-          co2_high: 420,
-          precipitacao: Math.random() * 10,
+          precipitacao: Math.random() * 50,
+          nome_estacao: params.stationName || `Estação ${index}`,
         }),
       );
     }
