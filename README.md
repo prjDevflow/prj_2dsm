@@ -287,7 +287,7 @@ A plataforma integra dados de duas fontes principais:
   <tr>
     <td align="center">
       <b>Protótipo do Painel</b><br>
-      <img src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/imagem_2025-09-18_211738787.png" width="400"/>
+      <img src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowPainel.png" width="400"/>
     </td>
     <td align="center">
       <b>Protótipo dos Gráficos e Tabelas</b><br>
