@@ -7,6 +7,7 @@ WORKDIR /usr/src/app
 # Copiar package.json e instalar dependências
 COPY package*.json ./
 RUN npm install
+RUN npm install --save-dev ts-node-dev
 
 # Copiar o restante do código
 COPY . .
