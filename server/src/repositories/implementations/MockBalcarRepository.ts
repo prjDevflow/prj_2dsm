@@ -1,11 +1,11 @@
 import { IBalcarRepository } from "../IBalcarRepository";
+import { coordinatesBalcar } from "../mock/MockCoordinates";
 
 export class MockBalcarRepository implements IBalcarRepository {
   async getCoordinates(): Promise<
-    { id: string; name: string; latitude: number; longitude: number }[]
+    { id: string; rotulo: string; latitude: number; longitude: number }[]
   > {
-    const coordinates = [{ id: "3", name: "Ponto C", latitude: -3.1015, longitude: -60.012 }];
-    return coordinates;
+    return coordinatesBalcar;
   }
 
   async getFullData(): Promise<any[]> {

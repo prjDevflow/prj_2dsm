@@ -1,3 +1,3 @@
 export interface IFurnasRepository {
-  getCoordinates(): Promise<{ id: string; name: string; latitude: number; longitude: number }[]>;
+  getCoordinates(): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
 }
