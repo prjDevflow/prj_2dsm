@@ -28,6 +28,7 @@ function App() {
               minHeight: "calc(100vh - 3rem - 56px)",
               paddingTop: "1rem",
               paddingBottom: "72px",
+              paddingLeft: "-1rem",
             }}
           >
             <Routes>
