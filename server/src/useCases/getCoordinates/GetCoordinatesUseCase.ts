@@ -1,7 +1,7 @@
 import { ISimaRepository } from "../../repositories/ISimaRepository";
 import { IBalcarRepository } from "../../repositories/IBalcarRepository";
 import { IFurnasRepository } from "../../repositories/IFurnasRepository";
-import { IGetCoordinatesDTO } from "./GetCoordinatesDTO";
+import { IGetCoordinates } from "./GetCoordinatesDTO";
 
 export class GetCoordinatesUseCase {
   constructor(
@@ -17,7 +17,7 @@ export class GetCoordinatesUseCase {
       this.furnasRepository.getCoordinates(),
     ]);
 
-    const coordinates: IGetCoordinatesDTO[] = [
+    const coordinates: IGetCoordinates[] = [
       ...coordinatesBalcar,
       ...coordinatesFurnas,
       ...coordinatesSimas,
