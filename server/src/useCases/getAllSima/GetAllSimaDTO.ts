@@ -7,8 +7,7 @@ export const getAllSimaSchema = z.object({
     .default(0),
   limit: z
     .string()
-    .transform((val) => parseInt(val, 10))
-    .default(20),
+    .transform((val) => parseInt(val, 10)).optional(),
   dateInit: z
     .string()
     .optional()
@@ -17,7 +16,7 @@ export const getAllSimaSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val ? new Date(val) : undefined)),
-  stationName: z.string().optional(),
+  rotulo: z.string().optional(),
 });
 
 export type IGetAllSima = z.infer<typeof getAllSimaSchema>;

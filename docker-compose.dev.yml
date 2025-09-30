@@ -35,6 +35,7 @@ services:
       - sima_data:/var/lib/postgresql/data
       - ./sima/create-table.sql:/docker-entrypoint-initdb.d/1-create-table.sql
       - ./sima/copy-table.sql:/docker-entrypoint-initdb.d/2-copy-table.sql
+      - ./sima/procedures.sql:/docker-entrypoint-initdb.d/3-procedures.sql
       - ./sima/csv:/csv
     networks:
       - abp-network

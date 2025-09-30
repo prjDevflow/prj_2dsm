@@ -4,7 +4,7 @@ export interface ISimaRepository {
   getCoordinates(): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
   getAll(params: {
     offset: number;
-    limit: number;
+    limit?: number;
     dateInit?: Date;
     dateEnd?: Date;
     stationName?: string;

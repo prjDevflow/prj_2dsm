@@ -7,22 +7,22 @@ export class GetAllSimaUseCase {
   async execute(params: IGetAllSima) {
     const result = await this.simaRepository.getAll({
       offset: params.offset,
-      limit: params.limit,
+      limit: params.limit && undefined,
       dateInit: params.dateInit,
       dateEnd: params.dateEnd,
-      stationName: params.stationName,
+      stationName: params.rotulo,
     });
 
-    const nextOffset = params.offset + params.limit;
-    const prevOffset = Math.max(0, params.offset - params.limit);
+const nextOffset = typeof params.limit === "number" ? params.offset + params.limit : undefined;
+const prevOffset = typeof params.limit === "number" ? Math.max(0, params.offset - params.limit) : undefined;
 
-    return {
-      registers: result.registers,
-      total: result.total,
-      offset: params.offset,
-      limit: params.limit,
-      nextOffset,
-      prevOffset,
-    };
+return {
+  registers: result.registers,
+  total: result.total,
+  offset: params.offset,
+  limit: params.limit,
+  nextOffset,
+  prevOffset,
+};
   }
 }
