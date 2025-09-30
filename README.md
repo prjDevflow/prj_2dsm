@@ -16,8 +16,7 @@
 - [Design](#-design)
 - [Como Executar](#-como-executar)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Contribuição](#-contribuição)
-- [Licença](#-licença)
+
 
 ## 🚀 Sobre o Projeto
 
