@@ -1,8 +1,8 @@
 // src/pages/SimaPage.tsx
 import Sidebar from "../components/Sidebar";
-import Map from "../components/Map"; // se quiser mostrar um mapa só nessa página
+import Map from "../components/Map";
 
-export default function SimaPage() {
+export default function FurnasPage() {
   return (
     <div className="flex gap-4">
       {/* Sidebar específico pra SIMA */}

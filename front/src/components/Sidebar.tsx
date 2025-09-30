@@ -1,3 +1,4 @@
+// src/components/Sidebar.tsx
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { Sliders, ChevronLeft, ChevronDown } from "lucide-react";
@@ -12,7 +13,7 @@ const SIDEBAR_WIDTH = 300;
 const FOOTER_HEIGHT = 0;
 const HEADER_HEIGHT = "32px";
 
-const Backdrop = styled.div<{ visible: boolean }>`
+const Backdrop = styled.div<{ $visible: boolean }>`
   position: fixed;
   inset: 0;
   background: rgba(2, 6, 23, 0.45);
@@ -20,7 +21,7 @@ const Backdrop = styled.div<{ visible: boolean }>`
   opacity: 0;
   visibility: hidden;
   transition: opacity 220ms ease;
-  ${(p) => p.visible && `opacity:1; visibility:visible;`}
+  ${(p) => p.$visible && `opacity:1; visibility:visible;`}
 `;
 
 const SidebarWrapper = styled.aside<{ open: boolean }>`
@@ -226,8 +227,6 @@ export default function Sidebar({ logoSrc, variant }: SidebarProps) {
   };
   const [openSection, setOpenSection] = useState<Record<string, boolean>>(initialSections);
 
-  // ... resto do componente permanece igual (todos os useEffect e JSX)
-
   const sidebarRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -266,7 +265,7 @@ export default function Sidebar({ logoSrc, variant }: SidebarProps) {
 
   return (
     <>
-      <Backdrop visible={open} aria-hidden={!open} onClick={() => setOpen(false)} />
+      <Backdrop $visible={open} aria-hidden={!open} onClick={() => setOpen(false)} />
 
       <SidebarWrapper open={open} aria-hidden={!open} ref={sidebarRef}>
         <ToggleHandle
