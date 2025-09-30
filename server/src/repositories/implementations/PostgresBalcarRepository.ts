@@ -27,4 +27,12 @@ export class PostgresBalcarRepository implements IBalcarRepository {
 
     return rows;
   }
+
+  async getFullData(): Promise<any[]> {
+    const query = `SELECT * FROM buscar_dados_completos()`;
+
+    const { rows } = await balcarPool.query(query);
+
+    return rows;
+  }
 }

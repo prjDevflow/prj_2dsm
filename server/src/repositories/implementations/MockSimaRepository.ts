@@ -1,12 +1,12 @@
 import { ISimaRepository } from "../ISimaRepository";
 import { Sima } from "../../entities/Sima";
-import { coordinatesSima } from "../mock/MockCoordinates";
+// import { coordinatesSima } from "../mock/MockCoordinates";
 
 export class MockSimaRepository implements ISimaRepository {
   async getCoordinates(): Promise<
-    { id: string; name: string; latitude: number; longitude: number }[]
+    { id: string; rotulo: string; latitude: number; longitude: number }[]
   > {
-    return [{ id: "1", name: "Ponto A", latitude: -3.10719, longitude: -60.0261 }];
+    return [{ id: "1", rotulo: "Ponto A", latitude: -3.10719, longitude: -60.0261 }];
   }
 
   async getAll(params: {
