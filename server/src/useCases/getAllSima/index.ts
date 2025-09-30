@@ -1,5 +1,5 @@
 // import { MockSimaRepository } from "../../repositories/implementations/MockSimaRepository";
-import { SimaRepository } from "../../repositories/implementations/SimaRepository";
+import { SimaRepository } from "../../repositories/implementations/PostgresSimaRepository";
 import { GetAllSimaController } from "./GetAllSimaController";
 import { GetAllSimaUseCase } from "./GetAllSimaUseCase";
 
