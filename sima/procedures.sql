@@ -467,3 +467,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- =========================
+-- localização
+-- =========================
+
+CREATE OR REPLACE FUNCTION listar_todas_coordenadas()
+RETURNS TABLE(
+  rotulo VARCHAR,
+  lat FLOAT,
+  lng FLOAT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT e.rotulo, e.lat, e.lng
+  FROM tbestacao e
+  ORDER BY e.rotulo;
+END;
+$$ LANGUAGE plpgsql;
+
+
