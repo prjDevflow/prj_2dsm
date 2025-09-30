@@ -390,42 +390,41 @@ $$ LANGUAGE plpgsql;
 -- =========================
 -- TODAS AS INFORMAÇÕES
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_todas_informacoes(
+CREATE OR REPLACE FUNCTION public.buscar_todas_informacoes(
     rotulo TEXT DEFAULT NULL,
     data_inicio TIMESTAMP DEFAULT NULL,
-    data_fim TIMESTAMP DEFAULT NULL,
-    offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    data_fim TIMESTAMP DEFAULT NULL
 )
 RETURNS TABLE (
-    datahora TIMESTAMP,
-    co2_low FLOAT,
-    co2_high FLOAT,
-    tempag1 FLOAT,
-    tempag2 FLOAT,
-    tempag3 FLOAT,
-    tempag4 FLOAT,
-    tempar FLOAT,
-    tempar_r FLOAT,
-    sonda_do FLOAT,
-    sonda_dosat FLOAT,
-    sonda_ph FLOAT,
-    sonda_chl FLOAT,
-    sonda_nh4 FLOAT,
-    sonda_no3 FLOAT,
-    sonda_cond FLOAT,
-    sonda_turb FLOAT,
-    radincid FLOAT,
-    radrefl FLOAT,
-    dirvt FLOAT,
-    intensvt FLOAT,
-    u_vel FLOAT,
-    v_vel FLOAT,
-    corr_norte FLOAT,
-    corr_leste FLOAT,
-    precipitacao FLOAT,
-    nome_estacao TEXT
-) AS $$
+    datahora      TIMESTAMP,
+    co2_low       FLOAT,
+    co2_high      FLOAT,
+    tempag1       FLOAT,
+    tempag2       FLOAT,
+    tempag3       FLOAT,
+    tempag4       FLOAT,
+    tempar        FLOAT,
+    tempar_r      FLOAT,
+    sonda_do      FLOAT,
+    sonda_dosat   FLOAT,
+    sonda_ph      FLOAT,
+    sonda_chl     FLOAT,
+    sonda_nh4     FLOAT,
+    sonda_no3     FLOAT,
+    sonda_cond    FLOAT,
+    sonda_turb    FLOAT,
+    radincid      FLOAT,
+    radrefl       FLOAT,
+    dirvt         FLOAT,
+    intensvt      FLOAT,
+    u_vel         FLOAT,
+    v_vel         FLOAT,
+    corr_norte    FLOAT,
+    corr_leste    FLOAT,
+    precipitacao  FLOAT,
+    nome_estacao  TEXT
+)
+AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -461,11 +460,10 @@ BEGIN
     WHERE (rotulo IS NULL OR e.rotulo ILIKE '%' || rotulo || '%')
       AND (data_inicio IS NULL OR s.datahora >= data_inicio)
       AND (data_fim IS NULL OR s.datahora <= data_fim)
-    ORDER BY s.datahora DESC
-    OFFSET offset_param
-    LIMIT limit_param;
+    ORDER BY s.datahora DESC;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- localização
