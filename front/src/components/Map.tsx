@@ -1,10 +1,13 @@
+// src/components/Map.tsx
 import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
+import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/Map.css";
-// import api from "../services/api"; // ⬅️ desativado por enquanto
-// import L from "leaflet"; // ⬅️ precisa quando for usar ícones customizados
+// import api from "../services/api"; //  Para buscar dados reais da API futuramente
+// import L from "leaflet";           //  Necessário para ícones customizados
 
+// Tipagem dos pontos de coleta que podem vir da API
 interface Coletas {
   id: number;
   name?: string;
@@ -13,14 +16,16 @@ interface Coletas {
   type?: string;
 }
 
-export default function Map() {
-  const position: [number, number] = [-4.4067, -64.6002];
+// Props para o componente Map
+interface MapProps {
+  onMarkerClick?: (ponto: Coletas) => void;
+}
 
-  // 🔹 Usaria quando a API estiver ligada
-  // const [coletas, setColetas] = useState<Coletas[]>([]);
-  // const [loading, setLoading] = useState(true);
+export default function Map({ onMarkerClick }: MapProps) {
+  // Posição inicial do mapa (centro do Amazonas)
+  const position: LatLngExpression = [-4.4067, -64.6002];
 
-  // 🔹 Apenas pontos fictícios para teste
+  // 🔹 Mock (dados fictícios para teste do mapa)
   const [coletas] = useState<Coletas[]>([
     {
       id: 9991,
@@ -45,7 +50,13 @@ export default function Map() {
     },
   ]);
 
-  // 🔹 Quando for usar a API, basta descomentar
+  const handleMarkerClick = (ponto: Coletas) => {
+    if (onMarkerClick) {
+      onMarkerClick(ponto);
+    }
+  };
+
+  // 🔹 Exemplo para buscar os pontos de uma API
   /*
   useEffect(() => {
     const fetchColetas = async () => {
@@ -63,22 +74,17 @@ export default function Map() {
   }, []);
   */
 
-  // 🔹 Só funciona se o loading existir (API ativa)
-  // if (loading) {
-  //   return <p>Carregando mapa...</p>;
-  // }
-
-  // 🔹 Ícones customizados (descomente para usar)
+  // 🔹 Exemplo de ícones customizados
   /*
   const simaIcon = L.icon({
-    iconUrl: "/icons/drop-blue.png", // coloque esse arquivo na pasta public/icons/
+    iconUrl: "/icons/drop-blue.png",
     iconSize: [32, 32],
     iconAnchor: [16, 32],
     popupAnchor: [0, -32],
   });
 
   const campanhasIcon = L.icon({
-    iconUrl: "/icons/drop-green.png", // coloque esse arquivo na pasta public/icons/
+    iconUrl: "/icons/drop-green.png",
     iconSize: [32, 32],
     iconAnchor: [16, 32],
     popupAnchor: [0, -32],
@@ -87,7 +93,7 @@ export default function Map() {
   const getIcon = (type?: string) => {
     if (type === "sima") return simaIcon;
     if (type === "campanhas") return campanhasIcon;
-    return simaIcon; // default
+    return simaIcon; // padrão
   };
   */
 
@@ -97,25 +103,31 @@ export default function Map() {
       zoom={6}
       className="map-container"
       scrollWheelZoom={true}
-      minZoom={6}
-      maxZoom={13}
+      minZoom={5}
+      maxZoom={14}
     >
+      {/* Camada base do mapa (fornecida pela Esri) */}
       <TileLayer
         url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
         attribution="© Esri"
       />
 
+      {/* Marcadores dinâmicos */}
       {coletas.map((ponto) => (
         <Marker
           key={ponto.id}
           position={[ponto.latitude, ponto.longitude]}
-          // icon={getIcon(ponto.type)} // ⬅️ descomente quando quiser testar os ícones
+          eventHandlers={{
+            click: () => handleMarkerClick(ponto),
+          }}
+          // icon={getIcon(ponto.type)} // 🔹 Ative quando quiser usar ícones customizados
         >
-          <Popup>
+          {/* 🔹 Tooltip que aparece apenas no hover do marker */}
+          <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent={false}>
             <strong>{ponto.name}</strong> <br />
             ID: {ponto.id} <br />
             {ponto.type && <>Tipo: {ponto.type}</>}
-          </Popup>
+          </Tooltip>
         </Marker>
       ))}
     </MapContainer>

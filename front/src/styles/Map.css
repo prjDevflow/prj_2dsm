@@ -1,3 +1,8 @@
+/* src/styles/Animations.css */
+
+/* ------------------------------ */
+/* 🔹 Reset básico                */
+/* ------------------------------ */
 * {
   box-sizing: border-box;
 }
@@ -21,4 +26,99 @@ p {
   z-index: 2;
   height: 100vh;
   width: 100%;
+}
+
+/* ------------------------------ */
+/* 🔹 Sidebar (fixa à esquerda)   */
+/* ------------------------------ */
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px; /* ajuste conforme layout */
+  height: 100vh;
+  background: transparent; /* 🔹 remove fundo branco */
+  z-index: 30;
+  transform: translateX(0); /* estado inicial */
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease-in-out;
+}
+
+.sidebar-drawer-open {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* ------------------------------ */
+/* 🔹 Footer (fixo embaixo)       */
+/* ------------------------------ */
+.footer-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff; /* ou transparente se preferir */
+  z-index: 20;
+  transform: translateY(0); /* estado inicial */
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease-in-out;
+}
+
+.footer-drawer-open {
+  transform: translateY(100%); /* 🔹 agora desce animado */
+  opacity: 0;
+}
+
+/* ------------------------------ */
+/* 🔹 Overlay escuro opcional     */
+/* ------------------------------ */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.drawer-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ------------------------------ */
+/* 🔹 Responsividade              */
+/* ------------------------------ */
+@media (max-width: 768px) {
+  .sidebar-drawer-open {
+    transform: translateX(-100%);
+  }
+
+  .footer-drawer-open {
+    transform: translateY(150%);
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-drawer-open {
+    transform: translateY(120%);
+  }
+}
+
+/* ------------------------------ */
+/* 🔹 Animação do conteúdo        */
+/* ------------------------------ */
+.main-content {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content.drawer-open {
+  transform: scale(0.95);
+  filter: blur(1px);
 }
