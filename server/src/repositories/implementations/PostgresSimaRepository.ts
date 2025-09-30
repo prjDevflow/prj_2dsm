@@ -4,7 +4,7 @@ import { simaPool } from "../../configs/db";
 
 export class SimaRepository implements ISimaRepository {
   async getCoordinates(): Promise<
-    { id: string; name: string; latitude: number; longitude: number }[]
+    { id: string; rotulo: string; latitude: number; longitude: number }[]
   > {
     const result = await simaPool.query(
       `SELECT idestacao::text as id, rotulo as name, latitude, longitude 
