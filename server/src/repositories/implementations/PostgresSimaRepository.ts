@@ -1,5 +1,5 @@
 import { ISimaRepository } from "../ISimaRepository";
-import { Sima } from "../../entities/Sima";
+import { Sima } from "../../entities/sima/Sima";
 import { simaPool } from "../../configs/db";
 
 export class SimaRepository implements ISimaRepository {
