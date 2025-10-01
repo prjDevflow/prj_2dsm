@@ -3,7 +3,7 @@ export class AbioticoColuna {
   public idcampanha: number;
   public idsitio: number;
   public datamedida: Date | null;
-  public horamedida: string | null; // TIME → string
+  public horamedida: string | null;
   public profundidade: number | null;
   public dic: number | null;
   public nt: number | null;

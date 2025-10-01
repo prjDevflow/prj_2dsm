@@ -13,16 +13,17 @@ export class GetAllSimaUseCase {
       stationName: params.rotulo,
     });
 
-const nextOffset = typeof params.limit === "number" ? params.offset + params.limit : undefined;
-const prevOffset = typeof params.limit === "number" ? Math.max(0, params.offset - params.limit) : undefined;
+    const nextOffset = typeof params.limit === "number" ? params.offset + params.limit : undefined;
+    const prevOffset =
+      typeof params.limit === "number" ? Math.max(0, params.offset - params.limit) : undefined;
 
-return {
-  registers: result.registers,
-  total: result.total,
-  offset: params.offset,
-  limit: params.limit,
-  nextOffset,
-  prevOffset,
-};
+    return {
+      registers: result.registers,
+      total: result.total,
+      offset: params.offset,
+      limit: params.limit,
+      nextOffset,
+      prevOffset,
+    };
   }
 }

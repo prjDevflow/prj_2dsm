@@ -12,4 +12,3 @@ export class Biotico {
     Object.assign(this, props);
   }
 }
-
