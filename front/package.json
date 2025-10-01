@@ -24,6 +24,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1",
+    "react-query": "^3.39.3",
     "react-router-dom": "^7.9.1",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.3.1",

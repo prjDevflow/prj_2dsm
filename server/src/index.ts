@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import router from "./routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import cors from "cors";
-import { corsOptions } from "./configs/corsConfig";
 
 // Carrega as variáveis de ambiente definidas no arquivo .env
 dotenv.config();
@@ -12,7 +11,7 @@ dotenv.config();
 const app = express();
 
 // habilitar CORS
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Define a porta utilizada pelo servidor
 const PORT = process.env.PORT || 3000;
