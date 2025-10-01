@@ -1,16 +1,30 @@
 import { ISimaRepository } from "../ISimaRepository";
 import { Sima } from "../../entities/Sima";
 import { simaPool } from "../../configs/db";
+import { connectRedis, redisClient } from "../../providers/RedisConfig";
 
 export class SimaRepository implements ISimaRepository {
   async getCoordinates(): Promise<
     { id: string; rotulo: string; latitude: number; longitude: number }[]
   > {
-    const result = await simaPool.query(
+    await connectRedis();
+
+    const cacheKey = "coordinates:furnas";
+
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    const { rows } = await simaPool.query(
       `SELECT idestacao::text as id, rotulo as name, latitude, longitude 
        FROM tbestacao`,
     );
-    return result.rows;
+
+    await redisClient.set(cacheKey, JSON.stringify(rows), {
+      EX: 60 * 60,
+    });
+    return rows;
   }
 
   async getAll(params: {
@@ -81,5 +95,31 @@ export class SimaRepository implements ISimaRepository {
     const total = parseInt(totalResult.rows[0].count, 10);
 
     return { registers, total };
+  }
+
+  async getDataById(params: {
+    id: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    // rotulo?: string;
+    type: "sima";
+  }): Promise<{ registers: Sima[]; total: number }> {
+    const { id, offset, limit, dateInit, dateEnd } = params;
+    const {rows} = await simaPool.query(
+      `SELECT * FROM buscar_informacoes_por_id(
+        $1::int, 
+        $2::timestamp, 
+        $3::timestamp, 
+        $4::int, 
+        $5::int
+      )`,
+      [id, dateInit || null, dateEnd || null, limit || null, offset],
+    );
+    return {
+      registers: rows,
+      total: rows.length,
+    };
   }
 }

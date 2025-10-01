@@ -35,4 +35,29 @@ export class PostgresBalcarRepository implements IBalcarRepository {
 
     return rows;
   }
+
+  async getDataById(params: {
+    id: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    type: "balcar";
+  }): Promise<{ registers: any[]; total: number }> {
+    const { id, offset, limit, dateInit, dateEnd } = params;
+    const { rows } = await balcarPool.query(
+      `SELECT * FROM buscar_informacoes_por_id(
+            $1::int,
+            $2::timestamp,
+            $3::timestamp,
+            $4::int,
+            $5::int
+          )`,
+      [id, dateInit || null, dateEnd || null, limit || null, offset],
+    );
+    return {
+      registers: rows,
+      total: rows.length,
+    };
+  }
 }

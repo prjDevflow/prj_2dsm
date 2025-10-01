@@ -9,4 +9,13 @@ export interface ISimaRepository {
     dateEnd?: Date;
     stationName?: string;
   }): Promise<{ registers: Sima[]; total: number }>;
+  getDataById(params: {
+    id: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    // rotulo?: string;
+    type: "sima";
+  }): Promise<{ registers: Sima[]; total: number }>;
 }

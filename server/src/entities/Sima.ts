@@ -1,4 +1,5 @@
 export class Sima {
+  id?: string;
   public datahora: Date;
   public co2_low: number | null;
   public co2_high: number | null;
