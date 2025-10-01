@@ -7,7 +7,8 @@ export const getAllSimaSchema = z.object({
     .default(0),
   limit: z
     .string()
-    .transform((val) => parseInt(val, 10)).optional(),
+    .transform((val) => parseInt(val, 10))
+    .optional(),
   dateInit: z
     .string()
     .optional()

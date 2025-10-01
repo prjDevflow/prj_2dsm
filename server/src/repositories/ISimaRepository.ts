@@ -1,4 +1,4 @@
-import { Sima } from "../entities/Sima";
+import { Sima } from "../entities/sima/Sima";
 
 export interface ISimaRepository {
   getCoordinates(): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
