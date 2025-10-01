@@ -220,34 +220,57 @@ A plataforma integra dados de duas fontes principais:
 <details>
 <summary><b>RF11 — Funções Agrupadoras</b></summary>
 
-**Como** X  
-**Quero** Y  
-**Para que** Z
+**Como** analista de dados do INPE  
+**Quero** aplicar funções de agregação (COUNT, SUM, AVG, MIN, MAX) combinadas com GROUP BY e HAVING nas tabelas do banco limnologia_db  
+**Para que** eu possa gerar relatórios estatísticos que resumam informações complexas e apoiem a tomada de decisão.
 
 **Critérios de Aceitação**
-- Escrever
+- Desenvolver 5 consultas SQL que utilizem funções de agregação com GROUP BY
+- Incluir pelo menos uma consulta utilizando cláusula HAVING para filtros em grupos
+- Cada consulta deve responder a uma questão prática como:
+  - Quantos parâmetros foram coletados em cada reservatório?
+  - Qual a média de valores de oxigênio dissolvido em cada campanha?
+  - Qual foi a data da primeira e última coleta em cada reservatório?
+  - Quais instituições realizaram mais de X campanhas?
+- As consultas devem retornar dados consistentes e prontos para uso em relatórios
+- Todas as consultas devem estar documentadas com comentários explicativos
+- O arquivo final deve ser entregue em BDR.02/scripts/consultas_groupby.sql
 </details>
 
 <details>
 <summary><b>RF12 — Stored Procedure</b></summary>
 
-**Como** X  
-**Quero** Y  
-**Para que** Z
+**Como** analista de dados do INPE  
+**Quero** desenvolver stored procedures no PostgreSQL para automatizar consultas e operações no banco limnologia_db  
+**Para que** eu possa encapsular lógica de negócio, reduzir a repetição de código SQL e permitir que analistas executem relatórios complexos de maneira simples e padronizada.
 
 **Critérios de Aceitação**
-- Escrever
+- Desenvolver 3 stored procedures com parâmetros de entrada e operações SQL internas
+- Cada procedure deve atender a uma necessidade prática do INPE, como:
+  - Listar coletas por reservatório em intervalo de datas
+  - Calcular estatísticas (média, mínimo, máximo) de parâmetros específicos
+  - Listar parâmetros medidos por instituição ou campanha
+- As procedures devem ser documentadas com comentários explicando objetivo, parâmetros e saída esperada
+- Todas as procedures devem ser validadas e retornar dados consistentes
+- O arquivo final deve ser entregue em BDR.03/scripts/stored_procedures.sql
 </details>
 
 <details>
 <summary><b>RF12 — Triggers</b></summary>
 
-**Como** X  
-**Quero** Y  
-**Para que** Z
+**Como** administrador de banco de dados do INPE  
+**Quero** desenvolver triggers no PostgreSQL para automatizar ações no banco limnologia_db  
+**Para que** eu possa garantir integridade, consistência e rastreabilidade dos dados limnológicos sem depender de intervenção manual.
 
 **Critérios de Aceitação**
-- Escrever
+- Desenvolver 3 triggers que executem automaticamente em resposta a eventos específicos
+- Cada trigger deve atender a uma necessidade prática como:
+  - Registrar operações críticas em tabelas de log para auditoria
+  - Validar dados de entrada conforme faixas aceitáveis de parâmetros limnológicos
+  - Atualizar automaticamente informações relacionadas em entidades vinculadas
+- Os triggers devem ser documentados com comentários explicando objetivo, evento disparador e tabela alvo
+- Todas as funções de trigger devem ser validadas e garantir o comportamento esperado
+- O arquivo final deve ser entregue em BDR.04/scripts/triggers.sql
 </details>
 
 # 📊 Burndown Chart
