@@ -391,7 +391,7 @@ $$ LANGUAGE plpgsql;
 -- TODAS AS INFORMAÇÕES
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_todas_informacoes(
-    p_rotulo TEXT DEFAULT NULL,
+    p_idestacao CHAR(6) DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
     p_limit_param INT DEFAULT 100,
@@ -460,7 +460,7 @@ BEGIN
         e.rotulo::text
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+    WHERE (p_idestacao IS NULL OR e.idestacao = p_idestacao)
       AND (p_data_inicio IS NULL OR s.datahora >= p_data_inicio)
       AND (p_data_fim IS NULL OR s.datahora <= p_data_fim)
     ORDER BY s.datahora DESC
@@ -468,6 +468,7 @@ BEGIN
     OFFSET p_offset_param;
 END;
 $$;
+
 
 
 
