@@ -1,6 +1,7 @@
 import { ISimaRepository } from "../ISimaRepository";
 import { Sima } from "../../entities/Sima";
 import { coordinatesSima } from "../mock/MockCoordinates";
+import { mockDataSima } from "../mock/MockSima";
 // import { coordinatesSima } from "../mock/MockCoordinates";
 
 export class MockSimaRepository implements ISimaRepository {
@@ -60,5 +61,33 @@ export class MockSimaRepository implements ISimaRepository {
       registers,
       total,
     };
+  }
+
+  async getDataById(params: {
+    id: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+  }): Promise<{ registers: Sima[]; total: number }> {
+    let filtered = mockDataSima.filter((item) => item.id === params.id);
+
+    // aplica filtro por data inicial
+    if (params.dateInit) {
+      filtered = filtered.filter((item) => item.datahora >= params.dateInit!);
+    }
+
+    // aplica filtro por data final
+    if (params.dateEnd) {
+      const endOfDay = new Date(params.dateEnd);
+      endOfDay.setHours(23, 59, 59, 999);
+      filtered = filtered.filter((item) => item.datahora <= endOfDay);
+    }
+
+    const total = filtered.length;
+    const limit = params.limit ?? 10;
+    const registers = filtered.slice(params.offset, params.offset + limit);
+
+    return { registers, total };
   }
 }

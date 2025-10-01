@@ -1,4 +1,5 @@
 import { furnasPool } from "../../configs/db";
+import { Sima } from "../../entities/Sima";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 import { IFurnasRepository } from "../IFurnasRepository";
 
@@ -23,8 +24,32 @@ export class PostgresFurnasRepository implements IFurnasRepository {
     await redisClient.set(cacheKey, JSON.stringify(rows), {
       EX: 60 * 60,
     });
-    console.log("Savando dados em cache");
 
     return rows;
+  }
+
+  async getDataById(params: {
+    id: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    type: "furnas";
+  }): Promise<{ registers: Sima[]; total: number }> {
+    const { id, offset, limit, dateInit, dateEnd } = params;
+    const { rows } = await furnasPool.query(
+      `SELECT * FROM buscar_informacoes_por_id(
+            $1::int, 
+            $2::timestamp, 
+            $3::timestamp, 
+            $4::int, 
+            $5::int
+          )`,
+      [id, dateInit || null, dateEnd || null, limit || null, offset],
+    );
+    return {
+      registers: rows,
+      total: rows.length,
+    };
   }
 }
