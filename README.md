@@ -324,7 +324,24 @@ A plataforma integra dados de duas fontes principais:
   </tr>
 </table>
 
+# Como executar
 
+## ✅ Pré-requisitos
+Antes de começar, certifique-se de ter instalado em sua máquina:
 
+- 🐳 [Docker](https://docs.docker.com/get-docker/)
+- ⚙️ [Docker Compose](https://docs.docker.com/compose/)
 
+---
+
+## 🚀 Inicializar e parar o ambiente
+
+Para subir todo o ambiente (bancos de dados, servidor e front-end), execute o comando abaixo **na raiz do projeto**:
+
+```bash
+# Subir containers
+docker compose -f docker-compose.dev.yml up --build -d
+
+# Encerrar containers
+docker compose -f docker-compose.dev.yml down
 
