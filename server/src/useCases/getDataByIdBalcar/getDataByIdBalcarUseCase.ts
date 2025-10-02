@@ -15,7 +15,8 @@ export class GetDataByIdBalcarUseCase {
     });
 
     const nextOffset = params.limit !== undefined ? params.offset + params.limit : undefined;
-    const prevOffset = params.limit !== undefined ? Math.max(0, params.offset - params.limit) : undefined;
+    const prevOffset =
+      params.limit !== undefined ? Math.max(0, params.offset - params.limit) : undefined;
 
     return {
       registers: result.registers,

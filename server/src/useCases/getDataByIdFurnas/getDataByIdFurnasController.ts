@@ -9,7 +9,7 @@ export class GetDataByIdFurnasController {
 
   async handle(req: Request, res: Response): Promise<void> {
     try {
-      const params = getDataByIdFurnasSchema.parse({id: req.params.id, ...req.query});
+      const params = getDataByIdFurnasSchema.parse({ id: req.params.id, ...req.query });
 
       const result = await this.getDataByIdFurnasUseCase.execute(params);
 

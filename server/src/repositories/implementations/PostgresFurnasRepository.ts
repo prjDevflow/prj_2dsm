@@ -1,5 +1,5 @@
 import { furnasPool } from "../../configs/db";
-import { Sima } from "../../entities/Sima";
+import { Sima } from "../../entities/sima/Sima";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 import { IFurnasRepository } from "../IFurnasRepository";
 

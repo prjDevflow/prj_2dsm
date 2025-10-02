@@ -9,7 +9,7 @@ export class GetDataByIdBalcarController {
 
   async handle(req: Request, res: Response): Promise<void> {
     try {
-      const params = getDataByIdBalcarSchema.parse({id: req.params.id, ...req.query});
+      const params = getDataByIdBalcarSchema.parse({ id: req.params.id, ...req.query });
 
       const result = await this.getDataByIdBalcarUseCase.execute(params);
 

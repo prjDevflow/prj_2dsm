@@ -118,7 +118,7 @@ export class SimaRepository implements ISimaRepository {
     type: "sima";
   }): Promise<{ registers: Sima[]; total: number }> {
     const { id, offset, limit, dateInit, dateEnd } = params;
-    const {rows} = await simaPool.query(
+    const { rows } = await simaPool.query(
       `SELECT * FROM buscar_informacoes_por_id(
         $1::int, 
         $2::timestamp, 

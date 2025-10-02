@@ -1,4 +1,4 @@
-import { Sima } from "../../entities/Sima";
+import { Sima } from "../../entities/sima/Sima";
 
 export const mockDataSima: Sima[] = [
   new Sima({
@@ -242,4 +242,3 @@ export const mockDataSima: Sima[] = [
     nome_estacao: "Manaus",
   }),
 ];
-

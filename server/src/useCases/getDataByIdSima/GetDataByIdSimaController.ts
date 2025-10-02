@@ -9,7 +9,7 @@ export class GetDataByIdSimaController {
 
   async handle(req: Request, res: Response): Promise<void> {
     try {
-      const params = getDataByIdSimaSchema.parse({id: req.params.id, ...req.query});
+      const params = getDataByIdSimaSchema.parse({ id: req.params.id, ...req.query });
 
       const result = await this.getDataByIdSimaUseCase.execute(params);
 

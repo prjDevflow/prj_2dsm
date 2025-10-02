@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { Sima } from "../../entities/Sima";
+import { Sima } from "../../entities/sima/Sima";
 
 export const getDataByIdFurnasSchema = z.object({
   id: z.string(),
@@ -7,7 +7,10 @@ export const getDataByIdFurnasSchema = z.object({
     .string()
     .transform((val) => parseInt(val, 10))
     .default(0),
-  limit: z.string().transform((val) => parseInt(val, 10)).optional(),
+  limit: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .optional(),
   dateInit: z
     .string()
     .optional()
