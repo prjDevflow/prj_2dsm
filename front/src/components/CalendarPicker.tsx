@@ -133,7 +133,7 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
     <div className="flex items-center gap-3">
       {/* --- Selector de ponto (novo) --- */}
       <div>
-        <label className="text-[11px] block mb-1 text-muted-foreground">Estação</label>
+        <label className="text-[11px] block mb-1 text-muted-foreground"></label>
         <select
           value={selectedPointId ?? ""}
           onChange={(e) => {
@@ -142,7 +142,7 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
           }}
           className="px-3 py-2 w-44 border rounded text-sm bg-white"
         >
-          <option value="">Todos / Selecione</option>
+          <option value="">Estação</option>
           {points.map((p) => (
             <option key={p.id} value={p.id}>
               {p.id} — {p.name ?? `Ponto ${p.id}`}
