@@ -187,7 +187,9 @@ const SimaTable = () => {
     if (!data || data.length === 0) return;
     const keys = Object.keys(data[0]);
     rows.push(keys);
-    data.forEach((row) => rows.push(keys.map((k) => String((row as unknown as Record<string, unknown>)[k] ?? ""))));
+    data.forEach((row) =>
+      rows.push(keys.map((k) => String((row as unknown as Record<string, unknown>)[k] ?? ""))),
+    );
     const csv = buildCSV(rows);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -206,7 +208,12 @@ const SimaTable = () => {
       <style>body{font-family:system-ui;padding:16px}table{border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px 8px;white-space:nowrap}th{background:#f3f4f6}</style></head><body>`;
     html += `<h3>SIMA ${which}</h3><table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
     data.forEach((row) => {
-      html += "<tr>" + keys.map((k) => `<td>${String((row as unknown as Record<string, unknown>)[k] ?? "-")}</td>`).join("") + "</tr>";
+      html +=
+        "<tr>" +
+        keys
+          .map((k) => `<td>${String((row as unknown as Record<string, unknown>)[k] ?? "-")}</td>`)
+          .join("") +
+        "</tr>";
     });
     html += "</tbody></table></body></html>";
     const w = window.open("", "_blank");
@@ -240,9 +247,19 @@ const SimaTable = () => {
   function TableToolbar(props: { which: "online" | "offline"; recordCount: number }) {
     const { which, recordCount } = props;
     return (
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 8,
+        }}
+      >
         <div style={{ fontSize: 14, fontWeight: 600 }}>
-          {which === "online" ? "SIMA Online" : "SIMA Offline"} <span style={{ fontWeight: 400, color: "#666", fontSize: 12 }}>— {recordCount} registro(s)</span>
+          {which === "online" ? "SIMA Online" : "SIMA Offline"}{" "}
+          <span style={{ fontWeight: 400, color: "#666", fontSize: 12 }}>
+            — {recordCount} registro(s)
+          </span>
         </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -272,11 +289,20 @@ const SimaTable = () => {
   return (
     <div className="space-y-6">
       {/* GERAL (texto explicativo em cima) */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+      <div
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}
+      >
         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>SIMA — Visualização de Dados</h2>
 
         {/* seletor de visão: Online / Offline / Ambos */}
-        <div style={{ display: "inline-flex", border: "1px solid #ddd", borderRadius: 8, overflow: "hidden" }}>
+        <div
+          style={{
+            display: "inline-flex",
+            border: "1px solid #ddd",
+            borderRadius: 8,
+            overflow: "hidden",
+          }}
+        >
           <button
             onClick={() => setView("online")}
             style={{
@@ -314,97 +340,114 @@ const SimaTable = () => {
       </div>
 
       {/* === ONLINE (toolbar acima) === */}
-      { (view === "online" || view === "ambos") && (
-      <div>
-        <TableToolbar which="online" recordCount={simaData.length} />
+      {(view === "online" || view === "ambos") && (
+        <div>
+          <TableToolbar which="online" recordCount={simaData.length} />
 
-        {loading ? (
-          <p className="text-sm">Carregando...</p>
-        ) : simaData.length === 0 ? (
-          <p className="text-sm text-red-600">Nenhum dado Online.</p>
-        ) : (
-          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
-            <div style={{ minWidth: calcMinWidth(Object.keys(simaData[0]).length) }}>
-              <Table>
-                <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
-                  Dados SIMA Online
-                </TableCaption>
+          {loading ? (
+            <p className="text-sm">Carregando...</p>
+          ) : simaData.length === 0 ? (
+            <p className="text-sm text-red-600">Nenhum dado Online.</p>
+          ) : (
+            <div
+              style={{
+                overflowX: "auto",
+                WebkitOverflowScrolling: "touch",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <div style={{ minWidth: calcMinWidth(Object.keys(simaData[0]).length) }}>
+                <Table>
+                  <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                    Dados SIMA Online
+                  </TableCaption>
 
-                <TableHeader>
-                  <TableRow>{renderHeaderCells(simaData[0] as unknown as Record<string, unknown>)}</TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {simaData.map((row, rIdx) => (
-                    <TableRow key={row.idsima} className={rowClass(rIdx)}>
-                      {Object.values(row).map((value, idx) => (
-                        <TableCell
-                          key={idx}
-                          style={{
-                            padding: "10px 12px",
-                            whiteSpace: "nowrap",
-                            borderTop: "1px solid rgba(0,0,0,0.04)",
-                          }}
-                        >
-                          {value ?? "-"}
-                        </TableCell>
-                      ))}
+                  <TableHeader>
+                    <TableRow>
+                      {renderHeaderCells(simaData[0] as unknown as Record<string, unknown>)}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+
+                  <TableBody>
+                    {simaData.map((row, rIdx) => (
+                      <TableRow key={row.idsima} className={rowClass(rIdx)}>
+                        {Object.values(row).map((value, idx) => (
+                          <TableCell
+                            key={idx}
+                            style={{
+                              padding: "10px 12px",
+                              whiteSpace: "nowrap",
+                              borderTop: "1px solid rgba(0,0,0,0.04)",
+                            }}
+                          >
+                            {value ?? "-"}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       )}
 
       {/* === OFFLINE (toolbar acima) === */}
-      { (view === "offline" || view === "ambos") && (
-      <div>
-        <TableToolbar which="offline" recordCount={simaOfflineData.length} />
+      {(view === "offline" || view === "ambos") && (
+        <div>
+          <TableToolbar which="offline" recordCount={simaOfflineData.length} />
 
-        {loading ? (
-          <p className="text-sm">Carregando...</p>
-        ) : simaOfflineData.length === 0 ? (
-          <p className="text-sm text-red-600">Nenhum dado Offline.</p>
-        ) : (
-          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
-            <div style={{ minWidth: calcMinWidth(Object.keys(simaOfflineData[0]).length) }}>
-              <Table>
-                <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
-                  Dados SIMA Offline
-                </TableCaption>
+          {loading ? (
+            <p className="text-sm">Carregando...</p>
+          ) : simaOfflineData.length === 0 ? (
+            <p className="text-sm text-red-600">Nenhum dado Offline.</p>
+          ) : (
+            <div
+              style={{
+                overflowX: "auto",
+                WebkitOverflowScrolling: "touch",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <div style={{ minWidth: calcMinWidth(Object.keys(simaOfflineData[0]).length) }}>
+                <Table>
+                  <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                    Dados SIMA Offline
+                  </TableCaption>
 
-                <TableHeader>
-                  <TableRow>{renderHeaderCells(simaOfflineData[0] as unknown as Record<string, unknown>)}</TableRow>
-                </TableHeader>
-
-                <TableBody>
-                  {simaOfflineData.map((row, rIdx) => (
-                    <TableRow key={row.idsimaoffline} className={rowClass(rIdx)}>
-                      {Object.values(row).map((value, idx) => (
-                        <TableCell
-                          key={idx}
-                          style={{
-                            padding: "10px 12px",
-                            whiteSpace: "nowrap",
-                            borderTop: "1px solid rgba(0,0,0,0.04)",
-                          }}
-                        >
-                          {value ?? "-"}
-                        </TableCell>
-                      ))}
+                  <TableHeader>
+                    <TableRow>
+                      {renderHeaderCells(simaOfflineData[0] as unknown as Record<string, unknown>)}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
-      </div>
-      )}
+                  </TableHeader>
 
+                  <TableBody>
+                    {simaOfflineData.map((row, rIdx) => (
+                      <TableRow key={row.idsimaoffline} className={rowClass(rIdx)}>
+                        {Object.values(row).map((value, idx) => (
+                          <TableCell
+                            key={idx}
+                            style={{
+                              padding: "10px 12px",
+                              whiteSpace: "nowrap",
+                              borderTop: "1px solid rgba(0,0,0,0.04)",
+                            }}
+                          >
+                            {value ?? "-"}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

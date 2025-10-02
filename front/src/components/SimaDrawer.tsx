@@ -2,7 +2,7 @@
 import React from "react";
 import CalendarPicker from "@/components/CalendarPicker";
 import SimaTable from "@/components/SimaTable";
- 
+
 import {
   Drawer,
   DrawerClose,
@@ -13,7 +13,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
- 
+
 type PontoColeta = {
   id: number;
   name?: string;
@@ -21,9 +21,9 @@ type PontoColeta = {
   longitude: number;
   type?: string;
 };
- 
+
 type Range = { start?: Date | null; end?: Date | null };
- 
+
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -32,13 +32,13 @@ type Props = {
   range: Range;
   setRange: (r: Range) => void;
 };
- 
+
 const pontosDisponiveis: PontoColeta[] = [
   { id: 30, name: "Ponto 30 - Escola X", latitude: -3.0, longitude: -60.0, type: "sima" },
   { id: 12, name: "Ponto 12 - Praça Y", latitude: -4.0, longitude: -61.0, type: "campanhas" },
   { id: 7, name: "Ponto 7 - Unidade Z", latitude: -5.0, longitude: -62.0, type: "sima" },
 ];
- 
+
 const SimaDrawer: React.FC<Props> = ({
   open,
   onOpenChange,
@@ -55,7 +55,7 @@ const SimaDrawer: React.FC<Props> = ({
             <span className="block text-lg font-semibold">
               Tabela de Dados{selectedPonto ? ` - ${selectedPonto.name}` : ""}
             </span>
- 
+
             <div className="mt-4 p-2 border rounded-md bg-white">
               <CalendarPicker
                 value={range}
@@ -76,7 +76,7 @@ const SimaDrawer: React.FC<Props> = ({
                   setRange(r);
                 }}
               />
- 
+
               {/* SimaTable faz o fetch por conta própria com props (selectedPointId + range) */}
               <div className="mt-4">
                 <SimaTable
@@ -88,10 +88,12 @@ const SimaDrawer: React.FC<Props> = ({
               </div>
             </div>
           </DrawerTitle>
- 
-          <DrawerDescription>Esta é uma tabela de dados carregados via Docker/SIMA.</DrawerDescription>
+
+          <DrawerDescription>
+            Esta é uma tabela de dados carregados via Docker/SIMA.
+          </DrawerDescription>
         </DrawerHeader>
- 
+
         <DrawerFooter>
           <Button
             onClick={() => {
@@ -109,5 +111,5 @@ const SimaDrawer: React.FC<Props> = ({
     </Drawer>
   );
 };
- 
+
 export default SimaDrawer;

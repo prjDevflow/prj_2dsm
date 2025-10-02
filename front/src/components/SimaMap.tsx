@@ -1,7 +1,7 @@
 // src/components/SimaMap.tsx
 import React from "react";
 import Map from "./Map"; // ajuste se o caminho for diferente
- 
+
 type PontoColeta = {
   id: number;
   name?: string;
@@ -9,11 +9,11 @@ type PontoColeta = {
   longitude: number;
   type?: string;
 };
- 
+
 type Props = {
   onMarkerClick?: (p: PontoColeta) => void;
 };
- 
+
 const SimaMap: React.FC<Props> = ({ onMarkerClick }) => {
   return (
     <div className="h-[85vh] rounded-md overflow-hidden shadow-sm">
@@ -22,5 +22,5 @@ const SimaMap: React.FC<Props> = ({ onMarkerClick }) => {
     </div>
   );
 };
- 
+
 export default SimaMap;
