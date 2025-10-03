@@ -1,19 +1,13 @@
 import { Parser } from "json2csv";
-import { IBalcarRepository } from "../../repositories/IBalcarRepository";
 
 export class ExportCsvUseCase {
-  constructor(private balcarRepository: IBalcarRepository) {}
+  async execute<T>(data: T[]): Promise<string> {
+    if (!data || data.length === 0) {
+      return "";
+    }
 
-  execute() {
-    const resultRows = this.balcarRepository.getFullData();
-
-    // Gerar CSV
     const parser = new Parser();
-    const csv = parser.parse(resultRows);
-
-    // Adiciona BOM UTF-8
-    const csvUtf8 = "\uFEFF" + csv;
-
-    return csvUtf8;
+    const csv = parser.parse(data);
+    return csv;
   }
 }
