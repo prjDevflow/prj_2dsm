@@ -1,0 +1,16 @@
+Registro de Commit Não Realizado
+
+Data: 02/10/2025
+Responsável: Matheus Soldesi
+
+Motivo:
+Não foi possível realizar o commit das alterações planejadas, pois ainda não estavam disponíveis os ajustes necessários de outros integrantes do time.
+
+Impacto:
+Sem esses ajustes, não foi viável executar os testes de forma adequada, o que impediria a validação completa das alterações.
+
+Próximos Passos:
+
+Aguardar a entrega dos ajustes pendentes pelos demais integrantes.
+
+Após a integração das dependências, prosseguir com os testes e, então, realizar o commit.
