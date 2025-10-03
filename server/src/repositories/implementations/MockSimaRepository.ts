@@ -1,5 +1,5 @@
 import { ISimaRepository } from "../ISimaRepository";
-import { Sima } from "../../entities/Sima";
+import { Sima } from "../../entities/sima/Sima";
 import { coordinatesSima } from "../mock/MockCoordinates";
 import { mockDataSima } from "../mock/MockSima";
 // import { coordinatesSima } from "../mock/MockCoordinates";

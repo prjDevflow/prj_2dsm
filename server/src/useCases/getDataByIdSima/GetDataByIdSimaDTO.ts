@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { Sima } from "../../entities/Sima";
+import { Sima } from "../../entities/sima/Sima";
 
 export const getDataByIdSimaSchema = z.object({
   id: z.string(),
