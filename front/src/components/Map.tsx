@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useColetas } from "../hooks/useColetas"; // Importando o hook de coletas
 import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
-import { LatLngExpression } from "leaflet";
+import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/Map.css";
 
