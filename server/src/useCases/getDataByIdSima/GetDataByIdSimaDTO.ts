@@ -2,7 +2,7 @@ import * as z from "zod";
 import { Sima } from "../../entities/sima/Sima";
 
 export const getDataByIdSimaSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
   offset: z
     .string()
     .transform((val) => parseInt(val, 10))

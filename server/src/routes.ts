@@ -14,12 +14,13 @@ router.get("/export-csv", (req: Request, res: Response) => {
 router.get("/get-coordinates", (req: Request, res: Response) => {
   return getCoordinatesController.handle(req, res);
 });
+// router.get("/sima", (req: Request, res: Response) => {
+//   return getAllSimaController.handle(req, res);
+// });
 router.get("/sima", (req: Request, res: Response) => {
-  return getAllSimaController.handle(req, res);
-});
-router.get("/sima/:id", (req: Request, res: Response) => {
   return getDataByIdSimaController.handle(req, res);
 });
+
 router.get("/furnas/:id", (req: Request, res: Response) => {
   return getDataByIdFurnasController.handle(req, res);
 });

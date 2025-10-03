@@ -11,8 +11,9 @@ export class GetCoordinatesUseCase {
   ) {}
 
   async execute(type?: "sima" | "balcar" | "furnas"): Promise<IGetCoordinatesResponse[]> {
+    let coordinates: any = []
     if (type === "sima") {
-      return this.simaRepository.getCoordinates();
+      coordinates = this.simaRepository.getCoordinates();
     }
     if (type === "balcar") {
       return this.balcarRepository.getCoordinates();
@@ -21,17 +22,17 @@ export class GetCoordinatesUseCase {
       return this.furnasRepository.getCoordinates();
     }
 
-    const [coordinatesBalcar, coordinatesFurnas, coordinatesSimas] = await Promise.all([
-      this.simaRepository.getCoordinates(),
-      this.balcarRepository.getCoordinates(),
-      this.furnasRepository.getCoordinates(),
-    ]);
+    // const [coordinatesBalcar, coordinatesFurnas, coordinatesSimas] = await Promise.all([
+    //   this.simaRepository.getCoordinates(),
+    //   this.balcarRepository.getCoordinates(),
+    //   this.furnasRepository.getCoordinates(),
+    // ]);
 
-    const coordinates: IGetCoordinatesResponse[] = [
-      ...coordinatesBalcar,
-      ...coordinatesSimas,
-      ...coordinatesFurnas,
-    ];
+    // const coordinates: IGetCoordinatesResponse[] = [
+    //   ...coordinatesBalcar,
+    //   ...coordinatesSimas,
+    //   ...coordinatesFurnas,
+    // ];
 
     return coordinates;
   }

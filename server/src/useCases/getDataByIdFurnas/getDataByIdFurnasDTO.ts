@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { Sima } from "../../entities/sima/Sima";
+import {Furnas} from "../../entities/furnas/Furnas";
 
 export const getDataByIdFurnasSchema = z.object({
   id: z.string(),
@@ -24,7 +24,7 @@ export const getDataByIdFurnasSchema = z.object({
 export type IGetDataByIdFurnas = z.infer<typeof getDataByIdFurnasSchema>;
 
 export interface IGetDataByIdFurnasResponse {
-  registers: Sima[]; // Alterar classe para Furnas
+  registers: Furnas[]; // Alterar classe para Furnas
   total: number;
   offset: number;
   limit: number;
