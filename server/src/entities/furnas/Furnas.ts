@@ -17,13 +17,13 @@ export class Furnas {
   public transparencia: number | null;
 
   // Nutrientes
-  public nt: number | null;       // Nitrogênio total
-  public pt: number | null;       // Fósforo total
+  public nt: number | null; // Nitrogênio total
+  public pt: number | null; // Fósforo total
 
   // Carbono
-  public dic: number | null;      // Carbono inorgânico dissolvido
-  public doc: number | null;      // Carbono orgânico dissolvido
-  public poc: number | null;      // Carbono orgânico particulado
+  public dic: number | null; // Carbono inorgânico dissolvido
+  public doc: number | null; // Carbono orgânico dissolvido
+  public poc: number | null; // Carbono orgânico particulado
 
   // Isótopos estáveis
   public delta13c: number | null;

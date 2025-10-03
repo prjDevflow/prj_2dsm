@@ -1,5 +1,5 @@
 import * as z from "zod";
-import {Furnas} from "../../entities/furnas/Furnas";
+import { Furnas } from "../../entities/furnas/Furnas";
 
 export const getDataByIdFurnasSchema = z.object({
   id: z.string(),

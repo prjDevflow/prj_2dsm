@@ -11,7 +11,7 @@ export class GetCoordinatesUseCase {
   ) {}
 
   async execute(type?: "sima" | "balcar" | "furnas"): Promise<IGetCoordinatesResponse[]> {
-    let coordinates: any = []
+    let coordinates: any = [];
     if (type === "sima") {
       coordinates = this.simaRepository.getCoordinates();
     }
