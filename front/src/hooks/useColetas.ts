@@ -4,7 +4,7 @@ import axios from "axios";
 // Função para buscar as coordenadas
 const fetchColetas = async (type: "sima" | "balcar" | "furnas") => {
   // Requisição para a rota correta no backend
-  const response = await axios.get(`http://localhost:3000/get-coordinates`, {
+  const response = await axios.get(`http://localhost:3001/get-coordinates`, {
     params: { type }, // Passa o tipo como parâmetro de query
   });
   console.log(response.data.markers);

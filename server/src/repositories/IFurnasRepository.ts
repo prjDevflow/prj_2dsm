@@ -1,4 +1,4 @@
-import { Sima } from "../entities/sima/Sima";
+import { Furnas } from "../entities/furnas/Furnas";
 
 export interface IFurnasRepository {
   getCoordinates(): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
@@ -10,5 +10,5 @@ export interface IFurnasRepository {
     dateEnd?: Date;
     type: "furnas";
     // rotulo?: string;
-  }): Promise<{ registers: Sima[]; total: number }>; // Alterar classe para Furnas
+  }): Promise<{ registers: Furnas[]; total: number }>; // Alterar classe para Furnas
 }

@@ -1,7 +1,7 @@
 import { Sima } from "../entities/sima/Sima";
 
 export interface ISimaRepository {
-  getCoordinates(): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
+  getCoordinates(): Promise<{ rotulo: string; latitude: number; longitude: number }[]>;
   getAll(params: {
     offset: number;
     limit?: number;
@@ -15,7 +15,7 @@ export interface ISimaRepository {
     limit?: number;
     dateInit?: Date;
     dateEnd?: Date;
-    // rotulo?: string;
+    rotulo?: string;
     type: "sima";
   }): Promise<{ registers: Sima[]; total: number }>;
 }
