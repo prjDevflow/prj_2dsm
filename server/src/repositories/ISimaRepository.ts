@@ -10,7 +10,7 @@ export interface ISimaRepository {
     stationName?: string;
   }): Promise<{ registers: Sima[]; total: number }>;
   getDataById(params: {
-    id: string;
+    id?: string;
     offset: number;
     limit?: number;
     dateInit?: Date;

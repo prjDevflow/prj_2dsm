@@ -1,14 +1,14 @@
 import { GetCoordinatesController } from "./GetCoordinatesController";
 import { GetCoordinatesUseCase } from "./GetCoordinatesUseCase";
-import { MockBalcarRepository } from "../../repositories/implementations/MockBalcarRepository";
-import { MockFurnasRepository } from "../../repositories/implementations/MockFurnasRepository";
-// import { MockSimaRepository } from "../../repositories/implementations/MockSimaRepository";
+import { PostgresBalcarRepository } from "../../repositories/implementations/PostgresBalcarRepository";
+import { PostgresFurnasRepository } from "../../repositories/implementations/PostgresFurnasRepository";
+
 import { SimaRepository } from "../../repositories/implementations/PostgresSimaRepository";
 
 // Instancia Repositórios - Mocks
 const simaRepository = new SimaRepository();
-const balcarRepository = new MockBalcarRepository();
-const furnasRepository = new MockFurnasRepository();
+const balcarRepository = new PostgresBalcarRepository();
+const furnasRepository = new PostgresFurnasRepository();
 
 // Instancia UseCase
 const getCoordinatesUseCase = new GetCoordinatesUseCase(

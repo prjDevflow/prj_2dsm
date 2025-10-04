@@ -1,9 +1,9 @@
-import { MockBalcarRepository } from "../../repositories/implementations/MockBalcarRepository";
+import { PostgresBalcarRepository } from "../../repositories/implementations/PostgresBalcarRepository";
 import { GetDataByIdBalcarController } from "./getDataByIdBalcarController";
 import { GetDataByIdBalcarUseCase } from "./getDataByIdBalcarUseCase";
 
 // Instancia Repositórios - Mocks
-const balcarRepository = new MockBalcarRepository();
+const balcarRepository = new PostgresBalcarRepository();
 
 // Instancia UseCase
 const getDataByIdBalcarUseCase = new GetDataByIdBalcarUseCase(balcarRepository);

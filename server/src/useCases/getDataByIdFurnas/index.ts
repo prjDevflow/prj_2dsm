@@ -1,9 +1,9 @@
-import { MockFurnasRepository } from "../../repositories/implementations/MockFurnasRepository";
+import { PostgresFurnasRepository } from "../../repositories/implementations/PostgresFurnasRepository";
 import { GetDataByIdFurnasController } from "./getDataByIdFurnasController";
 import { GetDataByIdFurnasUseCase } from "./getDataByIdFurnasUseCase";
 
 // Instancia Repositórios - Mocks
-const furnasRepository = new MockFurnasRepository();
+const furnasRepository = new PostgresFurnasRepository();
 
 // Instancia UseCase
 const getDataByIdFurnasUseCase = new GetDataByIdFurnasUseCase(furnasRepository);

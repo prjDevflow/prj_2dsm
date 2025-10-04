@@ -1,37 +1,36 @@
 export class Furnas {
-  // Identificadores principais
-  public idcampanha: number;
-  public idsitio: number;
-  public idabioticocoluna: number | null;
+  idcampanha: number;
+  idsitio: number;
+  idabioticocoluna: number | null;
 
   // Informações de data e hora
-  public datamedida: Date | null;
-  public horamedida: string | null;
+  datamedida: Date | null;
+  horamedida: string | null;
 
   // Parâmetros físico-químicos
-  public profundidade: number | null;
-  public temperatura: number | null;
-  public condutividade: number | null;
-  public ph: number | null;
-  public oxigenioDissolvido: number | null;
-  public transparencia: number | null;
+  profundidade: number | null;
+  temperatura: number | null;
+  condutividade: number | null;
+  ph: number | null;
+  oxigenioDissolvido: number | null;
+  transparencia: number | null;
 
   // Nutrientes
-  public nt: number | null; // Nitrogênio total
-  public pt: number | null; // Fósforo total
+  nt: number | null; // Nitrogênio total
+  pt: number | null; // Fósforo total
 
   // Carbono
-  public dic: number | null; // Carbono inorgânico dissolvido
-  public doc: number | null; // Carbono orgânico dissolvido
-  public poc: number | null; // Carbono orgânico particulado
+  dic: number | null;
+  doc: number | null;
+  poc: number | null;
 
   // Isótopos estáveis
-  public delta13c: number | null;
-  public delta15n: number | null;
+  delta13c: number | null;
+  delta15n: number | null;
 
-  // Gases (exemplo, pode adicionar outros)
-  public co2: number | null;
-  public ch4: number | null;
+  // Gases
+  co2: number | null;
+  ch4: number | null;
 
   constructor(props: Partial<Furnas>) {
     Object.assign(this, props);

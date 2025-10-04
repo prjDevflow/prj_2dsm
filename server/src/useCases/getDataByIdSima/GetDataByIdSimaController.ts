@@ -9,25 +9,37 @@ export class GetDataByIdSimaController {
 
   async handle(req: Request, res: Response): Promise<void> {
     try {
-      const params = getDataByIdSimaSchema.parse({ ...req.query });
+      // ✅ Inclui o ID que vem dos params
+      const params = getDataByIdSimaSchema.parse({
+        ...req.query,
+        id: req.params.id,
+      });
+
+      console.log("ID recebido no controller:", params.id);
 
       const result = await this.getDataByIdSimaUseCase.execute(params);
 
       res.status(200).send({ message: "Dados do Sima retornados", data: result });
-    } catch (error: Error | any) {
-      console.log(error);
+    } catch (error: any) {
+      console.log("Erro no controller:", error);
+
       if (error instanceof ZodError) {
         res.status(400).json({
           error: "Erro de validação nos parâmetros",
           issues: error.issues,
         });
+        return;
       }
+
       logger.error("Erro ao buscar dados", {
         message: error.message,
         stack: error.stack,
       });
 
-      res.status(500).json({ error: "Erro ao buscar dados", detail: error.message });
+      res.status(500).json({
+        error: "Erro ao buscar dados",
+        detail: error.message,
+      });
     }
   }
 }

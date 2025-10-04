@@ -1,5 +1,6 @@
 import { furnasPool } from "../../configs/db";
-import { Sima } from "../../entities/sima/Sima";
+
+import { Furnas } from "../../entities/furnas/Furnas";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 import { IFurnasRepository } from "../IFurnasRepository";
 
@@ -35,7 +36,7 @@ export class PostgresFurnasRepository implements IFurnasRepository {
     dateInit?: Date;
     dateEnd?: Date;
     type: "furnas";
-  }): Promise<{ registers: Sima[]; total: number }> {
+  }): Promise<{ registers: Furnas[]; total: number }> {
     const { id, offset, limit, dateInit, dateEnd } = params;
     const { rows } = await furnasPool.query(
       `SELECT * FROM buscar_informacoes_por_id(

@@ -1,10 +1,10 @@
 import { ExportCsvUseCase } from "./exportCsvUseCase";
 import { ExportCsvController } from "./exportCsvController";
-import { MockSimaRepository } from "../../repositories/implementations/MockSimaRepository";
+import { SimaRepository } from "../../repositories/implementations/PostgresSimaRepository";
 import { GetDataByIdSimaUseCase } from "../getDataByIdSima/GetDataByIdSimaUseCase";
 
 // Instancia Repositórios - Mocks
-const simaRepository = new MockSimaRepository();
+const simaRepository = new SimaRepository();
 // const balcarRepository = new MockBalcarRepository();
 // const furnasRepository = new MockFurnasRepository();
 
