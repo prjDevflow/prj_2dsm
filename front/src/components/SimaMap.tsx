@@ -1,6 +1,6 @@
-// src/components/SimaMap.tsx
 import React from "react";
 import Map from "./Map"; // ajuste se o caminho for diferente
+
 
 type PontoColeta = {
   id: number;

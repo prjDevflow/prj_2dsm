@@ -1,4 +1,3 @@
-// src/components/SimaDrawer.tsx
 import React from "react";
 import CalendarPicker from "@/components/CalendarPicker";
 import SimaTable from "@/components/SimaTable";
@@ -7,7 +6,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -89,9 +87,6 @@ const SimaDrawer: React.FC<Props> = ({
             </div>
           </DrawerTitle>
 
-          <DrawerDescription>
-            Esta é uma tabela de dados carregados via Docker/SIMA.
-          </DrawerDescription>
         </DrawerHeader>
 
         <DrawerFooter>

@@ -1,30 +1,35 @@
 import { useState } from "react";
-import { useColetas } from "../hooks/useColetas"; // Importando o hook de coletas
 import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/Map.css";
+import { useColetas } from "../hooks/useColetas"; // seu hook
 
-export default function Map() {
+// tipo genérico de ponto (adapte conforme seu backend)
+export type PontoColeta = {
+  id: number | string;
+  latitude: number;
+  longitude: number;
+  rotulo?: string;
+  name?: string;
+  type?: string;
+};
+
+type Props = {
+  onMarkerClick?: (p: PontoColeta) => void;
+};
+
+export default function Map({ onMarkerClick }: Props) {
   const position: LatLngExpression = [-4.4067, -64.6002];
+  const [type] = useState<"sima" | "balcar" | "furnas">("sima");
 
-  // Estado para controlar o tipo de coordenada (sima, balcar ou furnas)
-  const [type, setType] = useState<"sima" | "balcar" | "furnas">("sima");
+  const { data, isLoading, isError } = useColetas(type);
 
-  // Usando o hook para buscar as coordenadas com o tipo selecionado
-  const { data, isLoading, isError } = useColetas(type); // Passa o tipo para o hook
-
-  // Exibindo mensagens de carregamento ou erro
-  if (isLoading) return <div>Carregando...</div>;
-  if (isError) return <div>Erro ao carregar os dados.</div>;
+  if (isLoading) return <div>Carregando mapa...</div>;
+  if (isError) return <div>Erro ao carregar coordenadas.</div>;
 
   return (
     <div>
-      {/* Botões para mudar o tipo */}
-      <button onClick={() => setType("sima")}>SIMA</button>
-      <button onClick={() => setType("balcar")}>BALCAR</button>
-      <button onClick={() => setType("furnas")}>FURNAS</button>
-
       <MapContainer
         center={position}
         zoom={6}
@@ -38,12 +43,26 @@ export default function Map() {
           attribution="© Esri"
         />
 
-        {/* Marcadores dinâmicos */}
         {data?.map(
-          (ponto: { id: string; latitude: number; longitude: number; rotulo?: string }) => (
-            <Marker key={ponto.id} position={[ponto.latitude, ponto.longitude]}>
+          (ponto: { id: number | string; latitude: number; longitude: number; rotulo?: string }) => (
+            <Marker
+              key={String(ponto.id)}
+              position={[ponto.latitude, ponto.longitude] as LatLngExpression}
+              // react-leaflet v3/v4: use eventHandlers para clicks
+              eventHandlers={{
+                click: () => {
+                  onMarkerClick?.({
+                    id: ponto.id,
+                    latitude: ponto.latitude,
+                    longitude: ponto.longitude,
+                    rotulo: ponto.rotulo,
+                  });
+                },
+              }}
+            >
               <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent={false}>
-                <strong>{ponto.rotulo}</strong> <br />
+                <strong>{ponto.rotulo ?? `ID ${ponto.id}`}</strong>
+                <br />
                 ID: {ponto.id}
               </Tooltip>
             </Marker>
