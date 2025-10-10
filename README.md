@@ -292,6 +292,20 @@ A plataforma integra dados de duas fontes principais:
 ### Burndown Chart
 <img width="487" height="299" alt="Burndown Chart Sprint 1" src= "https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/burndown_sprint1.png" />
 
+## Sprint 2 — Planejamento (Poker Planning)
+
+### Estimativa de Tarefas e Story Points
+
+| Código | Tarefa | Story Points |
+|--------|--------|--------------|
+| **RF-02** | Visualização em tabelas | **13** |
+| **RF-07** | Diagrama de classe | **8** |
+| **RF-11** | Funções Agrupadoras | **8** |
+
+🔹 **Total de Story Points (Sprint 1): 29**
+
+### Burndown Chart
+<img width="487" height="299" alt="Burndown Chart Sprint 1" src= "https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/burndown_sprint2.png" />
 ---
 
 # 📝 UML
