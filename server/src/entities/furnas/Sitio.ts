@@ -1,10 +1,13 @@
 export class Sitio {
-  public idsitio: number;
-  public idreservatorio: number;
-  public nome: string | null;
-  public lat: number | null;
-  public lng: number | null;
-  public descricao: string | null;
+
+  idsitio: number;
+  nome_sitio: string;
+  lat: number;
+  lng: number;
+  descricao: string | null;
+  nome_reservatorio: string;
+  nome_instituicao: string;
+
 
   constructor(props: Sitio) {
     Object.assign(this, props);

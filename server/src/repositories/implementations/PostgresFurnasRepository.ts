@@ -1,6 +1,6 @@
 import { furnasPool } from "../../configs/db";
-
-import { Furnas } from "../../entities/furnas/Furnas";
+import { Sitio } from "../../entities/furnas/Sitio";
+// import { Furnas } from "../../entities/furnas/Furnas";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 import { IFurnasRepository } from "../IFurnasRepository";
 
@@ -29,28 +29,24 @@ export class PostgresFurnasRepository implements IFurnasRepository {
     return rows;
   }
 
-  async getDataById(params: {
-    id: string;
-    offset: number;
-    limit?: number;
-    dateInit?: Date;
-    dateEnd?: Date;
-    type: "furnas";
-  }): Promise<{ registers: Furnas[]; total: number }> {
-    const { id, offset, limit, dateInit, dateEnd } = params;
-    const { rows } = await furnasPool.query(
-      `SELECT * FROM buscar_informacoes_por_id(
-            $1::int, 
-            $2::timestamp, 
-            $3::timestamp, 
-            $4::int, 
-            $5::int
-          )`,
-      [id, dateInit || null, dateEnd || null, limit || null, offset],
-    );
-    return {
-      registers: rows,
-      total: rows.length,
-    };
-  }
+async getDataById(params: { id: string; limit?: number }): Promise<{ registers: Sitio[]; total: number }> {
+  const idInt = parseInt(params.id, 10);
+  if (isNaN(idInt)) throw new Error("ID inválido");
+
+  const limit = params.limit ?? null;
+
+  // Se limit não for informado ou for inválido, busca tudo
+  const query = limit ? 
+    `SELECT * FROM buscar_sitios_por_instituicao($1) LIMIT $2` : 
+    `SELECT * FROM buscar_sitios_por_instituicao($1)`;
+
+  const values = limit ? [idInt, limit] : [idInt];
+
+  const { rows } = await furnasPool.query(query, values);
+
+  return {
+    registers: rows,
+    total: rows.length,
+  };
+}
 }

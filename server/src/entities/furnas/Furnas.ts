@@ -1,4 +1,5 @@
 export class Furnas {
+  // Identificadores
   idcampanha: number;
   idsitio: number;
   idabioticocoluna: number | null;
