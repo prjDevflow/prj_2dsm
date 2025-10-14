@@ -324,7 +324,7 @@ BEGIN
         s.nome AS nome_sitio,
         s.lat,
         s.lng,
-        s.descricao,
+        s.descricao::text, -- cast aqui
         r.nome AS nome_reservatorio,
         i.nome AS nome_instituicao
     FROM
@@ -337,8 +337,6 @@ BEGIN
         tbinstituicao i ON c.idinstituicao = i.idinstituicao
     WHERE
         i.idinstituicao = p_idinstituicao
-    GROUP BY
-        s.idsitio, s.nome, s.lat, s.lng, s.descricao, r.nome, i.nome
     ORDER BY
         s.nome;
 END;
