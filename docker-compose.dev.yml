@@ -15,7 +15,7 @@ services:
       - furnas_campanha_data:/var/lib/postgresql/data
       - ./furnas-campanha/create-table.sql:/docker-entrypoint-initdb.d/1-create-table.sql
       - ./furnas-campanha/copy-table.sql:/docker-entrypoint-initdb.d/2-copy-table.sql
-      - ./furnas/procedures.sql:/docker-entrypoint-initdb.d/3-procedures.sql
+      - ./furnas-campanha/procedures.sql:/docker-entrypoint-initdb.d/3-procedures.sql
       - ./furnas-campanha/csv:/csv
     networks:
       - abp-network

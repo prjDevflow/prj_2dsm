@@ -303,44 +303,43 @@ CREATE OR REPLACE FUNCTION buscar_parametros_limnologicos(
 -- TODAS AS COORDENADAS DA INSTITUIÇÃO
 -- =========================
 
-CREATE OR REPLACE FUNCTION buscar_coordenadas_instituicao(
-    p_instituicao_nome text DEFAULT NULL,
-    p_reservatorio_nome text DEFAULT NULL,
-    p_limit_param integer DEFAULT 100,
-    p_offset_param integer DEFAULT 0
+CREATE OR REPLACE FUNCTION buscar_sitios_por_instituicao(
+    p_idinstituicao integer
 )
 RETURNS TABLE (
-    idestacao integer,
-    idhexadecimal text,
-    rotulo text,
+    idsitio integer,
+    nome_sitio varchar(100),
     lat double precision,
     lng double precision,
-    inicio date,
-    fim date,
-    reservatorio_nome text,
-    instituicao_nome text
+    descricao text,
+    nome_reservatorio varchar(50),
+    nome_instituicao varchar(50)
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
     SELECT
-        e.idestacao,
-        e.idhexadecimal,
-        e.rotulo,
-        e.lat,
-        e.lng,
-        e.inicio,
-        e.fim,
-        r.nome AS reservatorio_nome,
-        i.nome AS instituicao_nome
-    FROM tbestacao e
-    LEFT JOIN tbreservatorio r ON e.idreservatorio = r.idreservatorio
-    LEFT JOIN tbinstituicao i ON r.idinstituicao = i.idinstituicao
-    WHERE (p_instituicao_nome IS NULL OR i.nome = p_instituicao_nome)
-      AND (p_reservatorio_nome IS NULL OR r.nome = p_reservatorio_nome)
-    ORDER BY e.rotulo
-    LIMIT p_limit_param
-    OFFSET p_offset_param;
+        s.idsitio,
+        s.nome AS nome_sitio,
+        s.lat,
+        s.lng,
+        s.descricao,
+        r.nome AS nome_reservatorio,
+        i.nome AS nome_instituicao
+    FROM
+        tbsitio s
+    JOIN
+        tbreservatorio r ON s.idreservatorio = r.idreservatorio
+    JOIN
+        tbcampanha c ON r.idreservatorio = c.idreservatorio
+    JOIN
+        tbinstituicao i ON c.idinstituicao = i.idinstituicao
+    WHERE
+        i.idinstituicao = p_idinstituicao
+    GROUP BY
+        s.idsitio, s.nome, s.lat, s.lng, s.descricao, r.nome, i.nome
+    ORDER BY
+        s.nome;
 END;
 $$;
