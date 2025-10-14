@@ -311,7 +311,10 @@ A plataforma integra dados de duas fontes principais:
 # 📝 UML
 
 ## Diagrama de Casos de Uso
-<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowAnalytics.png" />
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowCasoDeUso.png" />
+
+## Diagrama de Classes
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowDiagramaDeClasse.png" />
 
 ---
 
