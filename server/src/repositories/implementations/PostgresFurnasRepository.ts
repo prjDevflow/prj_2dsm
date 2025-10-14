@@ -53,4 +53,30 @@ export class PostgresFurnasRepository implements IFurnasRepository {
       total: rows.length,
     };
   }
+
+  async getFilters(): Promise<{ institution: string[]; reservoir: string[] }> {
+    await connectRedis();
+    const cacheKey = "filters:furnas";
+
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    // MOCK DATA
+    const institution = ["ANA", "IBAMA", "CPRM"];
+    const reservoir = [
+      "Reservatório Norte",
+      "Reservatório Sul",
+      "Reservatório Oeste",
+      "Reservatório Leste",
+      "Reservatório Central",
+    ];
+
+    await redisClient.set(cacheKey, JSON.stringify({ institution, reservoir }), {
+      EX: 60 * 60, // 1 hora de expiração
+    });
+
+    return { institution, reservoir };
+  }
 }
