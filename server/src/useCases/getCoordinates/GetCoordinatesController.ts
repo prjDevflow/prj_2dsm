@@ -7,7 +7,7 @@ export class GetCoordinatesController {
   async handle(req: Request, res: Response) {
     try {
       const params = GetCoordinatesSchema.parse(req.query);
-      const coordinates = await this.getCoordinatesUseCase.execute(params.type);
+      const coordinates = await this.getCoordinatesUseCase.execute(params);
       res.status(200).json({
         message: "Coordenadas recuperadas com sucesso",
         markers: coordinates,

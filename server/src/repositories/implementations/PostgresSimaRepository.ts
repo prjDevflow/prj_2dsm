@@ -3,8 +3,13 @@ import { Sima } from "../../entities/sima/Sima";
 import { simaPool } from "../../configs/db";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 
-export class SimaRepository implements ISimaRepository {
-  async getCoordinates(): Promise<{ rotulo: string; latitude: number; longitude: number }[]> {
+export class PostgresSimaRepository implements ISimaRepository {
+  async getCoordinates(params: {
+    reservoir?: string;
+    institution?: string;
+    dateInit?: Date;
+    dateEnd?: Date;
+  }): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]> {
     await connectRedis();
 
     const cacheKey = "coordinates:sima";
@@ -14,13 +19,18 @@ export class SimaRepository implements ISimaRepository {
       return JSON.parse(cached);
     }
 
-    const { rows } = await simaPool.query(`SELECT * FROM listar_todas_coordenadas()`);
+    const { rows } = await simaPool.query(
+      `SELECT * FROM listar_todas_coordenadas($1, $2, $3, $4)`,
+      [params.reservoir, params.institution, params.dateInit, params.dateEnd],
+    );
 
-    const coordinates = rows.map((row: any) => ({
-      rotulo: row.rotulo,
-      latitude: row.lat,
-      longitude: row.lng,
-    }));
+    const coordinates: { id: string; rotulo: string; latitude: number; longitude: number }[] =
+      rows.map((row: any) => ({
+        id: row.string,
+        rotulo: row.rotulo,
+        latitude: row.lat,
+        longitude: row.lng,
+      }));
 
     await redisClient.set(cacheKey, JSON.stringify(coordinates), {
       EX: 60 * 60,
@@ -97,15 +107,15 @@ export class SimaRepository implements ISimaRepository {
     );
 
     // faz a contagem considerando filtro por rotulo
-    const totalResult = await simaPool.query(
-      `SELECT count(*)::text AS count
-     FROM tbsima s
-     JOIN tbestacao e ON s.idestacao = e.idestacao
-     WHERE ($1::text IS NULL OR e.rotulo ILIKE '%' || $1 || '%')
-       AND ($2::timestamp IS NULL OR s.datahora >= $2)
-       AND ($3::timestamp IS NULL OR s.datahora <= $3)`,
-      [stationName || null, dateInit || null, dateEnd || null],
-    );
+    // const totalResult = await simaPool.query(
+    //   `SELECT count(*)::text AS count
+    //  FROM tbsima s
+    //  JOIN tbestacao e ON s.idestacao = e.idestacao
+    //  WHERE ($1::text IS NULL OR e.rotulo ILIKE '%' || $1 || '%')
+    //    AND ($2::timestamp IS NULL OR s.datahora >= $2)
+    //    AND ($3::timestamp IS NULL OR s.datahora <= $3)`,
+    //   [stationName || null, dateInit || null, dateEnd || null],
+    // );
 
     // const total = parseInt(totalResult.rows[0].count, 10);
 

@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import router from "./routes";
-import { errorHandler } from "./middlewares/errorHandler";
 import cors from "cors";
 
 // Carrega as variáveis de ambiente definidas no arquivo .env
@@ -32,9 +31,6 @@ app.use((_req: Request, res: Response) => {
     error: "Rota não encontrada",
   });
 });
-
-// middleware de erro sempre por último
-app.use(errorHandler);
 
 // Inicializa o servidor na porta definida
 app.listen(PORT, function () {

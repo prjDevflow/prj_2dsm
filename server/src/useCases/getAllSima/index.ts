@@ -1,11 +1,11 @@
 // import { MockSimaRepository } from "../../repositories/implementations/MockSimaRepository";
-import { SimaRepository } from "../../repositories/implementations/PostgresSimaRepository";
+import { PostgresSimaRepository } from "../../repositories/implementations/PostgresSimaRepository";
 import { GetAllSimaController } from "./GetAllSimaController";
 import { GetAllSimaUseCase } from "./GetAllSimaUseCase";
 
 // Instancia Repositórios - Mocks
 // const simaRepository = new MockSimaRepository();
-const simaRepository = new SimaRepository();
+const simaRepository = new PostgresSimaRepository();
 
 // Instancia UseCase
 const getAllSimaUseCase = new GetAllSimaUseCase(simaRepository);

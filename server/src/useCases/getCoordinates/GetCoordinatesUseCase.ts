@@ -1,7 +1,7 @@
 import { ISimaRepository } from "../../repositories/ISimaRepository";
 import { IBalcarRepository } from "../../repositories/IBalcarRepository";
 import { IFurnasRepository } from "../../repositories/IFurnasRepository";
-import { IGetCoordinatesResponse } from "./GetCoordinatesDTO";
+import { IGetCoordinates, IGetCoordinatesResponse } from "./GetCoordinatesDTO";
 
 export class GetCoordinatesUseCase {
   constructor(
@@ -10,29 +10,22 @@ export class GetCoordinatesUseCase {
     private furnasRepository: IFurnasRepository,
   ) {}
 
-  async execute(type?: "sima" | "balcar" | "furnas"): Promise<IGetCoordinatesResponse[]> {
+  async execute(data: IGetCoordinates): Promise<IGetCoordinatesResponse[]> {
+    const { type, ...filters } = data;
+    // const { reservoir, institution, dateInit, dateEnd } = filters;
+
     let coordinates: any = [];
     if (type === "sima") {
-      coordinates = this.simaRepository.getCoordinates();
+      coordinates = await this.simaRepository.getCoordinates({
+        ...filters,
+      });
     }
     if (type === "balcar") {
-      return this.balcarRepository.getCoordinates();
+      coordinates = await this.balcarRepository.getCoordinates({ ...filters });
     }
     if (type === "furnas") {
-      return this.furnasRepository.getCoordinates();
+      coordinates = await this.furnasRepository.getCoordinates({ ...filters });
     }
-
-    // const [coordinatesBalcar, coordinatesFurnas, coordinatesSimas] = await Promise.all([
-    //   this.simaRepository.getCoordinates(),
-    //   this.balcarRepository.getCoordinates(),
-    //   this.furnasRepository.getCoordinates(),
-    // ]);
-
-    // const coordinates: IGetCoordinatesResponse[] = [
-    //   ...coordinatesBalcar,
-    //   ...coordinatesSimas,
-    //   ...coordinatesFurnas,
-    // ];
 
     return coordinates;
   }

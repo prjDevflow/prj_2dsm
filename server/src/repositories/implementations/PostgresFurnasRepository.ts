@@ -29,24 +29,54 @@ export class PostgresFurnasRepository implements IFurnasRepository {
     return rows;
   }
 
-async getDataById(params: { id: string; limit?: number }): Promise<{ registers: Sitio[]; total: number }> {
-  const idInt = parseInt(params.id, 10);
-  if (isNaN(idInt)) throw new Error("ID inválido");
+  async getDataById(params: {
+    id: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    type: "furnas";
+  }): Promise<{ registers: Furnas[]; total: number }> {
+    const { id, offset, limit, dateInit, dateEnd } = params;
+    const { rows } = await furnasPool.query(
+      `SELECT * FROM buscar_informacoes_por_id(
+            $1::int, 
+            $2::timestamp, 
+            $3::timestamp, 
+            $4::int, 
+            $5::int
+          )`,
+      [id, dateInit || null, dateEnd || null, limit || null, offset],
+    );
+    return {
+      registers: rows,
+      total: rows.length,
+    };
+  }
 
-  const limit = params.limit ?? null;
+  async getFilters(): Promise<{ institution: string[]; reservoir: string[] }> {
+    await connectRedis();
+    const cacheKey = "filters:furnas";
 
-  // Se limit não for informado ou for inválido, busca tudo
-  const query = limit ? 
-    `SELECT * FROM buscar_sitios_por_instituicao($1) LIMIT $2` : 
-    `SELECT * FROM buscar_sitios_por_instituicao($1)`;
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
 
-  const values = limit ? [idInt, limit] : [idInt];
+    // MOCK DATA
+    const institution = ["ANA", "IBAMA", "CPRM"];
+    const reservoir = [
+      "Reservatório Norte",
+      "Reservatório Sul",
+      "Reservatório Oeste",
+      "Reservatório Leste",
+      "Reservatório Central",
+    ];
 
-  const { rows } = await furnasPool.query(query, values);
+    await redisClient.set(cacheKey, JSON.stringify({ institution, reservoir }), {
+      EX: 60 * 60, // 1 hora de expiração
+    });
 
-  return {
-    registers: rows,
-    total: rows.length,
-  };
-}
+    return { institution, reservoir };
+  }
 }
