@@ -35,7 +35,7 @@ export class SimaRepository implements ISimaRepository {
     dateEnd?: Date;
     stationName?: string;
   }): Promise<{ registers: Sima[]; total: number }> {
-    const { offset = 0, limit, dateInit, dateEnd, stationName } = params;
+    const { offset = 0, limit, dateInit, dateEnd,  } = params;
 
     let result;
 
@@ -97,15 +97,7 @@ export class SimaRepository implements ISimaRepository {
     );
 
     // faz a contagem considerando filtro por rotulo
-    const totalResult = await simaPool.query(
-      `SELECT count(*)::text AS count
-     FROM tbsima s
-     JOIN tbestacao e ON s.idestacao = e.idestacao
-     WHERE ($1::text IS NULL OR e.rotulo ILIKE '%' || $1 || '%')
-       AND ($2::timestamp IS NULL OR s.datahora >= $2)
-       AND ($3::timestamp IS NULL OR s.datahora <= $3)`,
-      [stationName || null, dateInit || null, dateEnd || null],
-    );
+   
 
     // const total = parseInt(totalResult.rows[0].count, 10);
 

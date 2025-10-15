@@ -30,6 +30,10 @@ router.get("/sima/:id", (req: Request, res: Response) => {
   return getDataByIdSimaController.handle(req, res);
 });
 
+
+router.get("/furnas", (req: Request, res: Response) => {
+  return getDataByIdFurnasController.handle(req, res);
+});
 router.get("/furnas/:id", (req: Request, res: Response) => {
   return getDataByIdFurnasController.handle(req, res);
 });
