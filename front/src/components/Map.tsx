@@ -1,3 +1,4 @@
+// src/components/Map.tsx
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
@@ -5,7 +6,6 @@ import "leaflet/dist/leaflet.css";
 import "../styles/Map.css";
 import { useColetas } from "../hooks/useColetas"; // seu hook
 
-// tipo genérico de ponto (adapte conforme seu backend)
 export type PontoColeta = {
   id: number | string;
   latitude: number;
@@ -17,9 +17,10 @@ export type PontoColeta = {
 
 type Props = {
   onMarkerClick?: (p: PontoColeta) => void;
+  filters?: { points: (string | number)[] };
 };
 
-export default function Map({ onMarkerClick }: Props) {
+export default function Map({ onMarkerClick, filters }: Props) {
   const position: LatLngExpression = [-4.4067, -64.6002];
   const [type] = useState<"sima" | "balcar" | "furnas">("sima");
 
@@ -27,6 +28,16 @@ export default function Map({ onMarkerClick }: Props) {
 
   if (isLoading) return <div>Carregando mapa...</div>;
   if (isError) return <div>Erro ao carregar coordenadas.</div>;
+
+  // normalizar conjunto de filtros para comparação rápida (strings)
+  const filterSet = new Set((filters?.points ?? []).map((x) => String(x)));
+
+  // filtrar dados: se não há filtros, mostra tudo; senão apenas os ids presentes
+  const visibleData = (data ?? []).filter((ponto: any) => {
+    if (!filters?.points || filters.points.length === 0) return true;
+    const id = String(ponto.id ?? ponto._id ?? ponto.nome ?? ponto.rotulo ?? ponto.name);
+    return filterSet.has(id);
+  });
 
   return (
     <div>
@@ -43,12 +54,11 @@ export default function Map({ onMarkerClick }: Props) {
           attribution="© Esri"
         />
 
-        {data?.map(
+        {visibleData.map(
           (ponto: { id: number | string; latitude: number; longitude: number; rotulo?: string }) => (
             <Marker
               key={String(ponto.id)}
               position={[ponto.latitude, ponto.longitude] as LatLngExpression}
-              // react-leaflet v3/v4: use eventHandlers para clicks
               eventHandlers={{
                 click: () => {
                   onMarkerClick?.({
@@ -69,6 +79,12 @@ export default function Map({ onMarkerClick }: Props) {
           ),
         )}
       </MapContainer>
+      {/* opcional: mensagem quando nenhum ponto é visível */}
+      {(!visibleData || visibleData.length === 0) && (
+        <div style={{ position: "absolute", left: 20, top: 20, zIndex: 1300, background: "rgba(255,255,255,0.95)", padding: 8, borderRadius: 6 }}>
+          Nenhum ponto selecionado para exibir.
+        </div>
+      )}
     </div>
   );
 }

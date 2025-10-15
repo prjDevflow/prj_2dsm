@@ -1,5 +1,10 @@
 export interface IBalcarRepository {
-  getCoordinates(): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
+  getCoordinates(params: {
+    reservoir?: string;
+    institution?: string;
+    dateInit?: Date;
+    dateEnd?: Date;
+  }): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
   getFullData(): Promise<any[]>;
   getDataById(params: {
     id: string;
@@ -9,4 +14,5 @@ export interface IBalcarRepository {
     dateEnd?: Date;
     type?: "balcar";
   }): Promise<{ registers: any[]; total: number }>;
+  getFilters(): Promise<{ institution: string[]; reservoir: string[] }>;
 }
