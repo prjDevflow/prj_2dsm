@@ -5,7 +5,7 @@ import { exportCsvController } from "./useCases/exportCsv";
 import { getDataByIdSimaController } from "./useCases/getDataByIdSima";
 import { getDataByIdFurnasController } from "./useCases/getDataByIdFurnas";
 import { getDataByIdBalcarController } from "./useCases/getDataByIdBalcar";
-import { getFiltersController } from "./useCases/getFilters";
+
 
 const router = express.Router();
 
@@ -27,9 +27,7 @@ router.get("/get-coordinates", (req: Request, res: Response) => {
 // ⚠️WARNING: deve receber um type(balcar ou furnas)]
 // salva em cache
 // http://localhost:3000/filters?type=balcar
-router.get("/filters", (req: Request, res: Response) => {
-  return getFiltersController.handle(req, res);
-});
+
 // pode receber limit, offset(paginacao), dateInit, dateEnd, rotulo(filtro)
 // padrao limit=20 e offset=0
 router.get("/sima", (req: Request, res: Response) => {
@@ -40,14 +38,11 @@ router.get("/sima", (req: Request, res: Response) => {
 router.get("/sima/:id", (req: Request, res: Response) => {
   return getDataByIdSimaController.handle(req, res);
 });
-<<<<<<< HEAD
 
 
 router.get("/furnas", (req: Request, res: Response) => {
   return getDataByIdFurnasController.handle(req, res);
 });
-=======
->>>>>>> 841bd0bcd7752bb57042b97abc28a13b5359350a
 router.get("/furnas/:id", (req: Request, res: Response) => {
   return getDataByIdFurnasController.handle(req, res);
 });

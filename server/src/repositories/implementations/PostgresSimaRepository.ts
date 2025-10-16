@@ -4,12 +4,7 @@ import { simaPool } from "../../configs/db";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 
 export class PostgresSimaRepository implements ISimaRepository {
-  async getCoordinates(params: {
-    reservoir?: string;
-    institution?: string;
-    dateInit?: Date;
-    dateEnd?: Date;
-  }): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]> {
+  async getCoordinates( ): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]> {
     await connectRedis();
 
     const cacheKey = "coordinates:sima";
@@ -20,8 +15,8 @@ export class PostgresSimaRepository implements ISimaRepository {
     }
 
     const { rows } = await simaPool.query(
-      `SELECT * FROM listar_todas_coordenadas($1, $2, $3, $4)`,
-      [params.reservoir, params.institution, params.dateInit, params.dateEnd],
+      `SELECT * FROM listar_todas_coordenadas()`,
+    
     );
 
     const coordinates: { id: string; rotulo: string; latitude: number; longitude: number }[] =
@@ -107,19 +102,7 @@ export class PostgresSimaRepository implements ISimaRepository {
     );
 
     // faz a contagem considerando filtro por rotulo
-<<<<<<< HEAD
    
-=======
-    // const totalResult = await simaPool.query(
-    //   `SELECT count(*)::text AS count
-    //  FROM tbsima s
-    //  JOIN tbestacao e ON s.idestacao = e.idestacao
-    //  WHERE ($1::text IS NULL OR e.rotulo ILIKE '%' || $1 || '%')
-    //    AND ($2::timestamp IS NULL OR s.datahora >= $2)
-    //    AND ($3::timestamp IS NULL OR s.datahora <= $3)`,
-    //   [stationName || null, dateInit || null, dateEnd || null],
-    // );
->>>>>>> 841bd0bcd7752bb57042b97abc28a13b5359350a
 
     // const total = parseInt(totalResult.rows[0].count, 10);
 

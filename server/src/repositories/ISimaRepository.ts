@@ -1,11 +1,7 @@
 import { Sima } from "../entities/sima/Sima";
 
 export interface ISimaRepository {
-  getCoordinates(params: {
-    reservoir?: string,
-    institution?: string,
-    dateInit?: Date,
-    dateEnd?: Date,}
+  getCoordinates(
   ): Promise<{ id: string, rotulo: string; latitude: number; longitude: number }[]>;
   getAll(params: {
     offset: number;

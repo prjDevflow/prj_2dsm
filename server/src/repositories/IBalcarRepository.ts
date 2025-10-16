@@ -1,9 +1,7 @@
 export interface IBalcarRepository {
   getCoordinates(params: {
-    reservoir?: string;
-    institution?: string;
-    dateInit?: Date;
-    dateEnd?: Date;
+    reservatorio?: string;
+    instituicao?: string;
   }): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]>;
   getFullData(): Promise<any[]>;
   getDataById(params: {
