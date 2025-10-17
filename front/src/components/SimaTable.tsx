@@ -176,13 +176,17 @@ export default function SimaTable({
 
       try {
         const params = new URLSearchParams();
-        if (selectedPointId !== null && selectedPointId !== undefined) params.append("point", String(selectedPointId));
         if (range?.start) params.append("start", new Date(range.start).toISOString());
         if (range?.end) params.append("end", new Date(range.end).toISOString());
         params.append("page", String(initialPage));
         params.append("limit", String(initialLimit));
 
-        const url = `${apiBase}?${params.toString()}`;
+        // === HERE: build URL using /sima/{ID} when selectedPointId exists ===
+        const idStr = selectedPointId !== null && selectedPointId !== undefined ? String(selectedPointId) : null;
+        const baseClean = apiBase.replace(/\/$/, "");
+        const baseUrl = idStr ? `${baseClean}/${encodeURIComponent(idStr)}` : baseClean;
+        const url = `${baseUrl}?${params.toString()}`;
+
         console.debug("[SimaTable] fetching", url);
 
         const res = await fetch(url, { signal });
@@ -281,63 +285,50 @@ export default function SimaTable({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3">
-  <h2 className="text-lg font-bold m-0">
-    SIMA — Visualização de Dados {selectedPointId || selectedPointName ? `(ponto ${String(selectedPointId ?? selectedPointName)})` : ""}
-  </h2>
+        <h2 className="text-lg font-bold m-0">
+          SIMA — Visualização de Dados {selectedPointId || selectedPointName ? `(ponto ${String(selectedPointId ?? selectedPointName)})` : ""}
+        </h2>
 
-  {/* Right side: toggle + export buttons */}
-  <div className="flex items-center gap-3">
-    <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">
-      <button
-        onClick={() => setView("online")}
-        className={`px-3 py-2 border-none ${view === "online" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
-      >
-        Online
-      </button>
-      <button
-        onClick={() => setView("offline")}
-        className={`px-3 py-2 border-none ${view === "offline" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
-      >
-        Offline
-      </button>
-    </div>
+        <div className="flex items-center gap-3">
+          <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setView("online")}
+              className={`px-3 py-2 border-none ${view === "online" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
+            >
+              Online
+            </button>
+            <button
+              onClick={() => setView("offline")}
+              className={`px-3 py-2 border-none ${view === "offline" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
+            >
+              Offline
+            </button>
+          </div>
 
-    <div className="inline-flex gap-2 flex-wrap">
-      {(view === "online" || view === "ambos") && (
-        <>
-          <button
-            onClick={() => exportCSV("online")}
-            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Exportar Online CSV
-          </button>
-          <button
-            onClick={() => openTableInNewTab("online")}
-            className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Abrir Online
-          </button>
-        </>
-      )}
-      {(view === "offline" || view === "ambos") && (
-        <>
-          <button
-            onClick={() => exportCSV("offline")}
-            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Exportar Offline CSV
-          </button>
-          <button
-            onClick={() => openTableInNewTab("offline")}
-            className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Abrir Offline
-          </button>
-        </>
-      )}
-    </div>
-  </div>
-</div>
+          <div className="inline-flex gap-2 flex-wrap">
+            {(view === "online" || view === "ambos") && (
+              <>
+                <button onClick={() => exportCSV("online")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                  Exportar Online CSV
+                </button>
+                <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                  Abrir Online
+                </button>
+              </>
+            )}
+            {(view === "offline" || view === "ambos") && (
+              <>
+                <button onClick={() => exportCSV("offline")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                  Exportar Offline CSV
+                </button>
+                <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                  Abrir Offline
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
       {loading && <p>Carregando...</p>}
       {error && <p className="text-red-600">{error}</p>}
@@ -346,10 +337,10 @@ export default function SimaTable({
         style={{
           overflowX: "auto",
           overflowY: "auto",
-          maxHeight: "calc(100vh - 200px)", // ajusta espaço para header + footer
+          maxHeight: "calc(100vh - 200px)",
           border: "1px solid #ddd",
           borderRadius: 6,
-          paddingBottom: "16px",
+          paddingBottom: 16,
         }}
       >
         {(view === "online" || view === "ambos") && online.length > 0 && (

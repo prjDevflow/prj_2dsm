@@ -1,19 +1,10 @@
-// src/components/Map.tsx
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Tooltip } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/Map.css";
 import { useColetas } from "../hooks/useColetas"; // seu hook
-
-export type PontoColeta = {
-  id: number | string;
-  latitude: number;
-  longitude: number;
-  rotulo?: string;
-  name?: string;
-  type?: string;
-};
+import type { PontoColeta } from "../types/ponto";
 
 type Props = {
   onMarkerClick?: (p: PontoColeta) => void;
@@ -66,7 +57,7 @@ export default function Map({ onMarkerClick, filters }: Props) {
                     latitude: ponto.latitude,
                     longitude: ponto.longitude,
                     rotulo: ponto.rotulo,
-                  });
+                  } as PontoColeta);
                 },
               }}
             >
@@ -79,9 +70,19 @@ export default function Map({ onMarkerClick, filters }: Props) {
           ),
         )}
       </MapContainer>
-      {/* opcional: mensagem quando nenhum ponto é visível */}
+
       {(!visibleData || visibleData.length === 0) && (
-        <div style={{ position: "absolute", left: 20, top: 20, zIndex: 1300, background: "rgba(255,255,255,0.95)", padding: 8, borderRadius: 6 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: 20,
+            top: 20,
+            zIndex: 1300,
+            background: "rgba(255,255,255,0.95)",
+            padding: 8,
+            borderRadius: 6,
+          }}
+        >
           Nenhum ponto selecionado para exibir.
         </div>
       )}

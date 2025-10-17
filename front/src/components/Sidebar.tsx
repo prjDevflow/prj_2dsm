@@ -4,14 +4,12 @@ import styled from "styled-components";
 import { Sliders, ChevronLeft, ChevronDown } from "lucide-react";
 import "../styles/Sidebar.css";
 import { useColetas } from "../hooks/useColetas";
+import type { PontoColeta } from "../types/ponto";
 
 interface SidebarProps {
   logoSrc?: string;
   variant?: "sima" | "furnas" | "balcar";
-  /**
-   * recebe { points: (string|number)[] } quando o usuário clica em "Aplicar"
-   */
-  onFiltersChange?: (filters: { points: (string | number)[] }) => void;
+  onSelectPoint?: (p: PontoColeta) => void;
 }
 
 const SIDEBAR_WIDTH = 300;
@@ -193,7 +191,7 @@ const SectionBody = styled.div<{ open: boolean }>`
   }
 `;
 
-const Row = styled.label`
+const Row = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -201,6 +199,28 @@ const Row = styled.label`
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
   user-select: none;
+`;
+
+const PointRow = styled.button`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+  user-select: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.95;
+    transform: translateX(2px);
+  }
+  &:focus {
+    outline: 3px solid rgba(255,255,255,0.06);
+  }
 `;
 
 const DateRow = styled.div`
@@ -237,43 +257,12 @@ const SearchInput = styled.input`
   margin-bottom: 0.6rem;
 `;
 
-const ActionsRow = styled.div`
-  display:flex;
-  gap:0.5rem;
-  margin-bottom:0.5rem;
-  align-items:center;
-`;
-
-const ApplyRow = styled.div`
-  display:flex;
-  gap:0.5rem;
-  margin-top:0.6rem;
-  justify-content:flex-end;
-`;
-
-/* simples botões - use suas classes se preferir */
-const SecondaryButton = styled.button`
-  padding: 0.45rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  font-weight: 700;
-`;
-
-const PrimaryButton = styled.button`
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  border: none;
-  background: rgba(0,0,0,0.12);
-  color: inherit;
-  cursor: pointer;
-  font-weight: 800;
-`;
-
 /* ---------- componente ---------- */
-export default function Sidebar({ logoSrc, variant = "sima", onFiltersChange }: SidebarProps) {
+export default function Sidebar({
+  logoSrc,
+  variant = "sima",
+  onSelectPoint,
+}: SidebarProps) {
   const [open, setOpen] = useState(false);
 
   const defaultFiltersOpen = variant === "sima" ? true : false;
@@ -325,53 +314,58 @@ export default function Sidebar({ logoSrc, variant = "sima", onFiltersChange }: 
   const toggleSection = (key: string) => setOpenSection((s) => ({ ...s, [key]: !s[key] }));
 
   // === dados de pontos via useColetas ===
+  type ApiPonto = {
+    id?: number | string;
+    _id?: string;
+    idestacao?: string | number;
+    idHexadecimal?: string;
+    nome?: string;
+    nome_estacao?: string;
+    rotulo?: string;
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+
   const { data: pontos = [], isLoading, isError } = useColetas(variant);
 
-  // estados: pending (edição) e applied (o que foi enviado pro mapa)
-  const [pendingSelectedPoints, setPendingSelectedPoints] = useState<(string | number)[]>([]);
-  const [appliedPoints, setAppliedPoints] = useState<(string | number)[]>([]);
-
   const [search, setSearch] = useState("");
-
-  // inicializa pending com applied quando abre o sidebar
-  useEffect(() => {
-    if (open) setPendingSelectedPoints(appliedPoints);
-  }, [open, appliedPoints]);
 
   // filtrar lista localmente (por rotulo/name)
   const filteredPontos = useMemo(() => {
     if (!pontos || pontos.length === 0) return [];
     const q = search.trim().toLowerCase();
     if (!q) return pontos;
-    return pontos.filter((p: any) => {
-      const label = (p.rotulo ?? p.name ?? String(p.id ?? "")).toLowerCase();
-      return label.includes(q) || String(p.id).toLowerCase().includes(q);
+    return (pontos as ApiPonto[]).filter((p) => {
+      const label = (p.rotulo ?? p.name ?? p.nome ?? String(p.id ?? "")).toLowerCase();
+      return label.includes(q) || String(p.id ?? p.idHexadecimal ?? p.idestacao ?? "").toLowerCase().includes(q);
     });
   }, [pontos, search]);
 
-  const handleTogglePoint = (id: string | number) => {
-    setPendingSelectedPoints((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
+  // --------------------------------------------------------------------
+  // clicar no nome do reservatório -> abre tabela (via callback)
+  // prioridade: idestacao (numérico) -> idHexadecimal -> id -> _id -> nome -> rotulo -> name
+  // --------------------------------------------------------------------
+  const handleRowClick = (p: ApiPonto) => {
+    const maybeIdest = p.idestacao ?? p.id ?? p._id ?? null;
+    const preferIdest =
+      maybeIdest !== null &&
+      (typeof maybeIdest === "number" || (typeof maybeIdest === "string" && /^\d+$/.test(maybeIdest)));
 
-  const handleSelectAllVisible = () => {
-    const ids = filteredPontos.map((p: any) => p.id ?? p._id ?? p.nome ?? p.rotulo ?? p.name);
-    setPendingSelectedPoints((prev) => Array.from(new Set([...prev, ...ids])));
-  };
+    const chosenId = preferIdest
+      ? (typeof maybeIdest === "string" ? Number(maybeIdest) : maybeIdest)
+      : (p.idHexadecimal ?? p.id ?? p._id ?? p.nome ?? p.nome_estacao ?? p.rotulo ?? p.name ?? "");
 
-  const handleClearSelection = () => setPendingSelectedPoints([]);
+    const point: PontoColeta = {
+      id: chosenId,
+      name: (p.nome ?? p.nome_estacao ?? p.name ?? p.rotulo) as string | undefined,
+      rotulo: p.rotulo ?? p.name ?? p.nome ?? undefined,
+      latitude: p.latitude ?? 0,
+      longitude: p.longitude ?? 0,
+    };
 
-  // AÇÃO: aplicar filtros -> notifica o pai e guarda appliedPoints
-  const handleApply = () => {
-    setAppliedPoints(pendingSelectedPoints);
-    onFiltersChange?.({ points: pendingSelectedPoints });
-    // opcional: fechar sidebar ao aplicar
+    onSelectPoint?.(point);
     setOpen(false);
-  };
-
-  // AÇÃO: cancelar edições -> reverte pending para último applied
-  const handleCancel = () => {
-    setPendingSelectedPoints(appliedPoints);
-    // mantemos sidebar aberto para editar de novo
   };
 
   return (
@@ -465,56 +459,30 @@ export default function Sidebar({ logoSrc, variant = "sima", onFiltersChange }: 
                     aria-label="Buscar reservatórios"
                   />
 
-                  <ActionsRow>
-                    <button type="button" className="btn-small" onClick={handleSelectAllVisible}>
-                      Selecionar visíveis
-                    </button>
-                    <button type="button" className="btn-small" onClick={handleClearSelection}>
-                      Limpar seleção
-                    </button>
-                    <Hint style={{ marginLeft: "auto", fontSize: "0.9rem" }}>
-                      Selecionados: {pendingSelectedPoints.length}
-                    </Hint>
-                  </ActionsRow>
-
                   {isLoading && <Hint>Carregando pontos...</Hint>}
                   {isError && <Hint>Erro ao carregar pontos.</Hint>}
 
-                  {!isLoading && !isError && filteredPontos.length === 0 && (
-                    <Hint>Nenhum ponto encontrado.</Hint>
-                  )}
+                  {!isLoading && filteredPontos.length === 0 && <Hint>Nenhum ponto encontrado.</Hint>}
 
-                  {!isLoading && filteredPontos.map((p: any) => {
-                    const id = p.id ?? p._id ?? p.nome ?? p.rotulo ?? p.name;
-                    const label = p.rotulo ?? p.name ?? `Ponto ${id}`;
-                    return (
-                      <Row key={String(id)} className="row">
-                        <span className="row-label">{label}</span>
-                        <input
-                          type="checkbox"
-                          className="fancy-checkbox"
-                          aria-label={`Filtrar ponto ${label}`}
-                          checked={pendingSelectedPoints.includes(id)}
-                          onChange={() => handleTogglePoint(id)}
-                        />
-                      </Row>
-                    );
-                  })}
+                  {!isLoading &&
+                    (filteredPontos as ApiPonto[]).map((p) => {
+                      const id = p.id ?? p.idHexadecimal ?? p.idestacao ?? p._id ?? p.nome ?? p.nome_estacao ?? p.rotulo ?? p.name;
+                      const label = p.rotulo ?? p.name ?? p.nome ?? p.nome_estacao ?? `Ponto ${id}`;
+                      const displayId = String(id ?? "");
+                      const showId = displayId !== label;
 
-                  {/* botões aplicar/cancelar */}
-                  <ApplyRow>
-                    <SecondaryButton type="button" onClick={handleCancel} aria-label="Cancelar alterações">
-                      Cancelar
-                    </SecondaryButton>
-                    <PrimaryButton
-                      type="button"
-                      onClick={handleApply}
-                      aria-label="Aplicar filtros"
-                      title="Aplicar filtros"
-                    >
-                      Aplicar ({pendingSelectedPoints.length})
-                    </PrimaryButton>
-                  </ApplyRow>
+                      return (
+                        <PointRow
+                          key={String(id)}
+                          onClick={() => handleRowClick(p)}
+                          aria-label={`Abrir tabela do reservatório ${label}`}
+                          title={`${label}${showId ? " — " + displayId : ""}`}
+                        >
+                          <span>{label}</span>
+                          {showId && <span style={{ opacity: 0.85, fontSize: "0.9rem" }}>{displayId}</span>}
+                        </PointRow>
+                      );
+                    })}
                 </SectionBody>
               </Section>
 
