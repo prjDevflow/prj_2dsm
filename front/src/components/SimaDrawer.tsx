@@ -25,7 +25,7 @@ type Range = { start?: Date | null; end?: Date | null };
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  selectedPonto: PontoColeta | null;
+  selectedPonto: PontoColeta | void;
   setSelectedPonto: (p: PontoColeta | null) => void;
   range: Range;
   setRange: (r: Range) => void;
