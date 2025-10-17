@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 # copiar package.json e package-lock.json para instalar dependências
 COPY package*.json ./
 
-# instalar dependências
+# instala.r dependências
 RUN npm install
 
 # expor a porta do Vite
