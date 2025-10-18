@@ -110,25 +110,17 @@ export class PostgresSimaRepository implements ISimaRepository {
   }
 
   async getDataById(params: {
-    id: string; // idestacao (ex: "123" ou "000123")
+    id: string; 
     offset: number;
     limit?: number;
     dateInit?: Date;
     dateEnd?: Date;
     type: "sima";
   }): Promise<{ registers: Sima[]; total: number }> {
-    const { id, offset = 0, limit = 100, dateInit, dateEnd } = params;
 
-    // consulta usando a função buscar_todas_informacoes
     const { rows } = await simaPool.query(
-      `SELECT * FROM buscar_todas_informacoes(
-      $1::text,
-      $2::timestamp,
-      $3::timestamp,
-      $4::int,
-      $5::int
-    )`,
-      [id || null, dateInit || null, dateEnd || null, limit, offset],
+      `SELECT * FROM buscar_todas_informacoes($1, $2, $3, $4, $5)`,
+      [params.id, params.dateInit, params.dateEnd, params.limit, params.offset],
     );
 
     // transforma em instâncias de Sima
@@ -165,21 +157,7 @@ export class PostgresSimaRepository implements ISimaRepository {
         }),
     );
 
-    // total separado, sem limit/offset
-
-    const totalResult = await simaPool.query(
-      `SELECT count(*)::text AS count
-     FROM tbsima s
-     JOIN tbestacao e ON s.idestacao = e.idestacao
-     WHERE ($1::text IS NULL OR TRIM(LEADING '0' FROM e.idestacao::text) = TRIM(LEADING '0' FROM $1::text))
-       AND ($2::timestamp IS NULL OR s.datahora >= $2)
-       AND ($3::timestamp IS NULL OR s.datahora <= $3)`,
-      [id || null, dateInit || null, dateEnd || null],
-    );
-
-    const total = parseInt(totalResult.rows[0].count, 10);
-
-    return { registers, total };
+    return { registers, total: registers.length };
   }
 
   async getDataByCarbono(params: {

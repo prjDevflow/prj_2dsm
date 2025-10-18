@@ -36,7 +36,7 @@ router.get("/sima", (req: Request, res: Response) => {
 });
 // ⚠️WARNING: devem receber id
 // podem receber limit, offset(paginacao), dateInit, dateEnd, rotulo(filtro)
-router.get("/sima/:id", (req: Request, res: Response) => {
+router.get("/sima/:rotulo", (req: Request, res: Response) => {
   return getDataByIdSimaController.handle(req, res);
 });
 
