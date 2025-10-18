@@ -4,11 +4,10 @@ import { Sitio } from "../entities/furnas/Sitio";
 export interface IFurnasRepository {
   getCoordinates(params: {
     instituicao?: string;
-    reservatorio?: string;
-  }): Promise<{ id: number; rotulo: string; latitude: number; longitude: number, instituicao: string, reservatorio:string}[]>;
+  }): Promise<{ id: number; reservatorio: string; latitude: number; longitude: number, instituicao: string, }[]>;
 
   getDataById(params: {
-    id: string;
+    reservatorio: string;
     offset: number;
     limit?: number;
    

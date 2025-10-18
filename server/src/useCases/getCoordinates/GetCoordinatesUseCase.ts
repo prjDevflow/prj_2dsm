@@ -18,10 +18,10 @@ export class GetCoordinatesUseCase {
       coordinates = this.simaRepository.getCoordinates();
     }
     if (params.type === "balcar") {
-      coordinates = this.balcarRepository.getCoordinates({instituicao: params.instituicao, reservatorio: params.reservatorio});
+      coordinates = this.balcarRepository.getCoordinates({instituicao: params.instituicao});
     }
     if (params.type === "furnas") {
-      coordinates = this.furnasRepository.getCoordinates({instituicao: params.instituicao, reservatorio: params.reservatorio});
+      coordinates = this.furnasRepository.getCoordinates({instituicao: params.instituicao,});
     }
 
     return coordinates;

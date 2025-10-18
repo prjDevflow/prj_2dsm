@@ -5,7 +5,7 @@ export class GetDataByIdFurnasUseCase {
   constructor(private furnasRepository: IFurnasRepository) {}
   async execute(params: IGetDataByIdFurnas):Promise<IGetDataByIdFurnasResponse> {
     const result = await this.furnasRepository.getDataById({
-      id: params.id,
+      reservatorio: params.reservatorio,
       offset: params.offset,
       limit: params.limit,
       
