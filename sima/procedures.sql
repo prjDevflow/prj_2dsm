@@ -392,7 +392,7 @@ $$ LANGUAGE plpgsql;
 -- TODAS AS INFORMAÇÕES
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_todas_informacoes(
-    p_idestacao TEXT DEFAULT NULL,
+    p_rotulo_estacao TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
     p_limit_param INT DEFAULT 100,
@@ -462,8 +462,8 @@ BEGIN
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (
-        p_idestacao IS NULL 
-        OR TRIM(LEADING '0' FROM e.idestacao::text) = TRIM(LEADING '0' FROM p_idestacao::text)
+        p_rotulo_estacao IS NULL 
+        OR TRIM(LEADING '0' FROM e.rotulo::text) = TRIM(LEADING '0' FROM p_rotulo_estacao::text)
     )
       AND (p_data_inicio IS NULL OR s.datahora >= p_data_inicio)
       AND (p_data_fim IS NULL OR s.datahora <= p_data_fim)
@@ -472,6 +472,7 @@ BEGIN
     OFFSET p_offset_param;
 END;
 $$;
+
 
 
 
