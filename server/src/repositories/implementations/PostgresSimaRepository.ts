@@ -3,8 +3,12 @@ import { Sima } from "../../entities/sima/Sima";
 import { simaPool } from "../../configs/db";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 
+
+
 export class PostgresSimaRepository implements ISimaRepository {
-  async getCoordinates( ): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]> {
+  async getCoordinates(): Promise<
+    { id: string; rotulo: string; latitude: number; longitude: number }[]
+  > {
     await connectRedis();
 
     const cacheKey = "coordinates:sima";
@@ -14,10 +18,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       return JSON.parse(cached);
     }
 
-    const { rows } = await simaPool.query(
-      `SELECT * FROM listar_todas_coordenadas()`,
-    
-    );
+    const { rows } = await simaPool.query(`SELECT * FROM listar_todas_coordenadas()`);
 
     const coordinates: { id: string; rotulo: string; latitude: number; longitude: number }[] =
       rows.map((row: any) => ({
@@ -40,7 +41,7 @@ export class PostgresSimaRepository implements ISimaRepository {
     dateEnd?: Date;
     stationName?: string;
   }): Promise<{ registers: Sima[]; total: number }> {
-    const { offset = 0, limit, dateInit, dateEnd,  } = params;
+    const { offset = 0, limit, dateInit, dateEnd } = params;
 
     let result;
 
@@ -102,7 +103,6 @@ export class PostgresSimaRepository implements ISimaRepository {
     );
 
     // faz a contagem considerando filtro por rotulo
-   
 
     // const total = parseInt(totalResult.rows[0].count, 10);
 
@@ -180,5 +180,26 @@ export class PostgresSimaRepository implements ISimaRepository {
     const total = parseInt(totalResult.rows[0].count, 10);
 
     return { registers, total };
+  }
+
+  async getDataByCarbono(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]> {
+    const { rows } = await simaPool.query(`SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`, [params.rotulo, params.dataInicio, params.dataFim, params.offSet, params.limit]);
+
+    const data = rows.map(
+      (row: { date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }) => ({
+        date: row.date,
+        carbonoLow: row.carbonoLow,
+        carbonoHigh: row.carbonoHigh,
+        estacao: row.estacao
+      }),
+    );
+
+    return data;
   }
 }

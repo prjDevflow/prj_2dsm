@@ -1,5 +1,6 @@
 import * as z from "zod";
-import { Furnas } from "../../entities/furnas/Furnas";
+
+import { Sitio } from "../../entities/furnas/Sitio";
 
 export const getDataByIdFurnasSchema = z.object({
   id: z.string(),
@@ -11,23 +12,15 @@ export const getDataByIdFurnasSchema = z.object({
     .string()
     .transform((val) => parseInt(val, 10))
     .optional(),
-  dateInit: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
-  dateEnd: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
 });
 
 export type IGetDataByIdFurnas = z.infer<typeof getDataByIdFurnasSchema>;
 
 export interface IGetDataByIdFurnasResponse {
-  registers: Furnas[]; // Alterar classe para Furnas
+  registers: Sitio[]; // Alterar classe para Furnas
   total: number;
   offset: number;
-  limit: number;
+  limit?: number;
   nextOffset?: number;
   prevOffset?: number;
 }

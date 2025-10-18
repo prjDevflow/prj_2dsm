@@ -5,6 +5,7 @@ import { exportCsvController } from "./useCases/exportCsv";
 import { getDataByIdSimaController } from "./useCases/getDataByIdSima";
 import { getDataByIdFurnasController } from "./useCases/getDataByIdFurnas";
 import { getDataByIdBalcarController } from "./useCases/getDataByIdBalcar";
+import { getDataForGraphicsController } from "./useCases/getDataForGraphics";
 
 
 const router = express.Router();
@@ -49,5 +50,10 @@ router.get("/furnas/:id", (req: Request, res: Response) => {
 router.get("/balcar/:id", (req: Request, res: Response) => {
   return getDataByIdBalcarController.handle(req, res);
 });
+
+router.get("/graphics", (req: Request, res: Response) => {
+  return getDataForGraphicsController.handle(req, res);
+});
+
 
 export default router;

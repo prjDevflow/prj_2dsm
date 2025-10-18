@@ -1808,7 +1808,8 @@ $$ LANGUAGE plpgsql;
 -- =========================
 
 CREATE OR REPLACE FUNCTION buscar_sitios_por_instituicao(
-    p_idinstituicao integer
+    p_nome_instituicao DEFAULT NULL,
+    p_nome_reservatorio DEFAULT NULL
 )
 RETURNS TABLE (
     idsitio integer,
@@ -1828,7 +1829,7 @@ BEGIN
         s.nome AS nome_sitio,
         s.lat,
         s.lng,
-        s.descricao::text, -- cast aqui
+        s.descricao::text,
         r.nome AS nome_reservatorio,
         i.nome AS nome_instituicao
     FROM
@@ -1840,7 +1841,8 @@ BEGIN
     JOIN
         tbinstituicao i ON c.idinstituicao = i.idinstituicao
     WHERE
-        i.idinstituicao = p_idinstituicao
+        (p_nome_instituicao IS NULL OR i.nome ILIKE p_nome_instituicao)
+        AND (p_nome_reservatorio IS NULL OR r.nome ILIKE p_nome_reservatorio)
     ORDER BY
         s.nome;
 END;

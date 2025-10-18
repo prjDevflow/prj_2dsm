@@ -6,33 +6,33 @@ import { IFurnasRepository } from "../IFurnasRepository";
 
 export class PostgresFurnasRepository implements IFurnasRepository {
   async getCoordinates(params: {
-    instituicao: string;
-    reservatorio: string;
-  }): Promise<{
-    id: string;
-    rotulo: string;
-    latitude: number;
-    longitude: number;
-    instituicao: string;
-    reservatorio: string;
-  }[]> {
-    const instituicao = params.instituicao ?? null;
-    const reservatorio = params.reservatorio ??  null;
+  instituicao?: string;
+  reservatorio?: string;
+}): Promise<{
+  id: number;
+  rotulo: string;
+  latitude: number;
+  longitude: number;
+  instituicao: string;
+  reservatorio: string;
+}[]> {
+  const instituicao = params.instituicao ?? null;
+  const reservatorio = params.reservatorio ?? null;
 
-    const query = `SELECT * FROM buscar_sitios_por_instituicao($1, $2)`;
-    const values = [instituicao, reservatorio];
+  const query = `SELECT * FROM buscar_sitios_por_instituicao($1, $2)`;
+  const values = [instituicao, reservatorio];
 
-    const { rows } = await furnasPool.query(query, values);
+  const { rows } = await furnasPool.query(query, values);
 
-    return rows.map(row => ({
-      id: row.idsitio,
-      rotulo: row.nome_sitio,
-      latitude: row.lat,
-      longitude: row.lng,
-      instituicao: row.nome_instituicao,
-      reservatorio: row.nome_reservatorio,
-    }));
-  }
+  return rows.map(row => ({
+    id: row.idsitio,
+    rotulo: row.nome_sitio,
+    latitude: row.lat,
+    longitude: row.lng,
+    instituicao: row.nome_instituicao,
+    reservatorio: row.nome_reservatorio,
+  }));
+} 
 
 
 

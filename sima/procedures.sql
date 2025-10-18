@@ -16,16 +16,17 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.co2_low, s.co2_high, e.rotulo
+    SELECT s.datahora, s.co2_low, s.co2_high, e.rotulo AS nome_estacao
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (rotulo IS NULL OR e.rotulo ILIKE '%' || rotulo || '%')
+    WHERE (rotulo IS NULL OR e.rotulo ILIKE '%' || rotulo || '%')  -- Aqui, garantimos que estamos falando de e.rotulo
       AND (data_inicio IS NULL OR s.datahora >= data_inicio)
       AND (data_fim IS NULL OR s.datahora <= data_fim)
     ORDER BY s.datahora DESC
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- TEMPERATURAS
