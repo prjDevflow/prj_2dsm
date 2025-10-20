@@ -3,8 +3,12 @@ import { Sima } from "../../entities/sima/Sima";
 import { simaPool } from "../../configs/db";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 
+
+
 export class PostgresSimaRepository implements ISimaRepository {
-  async getCoordinates( ): Promise<{ id: string; rotulo: string; latitude: number; longitude: number }[]> {
+  async getCoordinates(): Promise<
+    { id: string; rotulo: string; latitude: number; longitude: number }[]
+  > {
     await connectRedis();
 
     const cacheKey = "coordinates:sima";
@@ -14,10 +18,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       return JSON.parse(cached);
     }
 
-    const { rows } = await simaPool.query(
-      `SELECT * FROM listar_todas_coordenadas()`,
-    
-    );
+    const { rows } = await simaPool.query(`SELECT * FROM listar_todas_coordenadas()`);
 
     const coordinates: { id: string; rotulo: string; latitude: number; longitude: number }[] =
       rows.map((row: any) => ({
@@ -40,7 +41,7 @@ export class PostgresSimaRepository implements ISimaRepository {
     dateEnd?: Date;
     stationName?: string;
   }): Promise<{ registers: Sima[]; total: number }> {
-    const { offset = 0, limit, dateInit, dateEnd,  } = params;
+    const { offset = 0, limit, dateInit, dateEnd } = params;
 
     let result;
 
@@ -102,7 +103,6 @@ export class PostgresSimaRepository implements ISimaRepository {
     );
 
     // faz a contagem considerando filtro por rotulo
-   
 
     // const total = parseInt(totalResult.rows[0].count, 10);
 
@@ -110,25 +110,17 @@ export class PostgresSimaRepository implements ISimaRepository {
   }
 
   async getDataById(params: {
-    id: string; // idestacao (ex: "123" ou "000123")
+    id: string; 
     offset: number;
     limit?: number;
     dateInit?: Date;
     dateEnd?: Date;
     type: "sima";
   }): Promise<{ registers: Sima[]; total: number }> {
-    const { id, offset = 0, limit = 100, dateInit, dateEnd } = params;
 
-    // consulta usando a função buscar_todas_informacoes
     const { rows } = await simaPool.query(
-      `SELECT * FROM buscar_todas_informacoes(
-      $1::text,
-      $2::timestamp,
-      $3::timestamp,
-      $4::int,
-      $5::int
-    )`,
-      [id || null, dateInit || null, dateEnd || null, limit, offset],
+      `SELECT * FROM buscar_todas_informacoes($1, $2, $3, $4, $5)`,
+      [params.id, params.dateInit, params.dateEnd, params.limit, params.offset],
     );
 
     // transforma em instâncias de Sima
@@ -165,20 +157,27 @@ export class PostgresSimaRepository implements ISimaRepository {
         }),
     );
 
-    // total separado, sem limit/offset
+    return { registers, total: registers.length };
+  }
 
-    const totalResult = await simaPool.query(
-      `SELECT count(*)::text AS count
-     FROM tbsima s
-     JOIN tbestacao e ON s.idestacao = e.idestacao
-     WHERE ($1::text IS NULL OR TRIM(LEADING '0' FROM e.idestacao::text) = TRIM(LEADING '0' FROM $1::text))
-       AND ($2::timestamp IS NULL OR s.datahora >= $2)
-       AND ($3::timestamp IS NULL OR s.datahora <= $3)`,
-      [id || null, dateInit || null, dateEnd || null],
+  async getDataByCarbono(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]> {
+    const { rows } = await simaPool.query(`SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`, [params.rotulo, params.dataInicio, params.dataFim, params.offSet, params.limit]);
+
+    const data = rows.map(
+      (row: { date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }) => ({
+        date: row.date,
+        carbonoLow: row.carbonoLow,
+        carbonoHigh: row.carbonoHigh,
+        estacao: row.estacao
+      }),
     );
 
-    const total = parseInt(totalResult.rows[0].count, 10);
-
-    return { registers, total };
+    return data;
   }
 }

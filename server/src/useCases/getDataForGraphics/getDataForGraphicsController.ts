@@ -1,17 +1,18 @@
 import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { logger } from "../../configs/logger";
-import { GetDataByIdFurnasUseCase } from "./getDataByIdFurnasUseCase";
-import { getDataByIdFurnasSchema } from "./getDataByIdFurnasDTO";
+import { getDataForGraphicsSchema } from "./getDataForGraphicsDTO";
+import { GetDataForGraphicsUseCase } from "./getDataForGraphicsUseCase";
 
-export class GetDataByIdFurnasController {
-  constructor(private getDataByIdFurnasUseCase: GetDataByIdFurnasUseCase) {}
+
+export class GetDataForGraphicsController {
+  constructor(private getDataForGraphicsUseCase: GetDataForGraphicsUseCase) {}
 
   async handle(req: Request, res: Response): Promise<void> {
     try {
-      const params = getDataByIdFurnasSchema.parse({ reservatorio: req.params.id, ...req.query });
+      const params = getDataForGraphicsSchema.parse(req.query);
 
-      const result = await this.getDataByIdFurnasUseCase.execute(params);
+      const result = await this.getDataForGraphicsUseCase.execute(params);
 
       res.status(200).send({ message: "Dados do Furnas retornado", data: result });
     } catch (error: Error | any) {

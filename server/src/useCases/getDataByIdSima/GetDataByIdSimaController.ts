@@ -12,17 +12,13 @@ export class GetDataByIdSimaController {
       // ✅ Inclui o ID que vem dos params
       const params = getDataByIdSimaSchema.parse({
         ...req.query,
-        id: req.params.id,
+        id: req.params.rotulo,
       });
-
-      console.log("ID recebido no controller:", params.id);
 
       const result = await this.getDataByIdSimaUseCase.execute(params);
 
       res.status(200).send({ message: "Dados do Sima retornados", data: result });
     } catch (error: any) {
-      console.log("Erro no controller:", error);
-
       if (error instanceof ZodError) {
         res.status(400).json({
           error: "Erro de validação nos parâmetros",
