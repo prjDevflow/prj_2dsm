@@ -182,7 +182,7 @@ async getDataByCarbono(params: {
   );
 
   const data = rows.map((row: any) => ({
-    date: row.datahora,             // veio do DB como datahora
+    date: row.datahora,             // veio do DB como datahora.
     carbonoLow: row.co2_low,        // veio como co2_low
     carbonoHigh: row.co2_high,      // veio como co2_high
     estacao: row.nome_estacao        // veio como nome_estacao
