@@ -1,31 +1,9 @@
 -- =========================
 -- CO2
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_co2(
-    p_rotulo TEXT DEFAULT NULL,
-    data_inicio TIMESTAMP DEFAULT NULL,
-    data_fim TIMESTAMP DEFAULT NULL,
-    offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
-)
-RETURNS TABLE (
-    datahora TIMESTAMP,
-    co2_low FLOAT,
-    co2_high FLOAT,
-    nome_estacao TEXT
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT s.datahora, s.co2_low, s.co2_high, e.rotulo AS nome_estacao
-    FROM tbsima s
-    JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (rotulo IS NULL OR e.rotulo ILIKE '%' || rotulo || '%')  -- Certifique-se que está se referindo a e.rotulo
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
-    ORDER BY s.datahora DESC
-    OFFSET offset_param LIMIT limit_param;
-END;
-$$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION public.buscar_co2(p_rotulo text DEFAULT NULL, p_data_inicio timestamp DEFAULT NULL, p_data_fim timestamp DEFAULT NULL, p_offset integer DEFAULT 0, p_limit integer DEFAULT 20) RETURNS TABLE(datahora timestamp, co2_low double precision, co2_high double precision, nome_estacao text) LANGUAGE plpgsql AS $$ BEGIN RETURN QUERY SELECT s.datahora::timestamp, s.co2_low::double precision, s.co2_high::double precision, e.rotulo::text AS nome_estacao FROM tbsima s JOIN tbestacao e ON s.idestacao = e.idestacao WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') AND (p_data_inicio IS NULL OR s.datahora >= p_data_inicio) AND (p_data_fim IS NULL OR s.datahora <= p_data_fim) ORDER BY s.datahora DESC LIMIT p_limit OFFSET p_offset; END; $$;
+
+
 
 
 

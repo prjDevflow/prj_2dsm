@@ -160,24 +160,34 @@ export class PostgresSimaRepository implements ISimaRepository {
     return { registers, total: registers.length };
   }
 
-  async getDataByCarbono(params: {
-    rotulo: string;
-    dataInicio?: Date;
-    dataFim?: Date;
-    offSet?: number;
-    limit?: number;
-  }): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]> {
-    const { rows } = await simaPool.query(`SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`, [params.rotulo, params.dataInicio, params.dataFim, params.offSet, params.limit]);
+async getDataByCarbono(params: {
+  rotulo: string;
+  dataInicio?: Date;
+  dataFim?: Date;
+  offSet?: number;
+  limit?: number;
+}): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]> {
 
-    const data = rows.map(
-      (row: { date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }) => ({
-        date: row.date,
-        carbonoLow: row.carbonoLow,
-        carbonoHigh: row.carbonoHigh,
-        estacao: row.estacao
-      }),
-    );
+  const values = [
+    params.rotulo ?? null,
+    params.dataInicio ?? null,
+    params.dataFim ?? null,
+    params.offSet ?? 0,
+    params.limit ?? 20
+  ];
 
-    return data;
-  }
+  const { rows } = await simaPool.query(
+    `SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`,
+    values
+  );
+
+  const data = rows.map((row: any) => ({
+    date: row.datahora,             // veio do DB como datahora
+    carbonoLow: row.co2_low,        // veio como co2_low
+    carbonoHigh: row.co2_high,      // veio como co2_high
+    estacao: row.nome_estacao        // veio como nome_estacao
+  }));
+
+  return data;
+}
 }
