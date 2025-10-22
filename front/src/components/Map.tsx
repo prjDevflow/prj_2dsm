@@ -12,7 +12,7 @@ type Props = {
 };
 
 export default function Map({ onMarkerClick, filters }: Props) {
-  const position: LatLngExpression = [-4.4067, -64.6002];
+  const position: LatLngExpression = [-15.7797, -47.9297];
   const [type] = useState<"sima" | "balcar" | "furnas">("sima");
 
   const { data, isLoading, isError } = useColetas(type);
@@ -34,7 +34,7 @@ export default function Map({ onMarkerClick, filters }: Props) {
     <div>
       <MapContainer
         center={position}
-        zoom={6}
+        zoom={5}
         className="map-container"
         scrollWheelZoom={true}
         minZoom={5}
@@ -53,7 +53,7 @@ export default function Map({ onMarkerClick, filters }: Props) {
               eventHandlers={{
                 click: () => {
                   onMarkerClick?.({
-                    id: ponto.id,
+                    id: ponto.rotulo ?? ponto.id,
                     latitude: ponto.latitude,
                     longitude: ponto.longitude,
                     rotulo: ponto.rotulo,

@@ -1,3 +1,4 @@
+// src/components/SimaTable.tsx
 import { useEffect, useState } from "react";
 import {
   Table,
@@ -17,6 +18,8 @@ export interface SimaRecord extends Record<string, unknown> {
   idestacao?: string | number;
   nome_estacao?: string;
   rotulo?: string;
+  nome?: string;
+  name?: string;
   datahora?: string;
   [k: string]: unknown;
 }
@@ -24,6 +27,7 @@ export interface SimaRecord extends Record<string, unknown> {
 interface Props {
   selectedPointId?: number | string | null;
   selectedPointName?: string | null;
+  selectedPoint?: Record<string, unknown> | null;
   range?: Range;
   initialPage?: number;
   initialLimit?: number;
@@ -32,12 +36,8 @@ interface Props {
 
 const calcMinWidth = (nCols: number) => Math.max(900, nCols * 140);
 
-const buildCSV = (rows: string[][]) =>
-  rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-
-function isRecordArray(v: unknown): v is Record<string, unknown>[] {
-  return Array.isArray(v) && (v.length === 0 || typeof v[0] === "object");
-}
+const isRecordArray = (v: unknown): v is Record<string, unknown>[] =>
+  Array.isArray(v) && (v.length === 0 || typeof v[0] === "object");
 
 function normalizePayload(payload: unknown): { online: Record<string, unknown>[]; offline: Record<string, unknown>[] } {
   const online: Record<string, unknown>[] = [];
@@ -93,53 +93,6 @@ function normalizePayload(payload: unknown): { online: Record<string, unknown>[]
   return { online, offline };
 }
 
-function filterRecords(records: Record<string, unknown>[], selectedPointId?: number | string | null, selectedPointName?: string | null) {
-  if ((selectedPointId === null || selectedPointId === undefined) && !selectedPointName) return records;
-
-  const idStr = selectedPointId !== null && selectedPointId !== undefined ? String(selectedPointId).trim() : null;
-  const idNumber = idStr !== null && idStr !== "" && !Number.isNaN(Number(idStr)) ? Number(idStr) : null;
-  const nameLower = selectedPointName ? selectedPointName.toLowerCase() : null;
-
-  return records.filter((r) => {
-    if (nameLower) {
-      const nomeEst = r["nome_estacao"];
-      const rotulo = r["rotulo"];
-      const idest = r["idestacao"];
-      const candidates = [nomeEst, rotulo, idest].filter(Boolean).map((v) => String(v).toLowerCase());
-      if (candidates.some((c) => c.includes(nameLower))) return true;
-    }
-
-    if (idStr) {
-      const candidates = [
-        r["idestacao"],
-        r["id_estacao"],
-        r["idsima"],
-        r["idsimaoffline"],
-        r["id"],
-        r["rotulo"],
-        r["station"],
-        r["nome_estacao"],
-        r["estacao"],
-      ];
-      const directMatch = candidates
-        .map((v) => (v === undefined || v === null ? "" : String(v)))
-        .some((v) => v === idStr);
-      if (directMatch) return true;
-
-      if (idNumber !== null) {
-        const nome = r["nome_estacao"];
-        if (typeof nome === "string" && nome.includes(String(idNumber))) return true;
-
-        const rot = typeof r["rotulo"] === "string" ? (r["rotulo"] as string) : typeof nome === "string" ? (nome as string) : "";
-        const lastNumMatch = rot.match(/(\d+)(?!.*\d)/);
-        if (lastNumMatch && Number(lastNumMatch[1]) === idNumber) return true;
-      }
-    }
-
-    return false;
-  });
-}
-
 function renderValue(v: unknown): string {
   if (v === null || v === undefined) return "-";
   if (typeof v === "object") {
@@ -155,6 +108,7 @@ function renderValue(v: unknown): string {
 export default function SimaTable({
   selectedPointId = null,
   selectedPointName = null,
+  selectedPoint = null,
   range,
   initialPage = 1,
   initialLimit = 100,
@@ -170,24 +124,71 @@ export default function SimaTable({
     const controller = new AbortController();
     const { signal } = controller;
 
+    // Extrai o segment (rotulo ou id) seguindo nova regra simples e determinística
+    function derivePathSegment(): { segment?: string; reason?: string } {
+      // 1) se veio o objeto selectedPoint, tentar rotulo primeiro
+      if (selectedPoint) {
+        const rotulo = (selectedPoint["rotulo"] ?? selectedPoint["nome_estacao"] ?? selectedPoint["nome"] ?? selectedPoint["name"]) as string | undefined;
+        const maybeIdest = selectedPoint["idestacao"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
+        const preferIdest = maybeIdest !== undefined && maybeIdest !== null && (typeof maybeIdest === "number" || /^\d+$/.test(String(maybeIdest)));
+
+        if (rotulo && String(rotulo).trim().length > 0) {
+          return { segment: String(rotulo).trim(), reason: "rotulo_from_object" };
+        }
+
+        if (preferIdest) {
+          return { segment: String(maybeIdest), reason: "idestacao_from_object" };
+        }
+
+        // fallback to other id-like fields if present
+        const fallbackId = selectedPoint["idHexadecimal"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
+        if (fallbackId !== undefined && fallbackId !== null && String(fallbackId).trim() !== "") {
+          return { segment: String(fallbackId), reason: "fallback_id_from_object" };
+        }
+
+        // nothing derivable from object
+        return { segment: undefined, reason: "no_identifier_in_object" };
+      }
+
+      // 2) if no object: use selectedPointName (rotulo)
+      if (selectedPointName && String(selectedPointName).trim().length > 0) {
+        return { segment: String(selectedPointName).trim(), reason: "rotulo_from_name_prop" };
+      }
+
+      // 3) fallback to selectedPointId
+      if (selectedPointId !== null && selectedPointId !== undefined && String(selectedPointId).trim() !== "") {
+        return { segment: String(selectedPointId), reason: "id_from_id_prop" };
+      }
+
+      return { segment: undefined, reason: "no_identifier" };
+    }
+
     async function fetchData() {
       setLoading(true);
       setError(null);
 
       try {
+        const { segment, reason } = derivePathSegment();
+
+        // se não conseguimos derivar um segmento, não fazemos requisição (evita /sima sem path)
+        if (!segment) {
+          console.debug("[SimaTable] sem identificador — não será feita requisição", { reason });
+          setOnline([]);
+          setOffline([]);
+          setLoading(false);
+          return;
+        }
+
         const params = new URLSearchParams();
         if (range?.start) params.append("start", new Date(range.start).toISOString());
         if (range?.end) params.append("end", new Date(range.end).toISOString());
         params.append("page", String(initialPage));
         params.append("limit", String(initialLimit));
 
-        // === HERE: build URL using /sima/{ID} when selectedPointId exists ===
-        const idStr = selectedPointId !== null && selectedPointId !== undefined ? String(selectedPointId) : null;
-        const baseClean = apiBase.replace(/\/$/, "");
-        const baseUrl = idStr ? `${baseClean}/${encodeURIComponent(idStr)}` : baseClean;
-        const url = `${baseUrl}?${params.toString()}`;
+        const baseClean = apiBase.replace(/\/$/, ""); // remove trailing slash se houver
+        const url = `${baseClean}/${encodeURIComponent(segment)}?${params.toString()}`;
 
-        console.debug("[SimaTable] fetching", url);
+        console.debug("[SimaTable] fetching by path", { segment, reason, url });
 
         const res = await fetch(url, { signal });
         if (!res.ok) {
@@ -200,11 +201,9 @@ export default function SimaTable({
 
         const { online: maybeOnline, offline: maybeOffline } = normalizePayload(payload);
 
-        const finalOnline = filterRecords(maybeOnline, selectedPointId, selectedPointName);
-        const finalOffline = filterRecords(maybeOffline, selectedPointId, selectedPointName);
-
-        setOnline(finalOnline as SimaRecord[]);
-        setOffline(finalOffline as SimaRecord[]);
+        // sem filtragem cliente: assumimos a API retornou apenas os dados relevantes para o rota solicitada
+        setOnline(maybeOnline as SimaRecord[]);
+        setOffline(maybeOffline as SimaRecord[]);
       } catch (err: unknown) {
         if (typeof err === "object" && err !== null && "name" in err && (err as Record<string, unknown>).name === "AbortError") {
           console.debug("[SimaTable] fetch aborted");
@@ -221,7 +220,7 @@ export default function SimaTable({
 
     fetchData();
     return () => controller.abort();
-  }, [selectedPointId, selectedPointName, range, initialPage, initialLimit, apiBase]);
+  }, [selectedPoint, selectedPointName, selectedPointId, range, initialPage, initialLimit, apiBase]);
 
   function exportCSV(which: "online" | "offline") {
     const data = which === "online" ? online : offline;
@@ -234,7 +233,7 @@ export default function SimaTable({
         return v === undefined || v === null ? "" : String(v);
       })),
     );
-    const csv = buildCSV(rows);
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -285,9 +284,7 @@ export default function SimaTable({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <h2 className="text-lg font-bold m-0">
-          SIMA — Visualização de Dados {selectedPointId || selectedPointName ? `(ponto ${String(selectedPointId ?? selectedPointName)})` : ""}
-        </h2>
+        <h2 className="text-lg font-bold m-0">SIMA — Visualização de Dados</h2>
 
         <div className="flex items-center gap-3">
           <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">

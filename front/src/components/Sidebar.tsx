@@ -16,7 +16,7 @@ const SIDEBAR_WIDTH = 300;
 const FOOTER_HEIGHT = 0;
 const HEADER_HEIGHT = "32px";
 
-/* ---------- styled components (mantive seus existentes) ---------- */
+
 const Backdrop = styled.div<{ $visible: boolean }>`
   position: fixed;
   inset: 0;
@@ -223,13 +223,6 @@ const PointRow = styled.button`
   }
 `;
 
-const DateRow = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.6rem;
-  align-items: center;
-  width: 100%;
-`;
 
 const Rotating = styled.span<{ open: boolean }>`
   display: inline-flex;
@@ -483,25 +476,6 @@ export default function Sidebar({
                         </PointRow>
                       );
                     })}
-                </SectionBody>
-              </Section>
-
-              <Section>
-                <SectionHeader
-                  onClick={() => toggleSection("periodo")}
-                  aria-expanded={!!openSection.periodo}
-                >
-                  <span>PERÍODO DE TEMPO</span>
-                  <Rotating open={!!openSection.periodo}>
-                    <ChevronDown color="white" size={16} />
-                  </Rotating>
-                </SectionHeader>
-                <SectionBody open={!!openSection.periodo}>
-                  <DateRow>
-                    <input type="date" aria-label="Data início" />
-                    <input type="date" aria-label="Data fim" />
-                  </DateRow>
-                  <Hint>Escolha um intervalo para filtrar os resultados.</Hint>
                 </SectionBody>
               </Section>
             </>

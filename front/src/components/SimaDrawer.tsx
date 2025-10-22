@@ -31,17 +31,10 @@ type Props = {
   setRange: (r: Range) => void;
 };
 
-const pontosDisponiveis: PontoColeta[] = [
-  { id: 30, name: "Ponto 30 - Escola X", latitude: -3.0, longitude: -60.0, type: "sima" },
-  { id: 12, name: "Ponto 12 - Praça Y", latitude: -4.0, longitude: -61.0, type: "campanhas" },
-  { id: 7, name: "Ponto 7 - Unidade Z", latitude: -5.0, longitude: -62.0, type: "sima" },
-];
-
 const SimaDrawer: React.FC<Props> = ({
   open,
   onOpenChange,
   selectedPonto,
-  setSelectedPonto,
   range,
   setRange,
 }) => {
@@ -55,20 +48,11 @@ const SimaDrawer: React.FC<Props> = ({
             </span>
 
             <div className="mt-4 p-2 border rounded-md bg-white">
+              {/* CalendarPicker sem seletor de estação */}
               <CalendarPicker
                 value={range}
                 onChange={(r) => setRange(r)}
                 showApply={true}
-                points={pontosDisponiveis.map((p) => ({ id: p.id, name: p.name }))}
-                selectedPointId={selectedPonto?.id ?? null}
-                onSelectPoint={(id) => {
-                  if (id === null) {
-                    setSelectedPonto(null);
-                  } else {
-                    const found = pontosDisponiveis.find((p) => p.id === id);
-                    setSelectedPonto(found ?? { id, latitude: 0, longitude: 0 });
-                  }
-                }}
                 onApply={(r) => {
                   // CalendarPicker já envia o range ao aplicar
                   setRange(r);
@@ -86,7 +70,6 @@ const SimaDrawer: React.FC<Props> = ({
               </div>
             </div>
           </DrawerTitle>
-
         </DrawerHeader>
 
         <DrawerFooter>
