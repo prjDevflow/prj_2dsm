@@ -1,7 +1,6 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
-import theme from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";
 
 import BarraBrasil from "./components/BarraBrasil";
@@ -55,6 +54,6 @@ function App() {
       </Router>
     </ThemeProvider>
   );
-}
+};
 
-export default App;
+export default AppLayout;
