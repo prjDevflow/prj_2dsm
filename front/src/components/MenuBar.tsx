@@ -1,6 +1,6 @@
 // src/components/MenuBar.tsx
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 import styled, { keyframes } from "styled-components";
@@ -222,12 +222,19 @@ export default function MenuBar({ title }: { title?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
+  const { instituicao } = useParams();
+
   // Mapeamento de rotas para títulos — adicione mais conforme necessário
   const pathToTitle: Record<string, string> = {
     "/sima": "DevFlow Analytics - SIMA",
-    "/furnas": "DevFlow Analytics - Furnas",
+    // "/furnas": "DevFlow Analytics - Furnas",
     "/balcar": "DevFlow Analytics - Balcar",
     "/mapa": "DevFlow Analytics - Mapa",
+
+    // chave dinâmica com interpolação
+    ...(instituicao && {
+      [`/furnas/${instituicao}`]: `DevFlow Analytics - Furnas (${instituicao})`,
+    }),
   };
 
   // tenta casar pela rota exata, caso não encontre usa startsWith (para rotas filhas)

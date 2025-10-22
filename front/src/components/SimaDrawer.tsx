@@ -24,11 +24,11 @@ type Range = { start?: Date | null; end?: Date | null };
 
 type Props = {
   open: boolean;
-  onOpenChange: (v: boolean) => void;
-  selectedPonto: PontoColeta | void;
-  setSelectedPonto: (p: PontoColeta | null) => void;
-  range: Range;
-  setRange: (r: Range) => void;
+  onOpenChange?: (v: boolean) => void;
+  selectedPonto?: PontoColeta | void;
+  setSelectedPonto?: (p: PontoColeta | null) => void;
+  range?: Range;
+  setRange?: (r: Range) => void;
 };
 
 const pontosDisponiveis: PontoColeta[] = [
