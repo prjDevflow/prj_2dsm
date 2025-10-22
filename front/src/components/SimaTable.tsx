@@ -39,7 +39,10 @@ const calcMinWidth = (nCols: number) => Math.max(900, nCols * 140);
 const isRecordArray = (v: unknown): v is Record<string, unknown>[] =>
   Array.isArray(v) && (v.length === 0 || typeof v[0] === "object");
 
-function normalizePayload(payload: unknown): { online: Record<string, unknown>[]; offline: Record<string, unknown>[] } {
+function normalizePayload(payload: unknown): {
+  online: Record<string, unknown>[];
+  offline: Record<string, unknown>[];
+} {
   const online: Record<string, unknown>[] = [];
   const offline: Record<string, unknown>[] = [];
 
@@ -91,6 +94,69 @@ function normalizePayload(payload: unknown): { online: Record<string, unknown>[]
   }
 
   return { online, offline };
+}
+
+function filterRecords(
+  records: Record<string, unknown>[],
+  selectedPointId?: number | string | null,
+  selectedPointName?: string | null,
+) {
+  if ((selectedPointId === null || selectedPointId === undefined) && !selectedPointName)
+    return records;
+
+  const idStr =
+    selectedPointId !== null && selectedPointId !== undefined
+      ? String(selectedPointId).trim()
+      : null;
+  const idNumber =
+    idStr !== null && idStr !== "" && !Number.isNaN(Number(idStr)) ? Number(idStr) : null;
+  const nameLower = selectedPointName ? selectedPointName.toLowerCase() : null;
+
+  return records.filter((r) => {
+    if (nameLower) {
+      const nomeEst = r["nome_estacao"];
+      const rotulo = r["rotulo"];
+      const idest = r["idestacao"];
+      const candidates = [nomeEst, rotulo, idest]
+        .filter(Boolean)
+        .map((v) => String(v).toLowerCase());
+      if (candidates.some((c) => c.includes(nameLower))) return true;
+    }
+
+    if (idStr) {
+      const candidates = [
+        r["idestacao"],
+        r["id_estacao"],
+        r["idsima"],
+        r["idsimaoffline"],
+        r["id"],
+        r["rotulo"],
+        r["station"],
+        r["nome_estacao"],
+        r["estacao"],
+      ];
+      const directMatch = candidates
+        .map((v) => (v === undefined || v === null ? "" : String(v)))
+        .some((v) => v === idStr);
+      if (directMatch) return true;
+
+      if (idNumber !== null) {
+        const nome = r["nome_estacao"];
+        if (typeof nome === "string" && nome.includes(String(idNumber))) return true;
+
+        const rot =
+          typeof r["rotulo"] === "string"
+            ? (r["rotulo"] as string)
+            : typeof nome === "string"
+              ? (nome as string)
+              : "";
+        const lastNumMatch = rot.match(/(\d+)(?!.*\d)/);
+        if (lastNumMatch && Number(lastNumMatch[1]) === idNumber) return true;
+      }
+    }
+
+    return false;
+  });
 }
 
 function renderValue(v: unknown): string {
@@ -185,8 +251,14 @@ export default function SimaTable({
         params.append("page", String(initialPage));
         params.append("limit", String(initialLimit));
 
-        const baseClean = apiBase.replace(/\/$/, ""); // remove trailing slash se houver
-        const url = `${baseClean}/${encodeURIComponent(segment)}?${params.toString()}`;
+        // === HERE: build URL using /sima/{ID} when selectedPointId exists ===
+        const idStr =
+          selectedPointId !== null && selectedPointId !== undefined
+            ? String(selectedPointId)
+            : null;
+        const baseClean = apiBase.replace(/\/$/, "");
+        const baseUrl = idStr ? `${baseClean}/${encodeURIComponent(idStr)}` : baseClean;
+        const url = `${baseUrl}?${params.toString()}`;
 
         console.debug("[SimaTable] fetching by path", { segment, reason, url });
 
@@ -205,7 +277,12 @@ export default function SimaTable({
         setOnline(maybeOnline as SimaRecord[]);
         setOffline(maybeOffline as SimaRecord[]);
       } catch (err: unknown) {
-        if (typeof err === "object" && err !== null && "name" in err && (err as Record<string, unknown>).name === "AbortError") {
+        if (
+          typeof err === "object" &&
+          err !== null &&
+          "name" in err &&
+          (err as Record<string, unknown>).name === "AbortError"
+        ) {
           console.debug("[SimaTable] fetch aborted");
         } else {
           console.error("[SimaTable] fetch error", err);
@@ -228,10 +305,12 @@ export default function SimaTable({
     const keys = Object.keys(data[0]) as string[];
     const rows: string[][] = [keys];
     data.forEach((row) =>
-      rows.push(keys.map((k) => {
-        const v = (row as Record<string, unknown>)[k];
-        return v === undefined || v === null ? "" : String(v);
-      })),
+      rows.push(
+        keys.map((k) => {
+          const v = (row as Record<string, unknown>)[k];
+          return v === undefined || v === null ? "" : String(v);
+        }),
+      ),
     );
     const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -251,7 +330,10 @@ export default function SimaTable({
       <style>body{font-family:system-ui;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:6px 8px;white-space:nowrap}th{background:#f3f4f6}</style></head><body>`;
     html += `<h3>SIMA ${which}</h3><table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
     data.forEach((row) => {
-      html += "<tr>" + keys.map((k) => `<td>${renderValue((row as Record<string, unknown>)[k])}</td>`).join("") + "</tr>";
+      html +=
+        "<tr>" +
+        keys.map((k) => `<td>${renderValue((row as Record<string, unknown>)[k])}</td>`).join("") +
+        "</tr>";
     });
     html += "</tbody></table></body></html>";
     const w = window.open("", "_blank");
@@ -284,7 +366,12 @@ export default function SimaTable({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <h2 className="text-lg font-bold m-0">SIMA — Visualização de Dados</h2>
+        <h2 className="text-lg font-bold m-0">
+          SIMA — Visualização de Dados{" "}
+          {selectedPointId || selectedPointName
+            ? `(ponto ${String(selectedPointId ?? selectedPointName)})`
+            : ""}
+        </h2>
 
         <div className="flex items-center gap-3">
           <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">
@@ -305,20 +392,32 @@ export default function SimaTable({
           <div className="inline-flex gap-2 flex-wrap">
             {(view === "online" || view === "ambos") && (
               <>
-                <button onClick={() => exportCSV("online")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={() => exportCSV("online")}
+                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Exportar Online CSV
                 </button>
-                <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                <button
+                  onClick={() => openTableInNewTab("online")}
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
                   Abrir Online
                 </button>
               </>
             )}
             {(view === "offline" || view === "ambos") && (
               <>
-                <button onClick={() => exportCSV("offline")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  onClick={() => exportCSV("offline")}
+                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Exportar Offline CSV
                 </button>
-                <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                <button
+                  onClick={() => openTableInNewTab("offline")}
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
                   Abrir Offline
                 </button>
               </>
@@ -343,7 +442,9 @@ export default function SimaTable({
         {(view === "online" || view === "ambos") && online.length > 0 && (
           <div style={{ minWidth: calcMinWidth(Object.keys(online[0]).length) }}>
             <Table>
-              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>Online</TableCaption>
+              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                Online
+              </TableCaption>
               <TableHeader>
                 <TableRow>{renderHeaderCells(online[0])}</TableRow>
               </TableHeader>
@@ -351,7 +452,14 @@ export default function SimaTable({
                 {online.map((row, rIdx) => (
                   <TableRow key={String(row.idsima ?? rIdx)} className={rowClass(rIdx)}>
                     {Object.values(row).map((value, idx) => (
-                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>
+                      <TableCell
+                        key={idx}
+                        style={{
+                          padding: "8px 10px",
+                          whiteSpace: "nowrap",
+                          borderTop: "1px solid #eee",
+                        }}
+                      >
                         {renderValue(value)}
                       </TableCell>
                     ))}
@@ -365,7 +473,9 @@ export default function SimaTable({
         {(view === "offline" || view === "ambos") && offline.length > 0 && (
           <div style={{ minWidth: calcMinWidth(Object.keys(offline[0]).length), marginTop: 20 }}>
             <Table>
-              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>Offline</TableCaption>
+              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                Offline
+              </TableCaption>
               <TableHeader>
                 <TableRow>{renderHeaderCells(offline[0])}</TableRow>
               </TableHeader>
@@ -373,7 +483,14 @@ export default function SimaTable({
                 {offline.map((row, rIdx) => (
                   <TableRow key={String(row.idsimaoffline ?? rIdx)} className={rowClass(rIdx)}>
                     {Object.values(row).map((value, idx) => (
-                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>
+                      <TableCell
+                        key={idx}
+                        style={{
+                          padding: "8px 10px",
+                          whiteSpace: "nowrap",
+                          borderTop: "1px solid #eee",
+                        }}
+                      >
                         {renderValue(value)}
                       </TableCell>
                     ))}

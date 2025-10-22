@@ -46,7 +46,12 @@ export default function Map({ onMarkerClick, filters }: Props) {
         />
 
         {visibleData.map(
-          (ponto: { id: number | string; latitude: number; longitude: number; rotulo?: string }) => (
+          (ponto: {
+            id: number | string;
+            latitude: number;
+            longitude: number;
+            rotulo?: string;
+          }) => (
             <Marker
               key={String(ponto.id)}
               position={[ponto.latitude, ponto.longitude] as LatLngExpression}
