@@ -1,7 +1,7 @@
 -- =========================
 -- CO2
 -- =========================
-CREATE OR REPLACE FUNCTION public.buscar_co2(p_rotulo text DEFAULT NULL, p_data_inicio timestamp DEFAULT NULL, p_data_fim timestamp DEFAULT NULL, p_offset integer DEFAULT 0, p_limit integer DEFAULT 20) RETURNS TABLE(datahora timestamp, co2_low double precision, co2_high double precision, nome_estacao text) LANGUAGE plpgsql AS $$ BEGIN RETURN QUERY SELECT s.datahora::timestamp, s.co2_low::double precision, s.co2_high::double precision, e.rotulo::text AS nome_estacao FROM tbsima s JOIN tbestacao e ON s.idestacao = e.idestacao WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') AND (p_data_inicio IS NULL OR s.datahora >= p_data_inicio) AND (p_data_fim IS NULL OR s.datahora <= p_data_fim) ORDER BY s.datahora DESC LIMIT p_limit OFFSET p_offset; END; $$;
+CREATE OR REPLACE FUNCTION public.buscar_co2(p_rotulo text DEFAULT NULL, p_data_inicio timestamp DEFAULT NULL, p_data_fim timestamp DEFAULT NULL, p_offset integer DEFAULT 0, p_limit integer DEFAULT 9999) RETURNS TABLE(datahora timestamp, co2_low double precision, co2_high double precision, nome_estacao text) LANGUAGE plpgsql AS $$ BEGIN RETURN QUERY SELECT s.datahora::timestamp, s.co2_low::double precision, s.co2_high::double precision, e.rotulo::text AS nome_estacao FROM tbsima s JOIN tbestacao e ON s.idestacao = e.idestacao WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') AND (p_data_inicio IS NULL OR s.datahora >= p_data_inicio) AND (p_data_fim IS NULL OR s.datahora <= p_data_fim) ORDER BY s.datahora DESC LIMIT p_limit OFFSET p_offset; END; $$;
 
 
 
@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION buscar_temperaturas(
   data_inicio TIMESTAMP DEFAULT NULL,
   data_fim TIMESTAMP DEFAULT NULL,
   offset_param INT DEFAULT 0,
-  limit_param INT DEFAULT 20
+  limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
   datahora TIMESTAMP,
@@ -62,7 +62,7 @@ CREATE OR REPLACE FUNCTION buscar_do(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -92,7 +92,7 @@ CREATE OR REPLACE FUNCTION buscar_ph(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION buscar_clorofila(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -150,7 +150,7 @@ CREATE OR REPLACE FUNCTION buscar_nutrientes(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -180,7 +180,7 @@ CREATE OR REPLACE FUNCTION buscar_condutividade(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -209,7 +209,7 @@ CREATE OR REPLACE FUNCTION buscar_turbidez(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -238,7 +238,7 @@ CREATE OR REPLACE FUNCTION buscar_radiacao(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -268,7 +268,7 @@ CREATE OR REPLACE FUNCTION buscar_vento_vetor(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -300,7 +300,7 @@ CREATE OR REPLACE FUNCTION buscar_correntes(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -331,7 +331,7 @@ CREATE OR REPLACE FUNCTION buscar_precipitacao(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -360,7 +360,7 @@ CREATE OR REPLACE FUNCTION buscar_qualidade_agua(
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
     offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+    limit_param INT DEFAULT 9999
 )
 RETURNS TABLE (
     datahora TIMESTAMP,
@@ -401,7 +401,7 @@ CREATE OR REPLACE FUNCTION buscar_todas_informacoes(
     p_rotulo_estacao TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
-    p_limit_param INT DEFAULT 100,
+    p_limit_param INT DEFAULT 9999,
     p_offset_param INT DEFAULT 0
 )
 RETURNS TABLE (
