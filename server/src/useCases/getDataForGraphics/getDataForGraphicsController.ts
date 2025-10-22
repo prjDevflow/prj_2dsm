@@ -28,7 +28,7 @@ export class GetDataForGraphicsController {
         stack: error.stack,
       });
 
-      res.status(500).json({ error: "Erro ao buscar dados", detail: error.message });
+      res.status(500).json({ error: "Erro ao buscar dados", detail: error });
     }
   }
 }

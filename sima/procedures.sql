@@ -11,38 +11,52 @@ CREATE OR REPLACE FUNCTION public.buscar_co2(p_rotulo text DEFAULT NULL, p_data_
 -- TEMPERATURAS
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_temperaturas(
-    p_rotulo TEXT DEFAULT NULL,
-    data_inicio TIMESTAMP DEFAULT NULL,
-    data_fim TIMESTAMP DEFAULT NULL,
-    offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 20
+  p_rotulo TEXT DEFAULT NULL,
+  data_inicio TIMESTAMP DEFAULT NULL,
+  data_fim TIMESTAMP DEFAULT NULL,
+  offset_param INT DEFAULT 0,
+  limit_param INT DEFAULT 20
 )
 RETURNS TABLE (
-    datahora TIMESTAMP,
-    tempag1 FLOAT,
-    tempag2 FLOAT,
-    tempag3 FLOAT,
-    tempag4 FLOAT,
-    tempar FLOAT,
-    tempar_r FLOAT,
-    nome_estacao TEXT
-) AS $$
+  datahora TIMESTAMP,
+  tempag1 FLOAT,
+  tempag2 FLOAT,
+  tempag3 FLOAT,
+  tempag4 FLOAT,
+  tempar FLOAT,
+  tempar_r FLOAT,
+  rotulo TEXT -- Aqui estamos esperando a coluna `rotulo` da tabela `tbestacao`
+)
+AS $$
 BEGIN
-    RETURN QUERY
-    SELECT s.datahora, s.tempag1, s.tempag2, s.tempag3, s.tempag4, s.tempar, s.tempar_r, e.rotulo
-    FROM tbsima s
-    JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
-    ORDER BY s.datahora DESC
-    OFFSET offset_param LIMIT limit_param;
+  RETURN QUERY
+  SELECT 
+    s.datahora,
+    s.tempag1,
+    s.tempag2,
+    s.tempag3,
+    s.tempag4,
+    s.tempar,
+    s.tempar_r,
+    e.rotulo::TEXT -- Certifique-se de que a tabela `tbestacao` tem a coluna `rotulo`
+  FROM tbsima s
+  JOIN tbestacao e ON s.idestacao = e.idestacao
+  WHERE 
+    (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') 
+    AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+    AND (data_fim IS NULL OR s.datahora <= data_fim)
+  ORDER BY s.datahora DESC
+  OFFSET offset_param 
+  LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
+
 
 -- =========================
 -- OXIGÊNIO DISSOLVIDO (DO)
 -- =========================
+
 CREATE OR REPLACE FUNCTION buscar_do(
     p_rotulo TEXT DEFAULT NULL,
     data_inicio TIMESTAMP DEFAULT NULL,
@@ -58,7 +72,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_do, s.sonda_dosat, e.rotulo
+    SELECT s.datahora, s.sonda_do, s.sonda_dosat, e.rotulo::TEXT -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -68,6 +82,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- PH
@@ -86,7 +101,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_ph, e.rotulo
+    SELECT s.datahora, s.sonda_ph, e.rotulo::TEXT -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -96,6 +111,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- CLOROFILA
@@ -114,7 +130,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_chl, e.rotulo
+    SELECT s.datahora, s.sonda_chl, e.rotulo::TEXT -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -124,6 +140,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- NUTRIENTES
@@ -143,7 +160,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_nh4, s.sonda_no3, e.rotulo
+    SELECT s.datahora, s.sonda_nh4, s.sonda_no3, e.rotulo::TEXT -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -153,6 +170,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- CONDUTIVIDADE
@@ -171,7 +189,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_cond, e.rotulo
+    SELECT s.datahora, s.sonda_cond, e.rotulo::TEXT  -- Conversão explícita de character varying(50) para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -181,6 +199,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- TURBIDEZ
@@ -199,7 +218,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_turb, e.rotulo
+    SELECT s.datahora, s.sonda_turb, e.rotulo::TEXT  -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -209,6 +228,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- RADIAÇÃO
@@ -228,7 +248,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.radincid, s.radrefl, e.rotulo
+    SELECT s.datahora, s.radincid, s.radrefl, e.rotulo::TEXT  -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -238,6 +258,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- VENTO (VETOR)
@@ -259,7 +280,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.dirvt, s.intensvt, s.u_vel, s.v_vel, e.rotulo
+    SELECT s.datahora, s.dirvt, s.intensvt, s.u_vel, s.v_vel, e.rotulo::TEXT  -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -269,6 +290,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- CORRENTES
@@ -288,7 +310,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.corr_norte, s.corr_leste, e.rotulo
+    SELECT s.datahora, s.corr_norte, s.corr_leste, e.rotulo::TEXT  -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -298,6 +320,8 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
+
 
 -- =========================
 -- PRECIPITAÇÃO
@@ -316,7 +340,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.precipitacao, e.rotulo
+    SELECT s.datahora, s.precipitacao, e.rotulo::TEXT  -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -326,6 +350,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =========================
 -- QUALIDADE DA ÁGUA (COMBINADO)
@@ -356,7 +381,7 @@ BEGIN
     RETURN QUERY
     SELECT s.datahora, s.tempag1, s.tempag2, s.tempag3, s.tempag4,
            s.sonda_temp, s.sonda_cond, s.sonda_do, s.sonda_dosat,
-           s.sonda_ph, s.sonda_chl, s.sonda_turb, e.rotulo
+           s.sonda_ph, s.sonda_chl, s.sonda_turb, e.rotulo::TEXT  -- Conversão explícita para TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
     WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
@@ -366,6 +391,7 @@ BEGIN
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================

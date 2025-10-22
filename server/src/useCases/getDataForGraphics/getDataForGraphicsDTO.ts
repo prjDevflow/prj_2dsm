@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 export const getDataForGraphicsSchema = z.object({
-  type: z.enum(["carbono"]),
+  type: z.enum(["carbono","temperatura","oxigenioDissolvido", "ph", "clorofila","nutrientes","condutividade","turbidez","radiacao","vento","correntes","precipitacao","qualidadeAgua"]).optional(),
   rotulo: z.string(),
   offset: z
     .string()
@@ -13,11 +13,11 @@ export const getDataForGraphicsSchema = z.object({
     .optional(),
   dateInit: z
     .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
+    .transform((val) => (val ? new Date(val) : undefined))
+    .optional(),
   dateEnd: z
     .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
+    .transform((val) => (val ? new Date(val) : undefined))
+     .optional(),
 });
 export type IGetDataForGraphics = z.infer<typeof getDataForGraphicsSchema>;

@@ -26,16 +26,124 @@ export interface ISimaRepository {
     offSet?: number;
     limit?: number;
   }): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]>;
-  // getDataByTempratura(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByOxigenioDissolvido(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByPh(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByCondutividade(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByClorofila(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByNutrientes(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByTurbidez(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByRadiacao(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByVentoVetor(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByCorrentes(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByPrecipitacao(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
-  // getDataByQualidadeAgua(params: {rotulo:string, dataInicio: Date, dataFim:Date, offSet?:number, limit?:number}):Promise<>
+  getDataByTemperatura(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<
+    {
+      date: Date;
+      tempag1: number;
+      tempag2: number;
+      tempag3: number;
+      tempag4: number;
+      tempar: number;
+      tempar_r: number;
+      rotulo: string;
+    }[]
+  >;
+  getDataByOxigenioDissolvido(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; sonda_do: number; sonda_dosat: number; nome_estacao: string }[]>;
+  getDataByPh(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; sonda_ph: number; nome_estacao: string }[]>;
+  getDataByCondutividade(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; sonda_cond: number; nome_estacao: string }[]>;
+  getDataByClorofila(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; sonda_chl: number; nome_estacao: string }[]>;
+  getDataByNutrientes(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; sonda_nh4: number; sonda_no3: number; nome_estacao: string }[]>;
+  getDataByTurbidez(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; sonda_turb: number; nome_estacao: string }[]>;
+  getDataByRadiacao(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; radincid: number; radrefl: number; nome_estacao: string }[]>;
+  getDataByVentoVetor(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<
+    {
+      date: Date;
+      dirvt: number;
+      intensvt: number;
+      u_vel: number;
+      v_vel: number;
+      nome_estacao: string;
+    }[]
+  >;
+  getDataByCorrentes(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; corr_norte: number; corr_leste: number; nome_estacao: string }[]>;
+  getDataByPrecipitacao(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; precipitacao: number; nome_estacao: string }[]>;
+  getDataByQualidadeAgua(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<
+    {
+      date: Date;
+      tempag1: number;
+      tempag2: number;
+      tempag3: number;
+      tempag4: number;
+      sonda_temp: number;
+      sonda_cond: number;
+      sonda_do: Number;
+      sonda_dosat: number;
+      sonda_ph: Number;
+      sonda_chl: Number;
+      sonda_turb: number;
+      nome_estacao: string;
+    }[]
+  >;
 }
