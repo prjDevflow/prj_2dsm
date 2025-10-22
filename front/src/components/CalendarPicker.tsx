@@ -1,20 +1,14 @@
-// src/components/CalendarPicker.tsx
 import React, { useEffect, useRef, useState } from "react";
 import Calendar from "./ui/calendar";
 
 type Range = { start?: Date | null; end?: Date | null };
-
-type PointOption = { id: number; name?: string };
 
 type CalendarPickerProps = {
   value?: Range;
   onChange?: (range: Range) => void;
   showApply?: boolean;
   onApply?: (range: Range) => void;
-  // --- novos props para seleção de ponto ---
-  points?: PointOption[]; // lista de pontos para popular o select
-  selectedPointId?: number | null; // ponto atualmente selecionado
-  onSelectPoint?: (id: number | null) => void; // handler quando usuário escolhe um ponto
+  // Note: removi as props relacionadas a pontos/estação (points, selectedPointId, onSelectPoint)
 };
 
 function clampToStartOfDay(d?: Date | null) {
@@ -31,9 +25,6 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
   onChange,
   showApply = true,
   onApply,
-  points = [],
-  selectedPointId = null,
-  onSelectPoint,
 }) => {
   const now = new Date();
 
@@ -131,25 +122,7 @@ const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
   return (
     <div className="flex items-center gap-3">
-      {/* --- Selector de ponto (novo) --- */}
-      <div>
-        <label className="text-[11px] block mb-1 text-muted-foreground"></label>
-        <select
-          value={selectedPointId ?? ""}
-          onChange={(e) => {
-            const val = e.target.value === "" ? null : Number(e.target.value);
-            onSelectPoint?.(val);
-          }}
-          className="px-3 py-2 w-44 border rounded text-sm bg-white"
-        >
-          <option value="">Estação</option>
-          {points.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.id} — {p.name ?? `Ponto ${p.id}`}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* NOTE: seletor de estação removido completamente */}
 
       {/* START input-like trigger */}
       <div ref={startRef} className="relative inline-block">

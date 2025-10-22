@@ -8,10 +8,7 @@ type Props = {
 
 const SimaMap: React.FC<Props> = ({ onMarkerClick }) => {
   return (
-    <div className="h-[85vh] rounded-md overflow-hidden shadow-sm">
-      {/* o Map original deve aceitar onMarkerClick (conforme seu código atual) */}
       <Map onMarkerClick={onMarkerClick} />
-    </div>
   );
 };
 
