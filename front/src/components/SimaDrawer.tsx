@@ -1,6 +1,7 @@
 import React from "react";
 import CalendarPicker from "@/components/CalendarPicker";
 import SimaTable from "@/components/SimaTable";
+import type { PontoColeta } from "../types/ponto";
 
 import {
   Drawer,
@@ -12,20 +13,12 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 
-type PontoColeta = {
-  id: number;
-  name?: string;
-  latitude: number;
-  longitude: number;
-  type?: string;
-};
-
 type Range = { start?: Date | null; end?: Date | null };
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  selectedPonto: PontoColeta | void;
+  selectedPonto?: PontoColeta | null;
   setSelectedPonto: (p: PontoColeta | null) => void;
   range: Range;
   setRange: (r: Range) => void;
@@ -59,8 +52,11 @@ const SimaDrawer: React.FC<Props> = ({
                 value={range}
                 onChange={(r) => setRange(r)}
                 showApply={true}
-                points={pontosDisponiveis.map((p) => ({ id: p.id, name: p.name }))}
-                selectedPointId={selectedPonto?.id ?? null}
+                points={pontosDisponiveis.map((p) => ({
+                  id: Number(p.id), // ✅ garante que sempre será number
+                  name: p.name ?? "",
+                }))}
+                selectedPointId={selectedPonto?.id != null ? Number(selectedPonto.id) : null}
                 onSelectPoint={(id) => {
                   if (id === null) {
                     setSelectedPonto(null);
@@ -86,7 +82,6 @@ const SimaDrawer: React.FC<Props> = ({
               </div>
             </div>
           </DrawerTitle>
-
         </DrawerHeader>
 
         <DrawerFooter>

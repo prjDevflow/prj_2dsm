@@ -182,9 +182,11 @@ const SectionBody = styled.div<{ open: boolean }>`
   overflow: auto; /* importante: permitir rolagem interna */
   -webkit-overflow-scrolling: touch;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent);
-  &::-webkit-scrollbar { width: 10px; }
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.06);
     border-radius: 99px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -219,7 +221,7 @@ const PointRow = styled.button`
     transform: translateX(2px);
   }
   &:focus {
-    outline: 3px solid rgba(255,255,255,0.06);
+    outline: 3px solid rgba(255, 255, 255, 0.06);
   }
 `;
 
@@ -250,19 +252,15 @@ const SearchInput = styled.input`
   width: 100%;
   padding: 0.5rem 0.6rem;
   border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
   color: inherit;
   font-size: 0.9rem;
   margin-bottom: 0.6rem;
 `;
 
 /* ---------- componente ---------- */
-export default function Sidebar({
-  logoSrc,
-  variant = "sima",
-  onSelectPoint,
-}: SidebarProps) {
+export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: SidebarProps) {
   const [open, setOpen] = useState(false);
 
   const defaultFiltersOpen = variant === "sima" ? true : false;
@@ -338,7 +336,12 @@ export default function Sidebar({
     if (!q) return pontos;
     return (pontos as ApiPonto[]).filter((p) => {
       const label = (p.rotulo ?? p.name ?? p.nome ?? String(p.id ?? "")).toLowerCase();
-      return label.includes(q) || String(p.id ?? p.idHexadecimal ?? p.idestacao ?? "").toLowerCase().includes(q);
+      return (
+        label.includes(q) ||
+        String(p.id ?? p.idHexadecimal ?? p.idestacao ?? "")
+          .toLowerCase()
+          .includes(q)
+      );
     });
   }, [pontos, search]);
 
@@ -350,10 +353,13 @@ export default function Sidebar({
     const maybeIdest = p.idestacao ?? p.id ?? p._id ?? null;
     const preferIdest =
       maybeIdest !== null &&
-      (typeof maybeIdest === "number" || (typeof maybeIdest === "string" && /^\d+$/.test(maybeIdest)));
+      (typeof maybeIdest === "number" ||
+        (typeof maybeIdest === "string" && /^\d+$/.test(maybeIdest)));
 
     const chosenId = preferIdest
-      ? (typeof maybeIdest === "string" ? Number(maybeIdest) : maybeIdest)
+      ? typeof maybeIdest === "string"
+        ? Number(maybeIdest)
+        : maybeIdest
       : (p.idHexadecimal ?? p.id ?? p._id ?? p.nome ?? p.nome_estacao ?? p.rotulo ?? p.name ?? "");
 
     const point: PontoColeta = {
@@ -444,7 +450,10 @@ export default function Sidebar({
               )}
 
               <Section>
-                <SectionHeader onClick={() => toggleSection("pontos")} aria-expanded={!!openSection.pontos}>
+                <SectionHeader
+                  onClick={() => toggleSection("pontos")}
+                  aria-expanded={!!openSection.pontos}
+                >
                   <span>RESERVATÓRIOS</span>
                   <Rotating open={!!openSection.pontos}>
                     <ChevronDown color="white" size={16} />
@@ -462,11 +471,21 @@ export default function Sidebar({
                   {isLoading && <Hint>Carregando pontos...</Hint>}
                   {isError && <Hint>Erro ao carregar pontos.</Hint>}
 
-                  {!isLoading && filteredPontos.length === 0 && <Hint>Nenhum ponto encontrado.</Hint>}
+                  {!isLoading && filteredPontos.length === 0 && (
+                    <Hint>Nenhum ponto encontrado.</Hint>
+                  )}
 
                   {!isLoading &&
                     (filteredPontos as ApiPonto[]).map((p) => {
-                      const id = p.id ?? p.idHexadecimal ?? p.idestacao ?? p._id ?? p.nome ?? p.nome_estacao ?? p.rotulo ?? p.name;
+                      const id =
+                        p.id ??
+                        p.idHexadecimal ??
+                        p.idestacao ??
+                        p._id ??
+                        p.nome ??
+                        p.nome_estacao ??
+                        p.rotulo ??
+                        p.name;
                       const label = p.rotulo ?? p.name ?? p.nome ?? p.nome_estacao ?? `Ponto ${id}`;
                       const displayId = String(id ?? "");
                       const showId = displayId !== label;
@@ -479,7 +498,9 @@ export default function Sidebar({
                           title={`${label}${showId ? " — " + displayId : ""}`}
                         >
                           <span>{label}</span>
-                          {showId && <span style={{ opacity: 0.85, fontSize: "0.9rem" }}>{displayId}</span>}
+                          {showId && (
+                            <span style={{ opacity: 0.85, fontSize: "0.9rem" }}>{displayId}</span>
+                          )}
                         </PointRow>
                       );
                     })}

@@ -49,14 +49,22 @@ export default function SimaPage(): JSX.Element {
 
   return (
     <div className="flex gap-4 min-h-screen">
-      {!isDrawerOpen && <Sidebar logoSrc="./imagens/Logo-2.png" variant="sima" onSelectPoint={handleSidebarSelectPoint} />}
+      {!isDrawerOpen && (
+        <Sidebar
+          logoSrc="./imagens/Logo-2.png"
+          variant="sima"
+          onSelectPoint={handleSidebarSelectPoint}
+        />
+      )}
 
       <main className={`flex-1 p-6 ${isDrawerOpen ? "overflow-hidden" : ""}`}>
         {!isDrawerOpen && (
           <header className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">SIMA</h1>
             <div className="text-sm text-gray-600">
-              {selectedPonto ? `Ponto selecionado: ${selectedPonto.name ?? selectedPonto.id}` : "Clique em um ponto no mapa para ver a tabela"}
+              {selectedPonto
+                ? `Ponto selecionado: ${selectedPonto.name ?? selectedPonto.id}`
+                : "Clique em um ponto no mapa para ver a tabela"}
             </div>
           </header>
         )}

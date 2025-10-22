@@ -34,7 +34,7 @@ router.get("/get-coordinates", (req: Request, res: Response) => {
 router.get("/sima", (req: Request, res: Response) => {
   return getAllSimaController.handle(req, res);
 });
-// ⚠️WARNING: devem receber id
+// ⚠️WARNING: devem receber rótulo
 // podem receber limit, offset(paginacao), dateInit, dateEnd, rotulo(filtro)
 router.get("/sima/:rotulo", (req: Request, res: Response) => {
   return getDataByIdSimaController.handle(req, res);
