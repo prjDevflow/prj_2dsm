@@ -4,7 +4,7 @@ FROM node:22-alpine AS build
 # Criar diretório de trabalho
 WORKDIR /usr/src/app
 
-# Copiar package.json e instalar dependências
+# Copiar package.json e instalar dependências.
 COPY package*.json ./
 RUN npm install
 RUN npm install --save-dev ts-node-dev
