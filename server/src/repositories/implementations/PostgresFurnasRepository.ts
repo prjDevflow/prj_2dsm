@@ -22,7 +22,7 @@ export class PostgresFurnasRepository implements IFurnasRepository {
     const { rows } = await furnasPool.query(query, values);
 
     return rows.map((row) => ({
-      id: row.reservatorio,
+      id: row.idreservatorio,
       reservatorio: row.nome_reservatorio,
       latitude: row.lat,
       longitude: row.lng,

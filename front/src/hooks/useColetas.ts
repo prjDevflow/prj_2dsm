@@ -7,6 +7,8 @@ const fetchColetas = async (type: "sima" | "balcar" | "furnas", instituicao?: st
     params: { type, instituicao },
   });
 
+  console.log(response)
+
   // Normaliza os dados, garantindo que todos tenham key única
   const normalizedData = response.data.markers.map((ponto: any, i: number) => ({
     ...ponto,
