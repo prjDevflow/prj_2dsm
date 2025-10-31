@@ -1,8 +1,8 @@
 import * as z from "zod";
 
 export const getDataForGraphicsSchema = z.object({
-  type: z.enum(["carbono","temperatura","oxigenioDissolvido", "ph", "clorofila","nutrientes","condutividade","turbidez","radiacao","vento","correntes","precipitacao","qualidadeAgua"]).optional(),
-  rotulo: z.string(),
+  type: z.enum(["carbono","temperatura","oxigenioDissolvido", "ph", "clorofila","nutrientes","condutividade","turbidez","radiacao","vento","correntes","precipitacao","qualidadeAgua"]),
+  rotulo: z.string("Balbina"),
   offset: z
     .string()
     .transform((val) => parseInt(val, 10))
