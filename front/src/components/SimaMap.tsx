@@ -8,7 +8,7 @@ type Props = {
 
 const SimaMap: React.FC<Props> = ({ onMarkerClick }) => {
   return (
-      <Map onMarkerClick={onMarkerClick} />
+      <Map onMarkerClick={onMarkerClick} type={"sima"} />
   );
 };
 

@@ -6,7 +6,10 @@
 * {
   box-sizing: border-box;
 }
-
+.leaflet-container {
+  z-index: 0 !important; /* coloca o mapa por baixo */
+  position: relative;    /* garante posicionamento */
+}
 body {
   margin: 0;
   padding: 0;

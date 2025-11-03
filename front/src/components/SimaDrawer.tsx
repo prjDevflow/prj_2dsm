@@ -1,7 +1,6 @@
 import React from "react";
 import CalendarPicker from "@/components/CalendarPicker";
 import SimaTable from "@/components/SimaTable";
-import type { PontoColeta } from "../types/ponto";
 
 import {
   Drawer,
@@ -13,13 +12,22 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 
+type PontoColeta = {
+  id: number | string;
+  name?: string;
+  rotulo?: string;
+  latitude: number;
+  longitude: number;
+  type?: string;
+};
+
 type Range = { start?: Date | null; end?: Date | null };
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  selectedPonto?: PontoColeta | null;
-  setSelectedPonto: (p: PontoColeta | null) => void;
+  selectedPonto: PontoColeta | null; // use null em vez de void
+  setSelectedPonto?: (p: PontoColeta | null) => void; // opcional
   range: Range;
   setRange: (r: Range) => void;
 };
@@ -31,13 +39,20 @@ const SimaDrawer: React.FC<Props> = ({
   range,
   setRange,
 }) => {
+  // debug rápido: mostra quando o drawer abre e o ponto atual
+  React.useEffect(() => {
+    if (open) {
+      console.debug("[SimaDrawer] abriu drawer, selectedPonto:", selectedPonto);
+    }
+  }, [open, selectedPonto]);
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="space-y-4">
             <span className="block text-lg font-semibold">
-              Tabela de Dados{selectedPonto ? ` - ${selectedPonto.name}` : ""}
+              Tabela de Dados{selectedPonto ? ` - ${selectedPonto.name ?? selectedPonto.rotulo ?? selectedPonto.id}` : ""}
             </span>
 
             <div className="mt-4 p-2 border rounded-md bg-white">
@@ -46,29 +61,16 @@ const SimaDrawer: React.FC<Props> = ({
                 value={range}
                 onChange={(r) => setRange(r)}
                 showApply={true}
-                points={pontosDisponiveis.map((p) => ({
-                  id: Number(p.id), // ✅ garante que sempre será number
-                  name: p.name ?? "",
-                }))}
-                selectedPointId={selectedPonto?.id != null ? Number(selectedPonto.id) : null}
-                onSelectPoint={(id) => {
-                  if (id === null) {
-                    setSelectedPonto(null);
-                  } else {
-                    const found = pontosDisponiveis.find((p) => p.id === id);
-                    setSelectedPonto(found ?? { id, latitude: 0, longitude: 0 });
-                  }
-                }}
                 onApply={(r) => {
-                  // CalendarPicker já envia o range ao aplicar
                   setRange(r);
                 }}
               />
 
-              {/* SimaTable faz o fetch por conta própria com props (selectedPointId + range) */}
+              {/* SimaTable: envio tanto do id quanto do objeto completo para mais robustez */}
               <div className="mt-4">
                 <SimaTable
-                  selectedPointId={selectedPonto?.id ?? null}
+                  selectedPoint={selectedPonto ?? undefined} // objeto completo (mais robusto)
+                  selectedPointId={selectedPonto?.id ?? null} // mantém compatibilidade
                   range={range}
                   initialPage={1}
                   initialLimit={20}

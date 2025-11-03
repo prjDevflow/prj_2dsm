@@ -12,9 +12,8 @@ type Props = {
   instituicao?: string;
 };
 
-export default function Map({ onMarkerClick, filters }: Props) {
-  const position: LatLngExpression = [-15.7797, -47.9297];
-  const [type] = useState<"sima" | "balcar" | "furnas">("sima");
+export default function Map({ onMarkerClick, filters, type, instituicao }: Props) {
+  const position: LatLngExpression = [-15.7797, -57.9297];
 
   const { data, isLoading, isError } = useColetas(type, instituicao);
 
@@ -25,7 +24,7 @@ export default function Map({ onMarkerClick, filters }: Props) {
   const filterSet = new Set((filters?.points ?? []).map((x) => String(x)));
   const visibleData = (data ?? []).filter((ponto: any) => {
     if (!filters?.points || filters.points.length === 0) return true;
-    const id = String(ponto.id ?? ponto.instituicao + ponto.reservatorio);
+    const id = String(ponto.id ?? ponto._id ?? ponto.rotulo ?? ponto.nome ??ponto.instituicao + ponto.reservatorio);
     return filterSet.has(id);
   });
 
@@ -34,7 +33,7 @@ export default function Map({ onMarkerClick, filters }: Props) {
       <MapContainer
         center={position}
         zoom={5}
-        className="map-container"
+        style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={true}
         minZoom={5}
         maxZoom={14}
@@ -44,18 +43,12 @@ export default function Map({ onMarkerClick, filters }: Props) {
           attribution="© Esri"
         />
 
-        {visibleData.map(
-          (ponto: {
-            id: number | string;
-            latitude: number;
-            longitude: number;
-            rotulo?: string;
-          }) => (
-            <Marker
-              key={String(ponto.id)}
-              position={[ponto.latitude, ponto.longitude] as LatLngExpression}
-              eventHandlers={{
-                click: () => {
+        {visibleData.map((ponto: any, index: number) => (
+          <Marker
+            key={`${ponto.instituicao}-${ponto.reservatorio}-${index}`} // key única
+            position={[ponto.latitude, ponto.longitude] as LatLngExpression}
+            eventHandlers={{
+              click: () => {
                   onMarkerClick?.({
                     id: ponto.rotulo ?? ponto.id,
                     latitude: ponto.latitude,
@@ -63,16 +56,15 @@ export default function Map({ onMarkerClick, filters }: Props) {
                     rotulo: ponto.rotulo,
                   } as PontoColeta);
                 },
-              }}
-            >
-              <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent={false}>
-                <strong>{ponto.rotulo ?? `ID ${ponto.id}`}</strong>
-                <br />
-                ID: {ponto.id}
-              </Tooltip>
-            </Marker>
-          ),
-        )}
+            }}
+          >
+            <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent={false}>
+              <strong>{ponto.reservatorio ?? ponto.rotulo ?? `ID ${ponto.id}`}</strong>
+              <br />
+              {ponto.instituicao}
+            </Tooltip>
+          </Marker>
+        ))}
       </MapContainer>
 
       {(!visibleData || visibleData.length === 0) && (
