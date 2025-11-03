@@ -6,6 +6,7 @@ import { getDataByIdSimaController } from "./useCases/getDataByIdSima";
 import { getDataByIdFurnasController } from "./useCases/getDataByIdFurnas";
 import { getDataByIdBalcarController } from "./useCases/getDataByIdBalcar";
 import { getDataForGraphicsController } from "./useCases/getDataForGraphics";
+import { getFurnasDataController } from "./useCases/getFurnasData";
 
 
 const router = express.Router();
@@ -44,6 +45,9 @@ router.get("/sima/:rotulo", (req: Request, res: Response) => {
 router.get("/furnas", (req: Request, res: Response) => {
   return getDataByIdFurnasController.handle(req, res);
 });
+router.get("/furnas/type", (req: Request, res: Response) => {
+  return getFurnasDataController.handle(req, res);
+});
 router.get("/furnas/:id", (req: Request, res: Response) => {
   return getDataByIdFurnasController.handle(req, res);
 });
@@ -54,6 +58,7 @@ router.get("/balcar/:id", (req: Request, res: Response) => {
 router.get("/graphics", (req: Request, res: Response) => {
   return getDataForGraphicsController.handle(req, res);
 });
+
 
 
 export default router;

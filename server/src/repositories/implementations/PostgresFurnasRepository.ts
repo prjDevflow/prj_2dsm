@@ -49,4 +49,44 @@ export class PostgresFurnasRepository implements IFurnasRepository {
       total: 0, //
     };
   }
+
+  async getDataByType(params: {
+    tipoDado: string;
+    rotulo?: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    instituicao?: string;
+    idReservatorio?: number;
+  }): Promise<{ registers: any[]; total: number }> {
+    // Mapeamento dos tipos de dado para procedures
+    const procedureMap: Record<string, string> = {
+      variaveisfisicasquimicasdaagua: "buscar_variaveisfisicasquimicasdaagua",
+      parametrosbiologicosfisicosagua: "buscar_parametrosbiologicosfisicosagua",
+      nutrientessedimento: "buscar_nutrientessedimento",
+      aguamateriaorganicasedimento: "buscar_aguamateriaorganicasedimento",
+      concentracaogasagua: "buscar_concentracaogasagua",
+      fluxoDifusivo: "buscar_fluxodifusivo",
+      fluxoCarbono: "buscar_fluxocarbono",
+    };
+    const procedure = procedureMap[params.tipoDado];
+    if (!procedure) throw new Error("Tipo de dado não suportado");
+    const query = `SELECT * FROM ${procedure}($1, $2, $3, $4, $5, $6, $7)`;
+    const values = [
+      params.instituicao ?? null,
+      params.idReservatorio ?? null,
+      params.rotulo ?? null,
+      params.dateInit ?? null,
+      params.dateEnd ?? null,
+      params.offset ?? 0,
+      params.limit ?? 20,
+      // Adapte conforme assinatura da procedure
+    ];
+    const { rows } = await furnasPool.query(query, values);
+    return {
+      registers: rows,
+      total: rows.length,
+    };
+  }
 }

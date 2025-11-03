@@ -12,4 +12,14 @@ export interface IFurnasRepository {
     limit?: number;
    
   }): Promise<{ registers: Sitio[]; total: number }>;
+  getDataByType(params: {
+    tipoDado: string;
+    rotulo?: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    instituicao?: string;
+    idReservatorio?: number;
+  }): Promise<{ registers: any[]; total: number }>;
 }
