@@ -9,6 +9,9 @@ export class GetFurnasDataController {
   async handle(req: Request, res: Response): Promise<void> {
     try {
       const params = getFurnasDataSchema.parse(req.query);
+      if(params.rotulo === ""){
+        res.status(400).send({ message: "Rotulo é obrigatório" });
+      }
       const result = await this.getFurnasDataUseCase.execute(params);
       res.status(200).send({ message: "Dados do Furnas retornados", data: result });
     } catch (error: Error | any) {

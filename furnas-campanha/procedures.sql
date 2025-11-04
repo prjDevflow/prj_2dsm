@@ -586,16 +586,16 @@ $$ LANGUAGE plpgsql;
 -- =========================
 -- FLUXO - CARBONO
 -- =========================
+
+
 CREATE OR REPLACE FUNCTION buscar_fluxocarbono(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
     p_offset_param INT DEFAULT 0,
     p_limit_param INT DEFAULT 20
 )
-RETURNS TABLE (
+RETURNS TABLE(
     datahora TIMESTAMP,
     producaofitoplanctonica DOUBLE PRECISION,
     carbonoorganicoexcretado DOUBLE PRECISION,
@@ -604,23 +604,28 @@ RETURNS TABLE (
     sitio_nome TEXT,
     instituicao_nome TEXT,
     reservatorio_nome TEXT
-) AS $$
+)
+AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.producaofitoplanctonica, t.carbonoorganicoexcretado, t.respiracaofito, t.producaobacteriana,
-           s.nome, i.nome, r.nome
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.producaofitoplanctonica,
+        t.carbonoorganicoexcretado,
+        t.respiracaofito,
+        t.producaobacteriana,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbfluxocarbono t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;

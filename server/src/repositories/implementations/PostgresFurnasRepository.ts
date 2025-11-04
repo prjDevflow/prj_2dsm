@@ -57,8 +57,7 @@ export class PostgresFurnasRepository implements IFurnasRepository {
     limit?: number;
     dateInit?: Date;
     dateEnd?: Date;
-    instituicao?: string;
-    idReservatorio?: number;
+
   }): Promise<{ registers: any[]; total: number }> {
     // Mapeamento dos tipos de dado para procedures
     const procedureMap: Record<string, string> = {
@@ -72,10 +71,9 @@ export class PostgresFurnasRepository implements IFurnasRepository {
     };
     const procedure = procedureMap[params.tipoDado];
     if (!procedure) throw new Error("Tipo de dado não suportado");
-    const query = `SELECT * FROM ${procedure}($1, $2, $3, $4, $5, $6, $7)`;
+    const query = `SELECT * FROM ${procedure}($1, $2, $3, $4, $5)`;
     const values = [
-      params.instituicao ?? null,
-      params.idReservatorio ?? null,
+   
       params.rotulo ?? null,
       params.dateInit ?? null,
       params.dateEnd ?? null,

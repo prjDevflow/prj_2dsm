@@ -20,6 +20,6 @@ export interface IFurnasRepository {
     dateInit?: Date;
     dateEnd?: Date;
     instituicao?: string;
-    idReservatorio?: number;
+    idReservatorio?: string;
   }): Promise<{ registers: any[]; total: number }>;
 }

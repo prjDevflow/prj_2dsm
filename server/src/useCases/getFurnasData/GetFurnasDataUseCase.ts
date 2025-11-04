@@ -12,8 +12,7 @@ export class GetFurnasDataUseCase {
       limit: params.limit,
       dateInit: params.dateInit,
       dateEnd: params.dateEnd,
-       instituicao: params.instituicao,
-    idReservatorio: params.idReservatorio,
+     
     });
 
     const nextOffset = typeof params.limit === "number" ? params.offset + params.limit : undefined;
