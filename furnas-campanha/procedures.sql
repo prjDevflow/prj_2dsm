@@ -8,8 +8,6 @@
 -- ABIÓTICO - COLUNA
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_abioticocoluna(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -30,19 +28,23 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    
     SELECT
         (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.profundidade, t.dic, t.nt, t.pt, t.delta13c, t.delta15n,
-        s.nome, i.nome, r.nome
+        t.profundidade,
+        t.dic,
+        t.nt,
+        t.pt,
+        t.delta13c,
+        t.delta15n,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbabioticocoluna t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
     ORDER BY datahora DESC
@@ -51,12 +53,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+
 -- =========================
 -- ABIÓTICO - SUPERFÍCIE
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_abioticosuperficie(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -77,31 +78,34 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-        t.dic, t.nt, t.pt, t.delta13c, t.delta15n,
-        s.nome, i.nome, r.nome
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.dic,
+        t.nt,
+        t.pt,
+        t.delta13c,
+        t.delta15n,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbabioticosuperficie t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- ÁGUA - MATÉRIA ORGÂNICA E SEDIMENTO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_aguamateriaorganicasedimento(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -120,20 +124,24 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.batimetria, t.agua, t.materiaOrganica,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.batimetria,
+        t.agua,
+        t.materiaorganica,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbaguamateriaorganicasedimento t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
@@ -143,8 +151,6 @@ $$ LANGUAGE plpgsql;
 -- BIÓTICO - COLUNA
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_bioticocoluna(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -158,38 +164,43 @@ RETURNS TABLE (
     toc DOUBLE PRECISION,
     poc DOUBLE PRECISION,
     densidadebacteria DOUBLE PRECISION,
-    clorofilaA DOUBLE PRECISION,
+    clorofilaa DOUBLE PRECISION,
     sitio_nome TEXT,
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.doc, t.toc, t.poc, t.densidadeBacteria, t.clorofilaA,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.doc,
+        t.toc,
+        t.poc,
+        t.densidadebacteria,
+        t.clorofilaA,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbbioticocoluna t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- BIÓTICO - SUPERFÍCIE
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_bioticosuperficie(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -202,38 +213,42 @@ RETURNS TABLE (
     toc DOUBLE PRECISION,
     poc DOUBLE PRECISION,
     densidadebacteria DOUBLE PRECISION,
-    clorofilaA DOUBLE PRECISION,
+    clorofilaa DOUBLE PRECISION,
     sitio_nome TEXT,
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.doc, t.toc, t.poc, t.densidadeBacteria, t.clorofilaA,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.doc,
+        t.toc,
+        t.poc,
+        t.densidadebacteria,
+        t.clorofilaA,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbbioticosuperficie t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- BOLHAS
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_bolhas(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -253,31 +268,35 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.nroDeFunis, t.volumeColetado, t.ch4, t.co2,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.nrodefunis,
+        t.volumecoletado,
+        t.ch4,
+        t.co2,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbbolhas t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- CÂMARA DE SOLO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_camarasolo(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -299,20 +318,27 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.ch4, t.co2, t.n2o, t.tempar, t.tempsolo, t.vento, t.altitude,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.ch4,
+        t.co2,
+        t.n2o,
+        t.tempar,
+        t.tempsolo,
+        t.vento,
+        t.altitude,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbcamarasolo t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
@@ -322,8 +348,6 @@ $$ LANGUAGE plpgsql;
 -- CARBONO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_carbono(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -344,31 +368,36 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.dc, t.doc, t.poc, t.toc, t.dic, t.tc,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.dc,
+        t.doc,
+        t.poc,
+        t.toc,
+        t.dic,
+        t.tc,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbcarbono t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- CONCENTRAÇÃO GÁS - ÁGUA
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_concentracaogasagua(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -388,31 +417,35 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.batimetria, t.altura, t.replica, t.ch4, t.co2,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.batimetria,
+        t.altura,
+        t.replica,
+        t.ch4,
+        t.co2,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbconcentracaogasagua t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- CONCENTRAÇÃO GÁS - SEDIMENTO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_concentracaogassedimento(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -432,31 +465,35 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.batimetria, t.profundidadeDoSedimento, t.replica, t.ch4, t.co2,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.batimetria,
+        t.profundidadeDoSedimento,
+        t.replica,
+        t.ch4,
+        t.co2,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbconcentracaogassedimento t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- DIFUSÃO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_difusao(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -476,31 +513,35 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.ch4, t.co2, t.n2o, t.ph, t.tempagua,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.ch4,
+        t.co2,
+        t.n2o,
+        t.ph,
+        t.tempagua,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbdifusao t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- DUPLA DESSORÇÃO ÁGUA
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_dupladessorcaoagua(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -521,31 +562,36 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.co2, t.o2, t.n2, t.ch4, t.n2o,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.co2,
+        t.o2,
+        t.n2,
+        t.ch4,
+        t.n2o,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbdupladessorcaoagua t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- FLUXO - BOLHAS (INPE)
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_fluxobolhasinpe(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -564,38 +610,41 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.ch4, t.ch4_desviopadrao, t.ch4_amostras,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.ch4,
+        t.ch4_desviopadrao,
+        t.ch4_amostras,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbfluxobolhasinpe t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- FLUXO - CARBONO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_fluxocarbono(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
     p_offset_param INT DEFAULT 0,
     p_limit_param INT DEFAULT 20
 )
-RETURNS TABLE (
+RETURNS TABLE(
     datahora TIMESTAMP,
     producaofitoplanctonica DOUBLE PRECISION,
     carbonoorganicoexcretado DOUBLE PRECISION,
@@ -604,23 +653,28 @@ RETURNS TABLE (
     sitio_nome TEXT,
     instituicao_nome TEXT,
     reservatorio_nome TEXT
-) AS $$
+)
+AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.producaofitoplanctonica, t.carbonoorganicoexcretado, t.respiracaofito, t.producaobacteriana,
-           s.nome, i.nome, r.nome
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.producaofitoplanctonica,
+        t.carbonoorganicoexcretado,
+        t.respiracaofito,
+        t.producaobacteriana,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbfluxocarbono t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
@@ -630,8 +684,6 @@ $$ LANGUAGE plpgsql;
 -- FLUXO - DIFUSIVO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_fluxodifusivo(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -650,31 +702,34 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.batimetria, t.intervalo, t.ch4, t.co2,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.batimetria,
+        t.intervalo,
+        t.ch4,
+        t.co2,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbfluxodifusivo t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- FLUXO - DIFUSIVO INPE
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_fluxodifusivoinpe(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -696,31 +751,37 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.co2, t.co2_desviopadrao, t.co2_amostras, t.ch4, t.ch4_desviopadrao, t.ch4_amostras,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.co2,
+        t.co2_desviopadrao,
+        t.co2_amostras,
+        t.ch4,
+        t.ch4_desviopadrao,
+        t.ch4_amostras,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbfluxodifusivoinpe t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- GASES - BOLHAS
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_gasesembolhas(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -741,31 +802,36 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.co2, t.o2, t.n2, t.ch4, t.n2o,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.co2,
+        t.o2,
+        t.n2,
+        t.ch4,
+        t.n2o,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbgasesembolhas t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- HORIBA (SENSOR DE CAMPO)
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_horiba(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -788,31 +854,38 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.tempagua, t.condutividade, t.ph, t._do, t.tds, t.redox, t.turbidez,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.tempagua,
+        t.condutividade,
+        t.ph,
+        t._do,
+        t.tds,
+        t.redox,
+        t.turbidez,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbhoriba t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- IONS NA ÁGUA INTERSTICIAL DO SEDIMENTO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_ionsnaaguaintersticialdosedimento(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -842,31 +915,45 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.batimetria, t.f, t.cl, t.no2, t.br, t.no3, t.po4, t.so4, t.na, t.nh4, t.k, t.mg, t.ca, t.acetato,
-           s.nome, i.nome, r.nome
+    SELECT
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.batimetria,
+        t.f,
+        t.cl,
+        t.no2,
+        t.br,
+        t.no3,
+        t.po4,
+        t.so4,
+        t.na,
+        t.nh4,
+        t.k,
+        t.mg,
+        t.ca,
+        t.acetato,
+        s.nome::TEXT AS sitio_nome,
+        i.nome::TEXT AS instituicao_nome,
+        r.nome::TEXT AS reservatorio_nome
     FROM tbionsnaaguaintersticialdosedimento t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
     LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
+    ORDER BY datahora DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
 -- MEDIDA CAMPOS - COLUNA
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_medidacampocoluna(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -890,17 +977,26 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.secchi, t.tempagua, t.condutividade, t._do, t.ph, t.turbidez, t.materialemsuspensao, t.intensidadeluminosa,
-           s.nome, i.nome, r.nome
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.secchi,
+        t.tempagua,
+        t.condutividade,
+        t._do,
+        t.ph,
+        t.turbidez,
+        t.materialemsuspensao,
+        t.intensidadeluminosa,
+        s.nome AS sitio_nome,
+        i.nome AS instituicao_nome,
+        r.nome AS reservatorio_nome
     FROM tbmedidacampocoluna t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
     ORDER BY 1 DESC
@@ -909,12 +1005,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+
 -- =========================
 -- MEDIDA CAMPOS - SUPERFÍCIE
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_medidacamposuperficie(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -936,17 +1031,24 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.secchi, t.tempagua, t.condutividade, t._do, t.ph, t.turbidez, t.materialemsuspensao,
-           s.nome, i.nome, r.nome
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.secchi,
+        t.tempagua,
+        t.condutividade,
+        t._do,
+        t.ph,
+        t.turbidez,
+        t.materialemsuspensao,
+        s.nome AS sitio_nome,
+        i.nome AS instituicao_nome,
+        r.nome AS reservatorio_nome
     FROM tbmedidacamposuperficie t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
     ORDER BY 1 DESC
@@ -955,12 +1057,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+
 -- =========================
 -- NUTRIENTES - SEDIMENTO
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_nutrientessedimento(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -983,23 +1084,32 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.batimetria, t.nh4, t.no2, t.no3, t.po4, t.ptotal, t.ntotal,
-           s.nome, i.nome, r.nome
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.batimetria,
+        t.nh4,
+        t.no2,
+        t.no3,
+        t.po4,
+        t.ptotal,
+        t.ntotal,
+        s.nome AS sitio_nome,
+        i.nome AS instituicao_nome,
+        r.nome AS reservatorio_nome
     FROM tbnutrientessedimento t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
     ORDER BY 1 DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
@@ -1060,9 +1170,7 @@ $$ LANGUAGE plpgsql;
 -- =========================
 -- PFQ
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_pfq(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
+CREATE OR REPLACE FUNCTION buscar_parametrosbiologicosfisicosagua(
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -1072,30 +1180,52 @@ CREATE OR REPLACE FUNCTION buscar_pfq(
 RETURNS TABLE (
     datahora TIMESTAMP,
     profundidade DOUBLE PRECISION,
-    batimetria DOUBLE PRECISION,
-    tempar DOUBLE PRECISION,
+    secchi DOUBLE PRECISION,
     tempagua DOUBLE PRECISION,
+    condutividade DOUBLE PRECISION,
     _do DOUBLE PRECISION,
     ph DOUBLE PRECISION,
-    redox DOUBLE PRECISION,
-    vento TEXT,
+    turbidez DOUBLE PRECISION,
+    doc DOUBLE PRECISION,
+    toc DOUBLE PRECISION,
+    poc DOUBLE PRECISION,
+    dic DOUBLE PRECISION,
+    nt DOUBLE PRECISION,
+    pt DOUBLE PRECISION,
+    clorofilaA DOUBLE PRECISION,
+    producaofitoplanctonica DOUBLE PRECISION,
     sitio_nome TEXT,
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.batimetria, t.tempar, t.tempagua, t._do, t.ph, t.redox, t.vento,
-           s.nome, i.nome, r.nome
-    FROM tbpfq t
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.secchi,
+        t.tempagua,
+        t.condutividade,
+        t._do,
+        t.ph,
+        t.turbidez,
+        t.doc,
+        t.toc,
+        t.poc,
+        t.dic,
+        t.nt,
+        t.pt,
+        t.clorofilaA,
+        t.producaofitoplanctonica,
+        s.nome AS sitio_nome,
+        i.nome AS instituicao_nome,
+        r.nome AS reservatorio_nome
+    FROM tbparametrosbiologicosfisicosagua t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
     ORDER BY 1 DESC
@@ -1104,12 +1234,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+
 -- =========================
 -- TC
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_tc(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -1126,17 +1255,19 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.tc,
-           s.nome, i.nome, r.nome
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.tc,
+        s.nome AS sitio_nome,
+        i.nome AS instituicao_nome,
+        r.nome AS reservatorio_nome
     FROM tbtc t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
     ORDER BY 1 DESC
@@ -1145,12 +1276,11 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+
 -- =========================
 -- VARIÁVEIS FÍSICO-QUÍMICAS DA ÁGUA
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_variaveisfisicasquimicasdaagua(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -1185,24 +1315,44 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.secchi, t.batimetria, t.f, t.cl, t.nno3, t.ppo43, t.sso42, t.li,
-           t.na, t.nnh4, t.k, t.mg, t.ca, t.clorofila, t.feofitina, t.turbidez, t.nt, t.pt, t.tdc,
-           s.nome, i.nome, r.nome
+    SELECT 
+        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        t.profundidade,
+        t.secchi,
+        t.batimetria,
+        t.f,
+        t.cl,
+        t.nno3,
+        t.ppo43,
+        t.sso42,
+        t.li,
+        t.na,
+        t.nnh4,
+        t.k,
+        t.mg,
+        t.ca,
+        t.clorofila,
+        t.feofitina,
+        t.turbidez,
+        t.nt,
+        t.pt,
+        t.tdc,
+        s.nome AS sitio_nome,
+        i.nome AS instituicao_nome,
+        r.nome AS reservatorio_nome
     FROM tbvariaveisfisicasquimicasdaagua t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
+    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
     ORDER BY 1 DESC
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- ==================================================================
 -- FIM DO SCRIPT: funções geradas (filtragem por nome da instituição).
