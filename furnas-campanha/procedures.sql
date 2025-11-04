@@ -637,6 +637,8 @@ $$ LANGUAGE plpgsql;
 -- =========================
 -- FLUXO - CARBONO
 -- =========================
+
+
 CREATE OR REPLACE FUNCTION buscar_fluxocarbono(
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
