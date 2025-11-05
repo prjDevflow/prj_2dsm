@@ -707,7 +707,7 @@ BEGIN
     SELECT
         (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
         t.batimetria,
-        t.intervalo,
+        t.intervalo::TEXT AS intervalo,            -- <-- cast para TEXT
         t.ch4,
         t.co2,
         s.nome::TEXT AS sitio_nome,
@@ -717,7 +717,7 @@ BEGIN
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
     JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
+    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio    -- <-- corrigido aqui
     WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
       AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
       AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
@@ -725,6 +725,7 @@ BEGIN
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -802,31 +803,38 @@ RETURNS TABLE (
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
+DECLARE
+    sql TEXT;
 BEGIN
-    RETURN QUERY
-    SELECT
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.profundidade,
-        t.co2,
-        t.o2,
-        t.n2,
-        t.ch4,
-        t.n2o,
-        s.nome::TEXT AS sitio_nome,
-        i.nome::TEXT AS instituicao_nome,
-        r.nome::TEXT AS reservatorio_nome
-    FROM tbgasesembolhas t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY datahora DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
+    sql := format($SQL$
+        SELECT
+            (COALESCE(t.datamedida, c.datainicio))::timestamp AS datahora,
+            t.profundidade,
+            t.co2,
+            t.o2,
+            t.n2,
+            t.ch4,
+            t.n2o,
+            s.nome::TEXT AS sitio_nome,
+            i.nome::TEXT AS instituicao_nome,
+            r.nome::TEXT AS reservatorio_nome
+        FROM tbgasesembolhas t
+        JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+        JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+        JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+        LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+        WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+          AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+          AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+        ORDER BY datahora DESC
+        LIMIT %s
+        OFFSET %s
+    $SQL$, p_limit_param::text, p_offset_param::text);
+
+    RETURN QUERY EXECUTE sql USING p_rotulo, p_data_inicio, p_data_fim;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -854,33 +862,39 @@ RETURNS TABLE (
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
+DECLARE
+    sql TEXT;
 BEGIN
-    RETURN QUERY
-    SELECT
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.profundidade,
-        t.tempagua,
-        t.condutividade,
-        t.ph,
-        t._do,
-        t.tds,
-        t.redox,
-        t.turbidez,
-        s.nome::TEXT AS sitio_nome,
-        i.nome::TEXT AS instituicao_nome,
-        r.nome::TEXT AS reservatorio_nome
-    FROM tbhoriba t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY datahora DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
+    sql := format($SQL$
+        SELECT
+            (COALESCE(t.datamedida, c.datainicio))::timestamp AS datahora,
+            t.profundidade,
+            t.tempagua,
+            t.condutividade,
+            t.ph,
+            t._do,
+            t.tds,
+            t.redox,
+            t.turbidez,
+            s.nome::TEXT AS sitio_nome,
+            i.nome::TEXT AS instituicao_nome,
+            r.nome::TEXT AS reservatorio_nome
+        FROM tbhoriba t
+        JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+        JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+        JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+        LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+        WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+          AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+          AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+        ORDER BY datahora DESC
+        LIMIT %s OFFSET %s
+    $SQL$, p_limit_param::text, p_offset_param::text);
+
+    RETURN QUERY EXECUTE sql USING p_rotulo, p_data_inicio, p_data_fim;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -977,34 +991,40 @@ RETURNS TABLE (
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
+DECLARE
+    sql TEXT;
 BEGIN
-    RETURN QUERY
-    SELECT 
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.profundidade,
-        t.secchi,
-        t.tempagua,
-        t.condutividade,
-        t._do,
-        t.ph,
-        t.turbidez,
-        t.materialemsuspensao,
-        t.intensidadeluminosa,
-        s.nome AS sitio_nome,
-        i.nome AS instituicao_nome,
-        r.nome AS reservatorio_nome
-    FROM tbmedidacampocoluna t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
-    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
+    sql := format($SQL$
+        SELECT
+            (COALESCE(t.datamedida, c.datainicio))::timestamp AS datahora,
+            t.profundidade,
+            t.secchi,
+            t.tempagua,
+            t.condutividade,
+            t._do,
+            t.ph,
+            t.turbidez,
+            t.materialemsuspensao,
+            t.intensidadeluminosa,
+            s.nome::TEXT            AS sitio_nome,
+            i.nome::TEXT            AS instituicao_nome,
+            r.nome::TEXT            AS reservatorio_nome
+        FROM tbmedidacampocoluna t
+        JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+        JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+        JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+        LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+        WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+          AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+          AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+        ORDER BY 1 DESC
+        LIMIT %s OFFSET %s
+    $SQL$, p_limit_param::text, p_offset_param::text);
+
+    RETURN QUERY EXECUTE sql USING p_rotulo, p_data_inicio, p_data_fim;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -1031,32 +1051,38 @@ RETURNS TABLE (
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
+DECLARE
+    sql TEXT;
 BEGIN
-    RETURN QUERY
-    SELECT 
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.secchi,
-        t.tempagua,
-        t.condutividade,
-        t._do,
-        t.ph,
-        t.turbidez,
-        t.materialemsuspensao,
-        s.nome AS sitio_nome,
-        i.nome AS instituicao_nome,
-        r.nome AS reservatorio_nome
-    FROM tbmedidacamposuperficie t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
-    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
+    sql := format($SQL$
+        SELECT 
+            (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+            t.secchi,
+            t.tempagua,
+            t.condutividade,
+            t._do,
+            t.ph,
+            t.turbidez,
+            t.materialemsuspensao,
+            s.nome::TEXT            AS sitio_nome,
+            i.nome::TEXT            AS instituicao_nome,
+            r.nome::TEXT            AS reservatorio_nome
+        FROM tbmedidacamposuperficie t
+        JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+        JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+        JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+        LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+        WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+          AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+          AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+        ORDER BY datahora DESC
+        LIMIT %s OFFSET %s
+    $SQL$, p_limit_param::text, p_offset_param::text);
+
+    RETURN QUERY EXECUTE sql USING p_rotulo, p_data_inicio, p_data_fim;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -1070,7 +1096,7 @@ CREATE OR REPLACE FUNCTION buscar_nutrientessedimento(
     p_offset_param INT DEFAULT 0,
     p_limit_param INT DEFAULT 20
 )
-RETURNS TABLE (
+RETURNS TABLE(
     datahora TIMESTAMP,
     profundidade DOUBLE PRECISION,
     batimetria DOUBLE PRECISION,
@@ -1083,34 +1109,111 @@ RETURNS TABLE (
     sitio_nome TEXT,
     instituicao_nome TEXT,
     reservatorio_nome TEXT
-) AS $$
+)
+AS $$
+DECLARE
+    has_horamedida BOOLEAN;
+    pick TEXT;
+    sel_parts TEXT := '';
+    col TEXT;
+    candidates TEXT[];
+    chosen TEXT;
+    sql TEXT;
 BEGIN
-    RETURN QUERY
-    SELECT 
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.profundidade,
-        t.batimetria,
-        t.nh4,
-        t.no2,
-        t.no3,
-        t.po4,
-        t.ptotal,
-        t.ntotal,
-        s.nome AS sitio_nome,
-        i.nome AS instituicao_nome,
-        r.nome AS reservatorio_nome
-    FROM tbnutrientessedimento t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
-    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
+    -- Verifica se a coluna horamedida existe
+    SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'tbnutrientessedimento'
+          AND column_name = 'horamedida'
+    ) INTO has_horamedida;
+
+    -- Mapeamento dinâmico de colunas
+    FOR pick, candidates IN
+        SELECT * FROM (
+            VALUES
+                ('nh4', ARRAY['nh4']),
+                ('no2', ARRAY['no2', 'n2']),
+                ('no3', ARRAY['no3']),
+                ('po4', ARRAY['po4']),
+                ('ptotal', ARRAY['ptotal', 'pt']),
+                ('ntotal', ARRAY['ntotal', 'tc'])
+        ) AS t(pick, candidates)
+    LOOP
+        chosen := NULL;
+        FOREACH col IN ARRAY candidates LOOP
+            IF EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'tbnutrientessedimento'
+                  AND column_name = col
+            ) THEN
+                chosen := format('t.%I AS %I', col, pick);
+                EXIT;
+            END IF;
+        END LOOP;
+
+        IF chosen IS NULL THEN
+            chosen := format('NULL::double precision AS %I', pick);
+        END IF;
+
+        sel_parts := sel_parts || ',' || chosen;
+    END LOOP;
+
+    -- Monta o SELECT conforme a existência de horamedida
+    IF has_horamedida THEN
+        sql := format($SQL$
+            SELECT 
+                (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+                t.profundidade,
+                t.batimetria
+                %s,
+                s.nome::TEXT AS sitio_nome,
+                i.nome::TEXT AS instituicao_nome,
+                r.nome::TEXT AS reservatorio_nome
+            FROM tbnutrientessedimento t
+            JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+            JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+            JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+            LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+            WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+              AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+              AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+            ORDER BY datahora DESC
+            LIMIT %s
+            OFFSET %s
+        $SQL$, sel_parts, p_limit_param::text, p_offset_param::text);
+    ELSE
+        sql := format($SQL$
+            SELECT 
+                (COALESCE(t.datamedida, c.datainicio))::timestamp AS datahora,
+                t.profundidade,
+                t.batimetria
+                %s,
+                s.nome::TEXT AS sitio_nome,
+                i.nome::TEXT AS instituicao_nome,
+                r.nome::TEXT AS reservatorio_nome
+            FROM tbnutrientessedimento t
+            JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+            JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+            JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+            LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+            WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+              AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+              AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+            ORDER BY datahora DESC
+            LIMIT %s
+            OFFSET %s
+        $SQL$, sel_parts, p_limit_param::text, p_offset_param::text);
+    END IF;
+
+    RETURN QUERY EXECUTE sql
+        USING p_rotulo, p_data_inicio, p_data_fim;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -1118,8 +1221,6 @@ $$ LANGUAGE plpgsql;
 -- PARÂMETROS BIOLÓGICOS/FÍSICOS ÁGUA
 -- =========================
 CREATE OR REPLACE FUNCTION buscar_parametrosbiologicosfisicosagua(
-    p_instituicao_nome TEXT DEFAULT NULL,
-    p_idreservatorio integer DEFAULT NULL,
     p_rotulo TEXT DEFAULT NULL,
     p_data_inicio TIMESTAMP DEFAULT NULL,
     p_data_fim TIMESTAMP DEFAULT NULL,
@@ -1147,94 +1248,46 @@ RETURNS TABLE (
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
+DECLARE
+    sql TEXT;
 BEGIN
-    RETURN QUERY
-    SELECT (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp,
-           t.profundidade, t.secchi, t.tempagua, t.condutividade, t._do, t.ph, t.turbidez,
-           t.doc, t.toc, t.poc, t.dic, t.nt, t.pt, t.clorofilaA, t.producaofitoplanctonica,
-           s.nome, i.nome, r.nome
-    FROM tbparametrosbiologicosfisicosagua t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = COALESCE(t.idsitio, s.idsitio)
-    WHERE (p_instituicao_nome IS NULL OR i.nome ILIKE '%' || p_instituicao_nome || '%')
-      AND (p_idreservatorio IS NULL OR c.idreservatorio = p_idreservatorio)
-      AND (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
+    sql := format($SQL$
+        SELECT
+            (COALESCE(t.datamedida, c.datainicio))::timestamp AS datahora,
+            t.profundidade,
+            t.secchi,
+            t.tempagua,
+            t.condutividade,
+            t._do,
+            t.ph,
+            t.turbidez,
+            t.doc,
+            t.toc,
+            t.poc,
+            t.dic,
+            t.nt,
+            t.pt,
+            t.clorofilaa        AS clorofilaA,
+            t.producaofitoplanctonica,
+            s.nome::TEXT       AS sitio_nome,
+            i.nome::TEXT       AS instituicao_nome,
+            r.nome::TEXT       AS reservatorio_nome
+        FROM tbparametrosbiologicosfisicosagua t
+        JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+        JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+        JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+        LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+        WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+          AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+          AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+        ORDER BY datahora DESC
+        LIMIT %s
+        OFFSET %s
+    $SQL$, p_limit_param::text, p_offset_param::text);
+
+    RETURN QUERY EXECUTE sql USING p_rotulo, p_data_inicio, p_data_fim;
 END;
 $$ LANGUAGE plpgsql;
-
-
--- =========================
--- PFQ
--- =========================
-CREATE OR REPLACE FUNCTION buscar_parametrosbiologicosfisicosagua(
-    p_rotulo TEXT DEFAULT NULL,
-    p_data_inicio TIMESTAMP DEFAULT NULL,
-    p_data_fim TIMESTAMP DEFAULT NULL,
-    p_offset_param INT DEFAULT 0,
-    p_limit_param INT DEFAULT 20
-)
-RETURNS TABLE (
-    datahora TIMESTAMP,
-    profundidade DOUBLE PRECISION,
-    secchi DOUBLE PRECISION,
-    tempagua DOUBLE PRECISION,
-    condutividade DOUBLE PRECISION,
-    _do DOUBLE PRECISION,
-    ph DOUBLE PRECISION,
-    turbidez DOUBLE PRECISION,
-    doc DOUBLE PRECISION,
-    toc DOUBLE PRECISION,
-    poc DOUBLE PRECISION,
-    dic DOUBLE PRECISION,
-    nt DOUBLE PRECISION,
-    pt DOUBLE PRECISION,
-    clorofilaA DOUBLE PRECISION,
-    producaofitoplanctonica DOUBLE PRECISION,
-    sitio_nome TEXT,
-    instituicao_nome TEXT,
-    reservatorio_nome TEXT
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.profundidade,
-        t.secchi,
-        t.tempagua,
-        t.condutividade,
-        t._do,
-        t.ph,
-        t.turbidez,
-        t.doc,
-        t.toc,
-        t.poc,
-        t.dic,
-        t.nt,
-        t.pt,
-        t.clorofilaA,
-        t.producaofitoplanctonica,
-        s.nome AS sitio_nome,
-        i.nome AS instituicao_nome,
-        r.nome AS reservatorio_nome
-    FROM tbparametrosbiologicosfisicosagua t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
-    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
-END;
-$$ LANGUAGE plpgsql;
-
 
 
 -- =========================
@@ -1255,27 +1308,33 @@ RETURNS TABLE (
     instituicao_nome TEXT,
     reservatorio_nome TEXT
 ) AS $$
+DECLARE
+    sql TEXT;
 BEGIN
-    RETURN QUERY
-    SELECT 
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
-        t.profundidade,
-        t.tc,
-        s.nome AS sitio_nome,
-        i.nome AS instituicao_nome,
-        r.nome AS reservatorio_nome
-    FROM tbtc t
-    JOIN tbcampanha c ON t.idcampanha = c.idcampanha
-    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
-    LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
-    WHERE (p_rotulo IS NULL OR s.nome ILIKE '%' || p_rotulo || '%')
-      AND (p_data_inicio IS NULL OR COALESCE(t.datamedida, c.datainicio) >= p_data_inicio)
-      AND (p_data_fim IS NULL OR COALESCE(t.datamedida, c.datainicio) <= p_data_fim)
-    ORDER BY 1 DESC
-    OFFSET p_offset_param LIMIT p_limit_param;
+    sql := format($SQL$
+        SELECT 
+            (COALESCE(t.datamedida, c.datainicio))::timestamp AS datahora,
+            t.profundidade::text AS profundidade, -- 🔹 cast explícito corrigindo o erro
+            t.tc,
+            s.nome::text            AS sitio_nome,
+            i.nome::text            AS instituicao_nome,
+            r.nome::text            AS reservatorio_nome
+        FROM tbtc t
+        JOIN tbcampanha c ON t.idcampanha = c.idcampanha
+        JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+        JOIN tbreservatorio r ON c.idreservatorio = r.idreservatorio
+        LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
+        WHERE ($1 IS NULL OR s.nome ILIKE '%%' || $1 || '%%')
+          AND ($2 IS NULL OR COALESCE(t.datamedida, c.datainicio) >= $2)
+          AND ($3 IS NULL OR COALESCE(t.datamedida, c.datainicio) <= $3)
+        ORDER BY 1 DESC
+        LIMIT %s OFFSET %s
+    $SQL$, p_limit_param::text, p_offset_param::text);
+
+    RETURN QUERY EXECUTE sql USING p_rotulo, p_data_inicio, p_data_fim;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 
@@ -1339,9 +1398,9 @@ BEGIN
         t.nt,
         t.pt,
         t.tdc,
-        s.nome AS sitio_nome,
-        i.nome AS instituicao_nome,
-        r.nome AS reservatorio_nome
+        s.nome::TEXT AS sitio_nome,         -- cast para TEXT
+        i.nome::TEXT AS instituicao_nome,   -- cast para TEXT
+        r.nome::TEXT AS reservatorio_nome    -- cast para TEXT
     FROM tbvariaveisfisicasquimicasdaagua t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
@@ -1354,6 +1413,7 @@ BEGIN
     OFFSET p_offset_param LIMIT p_limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- ==================================================================

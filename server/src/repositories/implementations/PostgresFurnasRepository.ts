@@ -68,6 +68,33 @@ export class PostgresFurnasRepository implements IFurnasRepository {
       concentracaogasagua: "buscar_concentracaogasagua",
       fluxoDifusivo: "buscar_fluxodifusivo",
       fluxoCarbono: "buscar_fluxocarbono",
+      abioticocoluna: "buscar_abioticocoluna",
+      abioticosuperficie: "buscar_abioticosuperficie",
+      bioticocoluna: "buscar_bioticocoluna",
+      bioticosuperficie: "buscar_bioticosuperficie",
+      bolhas: "buscar_bolhas",
+      camarasolo: "buscar_camarasolo",
+      carbono: "buscar_carbono",
+      concentracaogassedimento: "buscar_concentracaogassedimento",
+      difusao: "buscar_difusao",
+      dupladessorcaoagua: "buscar_dupladessorcaoagua",
+      fluxobolhasinpe: "buscar_fluxobolhasinpe",
+      fluxodifusivoinpe: "buscar_fluxodifusivoinpe",
+      ionsnaaguaintersticialdosedimento: "buscar_ionsnaaguaintersticialdosedimento",
+      gasesembolhas: "buscar_gasesembolhas",
+      horiba: "buscar_horiba",
+      medidacampocoluna: "buscar_medidacampocoluna",
+      medidacamposuperficie: "buscar_medidacamposuperficie",
+      tc: "buscar_tc",
+      
+
+
+
+
+
+
+
+
     };
     const procedure = procedureMap[params.tipoDado];
     if (!procedure) throw new Error("Tipo de dado não suportado");
