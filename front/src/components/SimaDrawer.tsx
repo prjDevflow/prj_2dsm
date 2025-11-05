@@ -73,7 +73,7 @@ const SimaDrawer: React.FC<Props> = ({
                   selectedPointId={selectedPonto?.id ?? null} // mantém compatibilidade
                   range={range}
                   initialPage={1}
-                  initialLimit={20}
+                  initialLimit={10}
                 />
               </div>
             </div>
