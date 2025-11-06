@@ -5,8 +5,8 @@ import type { PontoColeta } from "@/types/ponto";
 
 export const FurnasMapPage = () => {
   const { instituicao } = useParams<{ instituicao: string }>();
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
-  const [selectedPonto, setSelectedPonto] = useState<PontoColeta | null>(null);
+  const [, setIsDrawerOpen] = useState<boolean>(false);
+  const [, setSelectedPonto] = useState<PontoColeta | null>(null);
 
   const handleMarkerClick = useCallback((ponto: PontoColeta) => {
     setSelectedPonto({

@@ -8,7 +8,7 @@
 }
 .leaflet-container {
   z-index: 0 !important; /* coloca o mapa por baixo */
-  position: relative;    /* garante posicionamento */
+  position: relative; /* garante posicionamento */
 }
 body {
   margin: 0;

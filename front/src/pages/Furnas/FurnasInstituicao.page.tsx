@@ -2,10 +2,10 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-import imgINPE from "/public/instituicoes/logo_inpe.png"
-import imgIIE from "/public/instituicoes/logo_iie.png"
-import imgUFJF from "/public/instituicoes/logo_ufjf.png"
-import imgUFRJ from "/public/instituicoes/logo_ufrj.png"
+import imgINPE from "/public/instituicoes/logo_inpe.png";
+import imgIIE from "/public/instituicoes/logo_iie.png";
+import imgUFJF from "/public/instituicoes/logo_ufjf.png";
+import imgUFRJ from "/public/instituicoes/logo_ufrj.png";
 
 const Page = styled.div`
   height: 100%;
@@ -68,7 +68,7 @@ const CardLink = styled(Link)`
   transition:
     transform 340ms ease-in-out,
     box-shadow 340ms ease-in-out;
-    
+
   &:hover,
   &:focus {
     transform: translateY(-4px);

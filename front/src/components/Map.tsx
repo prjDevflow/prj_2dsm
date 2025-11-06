@@ -24,7 +24,9 @@ export default function Map({ onMarkerClick, filters, type, instituicao }: Props
   const filterSet = new Set((filters?.points ?? []).map((x) => String(x)));
   const visibleData = (data ?? []).filter((ponto: any) => {
     if (!filters?.points || filters.points.length === 0) return true;
-    const id = String(ponto.id ?? ponto._id ?? ponto.rotulo ?? ponto.nome ??ponto.instituicao + ponto.reservatorio);
+    const id = String(
+      ponto.id ?? ponto._id ?? ponto.rotulo ?? ponto.nome ?? ponto.instituicao + ponto.reservatorio,
+    );
     return filterSet.has(id);
   });
 
@@ -49,13 +51,13 @@ export default function Map({ onMarkerClick, filters, type, instituicao }: Props
             position={[ponto.latitude, ponto.longitude] as LatLngExpression}
             eventHandlers={{
               click: () => {
-                  onMarkerClick?.({
-                    id: ponto.rotulo ?? ponto.id,
-                    latitude: ponto.latitude,
-                    longitude: ponto.longitude,
-                    rotulo: ponto.rotulo,
-                  } as PontoColeta);
-                },
+                onMarkerClick?.({
+                  id: ponto.rotulo ?? ponto.id,
+                  latitude: ponto.latitude,
+                  longitude: ponto.longitude,
+                  rotulo: ponto.rotulo,
+                } as PontoColeta);
+              },
             }}
           >
             <Tooltip direction="top" offset={[0, -10]} opacity={1} permanent={false}>

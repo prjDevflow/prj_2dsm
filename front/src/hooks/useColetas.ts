@@ -7,7 +7,7 @@ const fetchColetas = async (type: "sima" | "balcar" | "furnas", instituicao?: st
     params: { type, instituicao },
   });
 
-  console.log(response)
+  console.log(response);
 
   // Normaliza os dados, garantindo que todos tenham key única
   const normalizedData = response.data.markers.map((ponto: any, i: number) => ({
@@ -19,7 +19,5 @@ const fetchColetas = async (type: "sima" | "balcar" | "furnas", instituicao?: st
 };
 
 export const useColetas = (type: "sima" | "balcar" | "furnas", instituicao?: string) => {
-  return useQuery(["get-coordinates", type, instituicao], () =>
-    fetchColetas(type, instituicao)
-  );
+  return useQuery(["get-coordinates", type, instituicao], () => fetchColetas(type, instituicao));
 };
