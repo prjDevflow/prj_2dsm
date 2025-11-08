@@ -10,8 +10,7 @@ export const furnasPool = new Pool({
   database: process.env.DB_FURNAS_NAME,
   port: Number(process.env.DB_FURNAS_PORT),
   ssl: {
-    require: true,
-    rejectUnauthorized: false, // Render exige SSL, mas sem certificado custom
+    rejectUnauthorized: false, // Render exige SSL, mas não requer certificado
   },
 });
 
