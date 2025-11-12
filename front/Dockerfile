@@ -1,16 +1,20 @@
-# Etapa única para desenvolvimento
-FROM node:22-alpine
+# Etapa 1: build
+FROM node:22-alpine AS build
 
-# diretório de trabalho
 WORKDIR /usr/src/app
-
-# copiar package.json e package-lock.json para instalar dependências
 COPY package*.json ./
-
-# instala.r dependências
 RUN npm install
+COPY . .
+RUN npm run build
 
-# expor a porta do Vite
-EXPOSE 5173
+# Etapa 2: servidor nginx
+FROM nginx:alpine
 
-# O comando final é definido no docker-compose (npm run dev -- --host)
+# Copiar build do React para a pasta padrão do nginx
+COPY --from=build /usr/src/app/dist /usr/share/nginx/html
+
+# Expor a porta padrão do nginx
+EXPOSE 80
+
+# Rodar nginx
+CMD ["nginx", "-g", "daemon off;"]

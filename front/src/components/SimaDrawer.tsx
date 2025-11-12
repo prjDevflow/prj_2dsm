@@ -32,13 +32,7 @@ type Props = {
   setRange: (r: Range) => void;
 };
 
-const SimaDrawer: React.FC<Props> = ({
-  open,
-  onOpenChange,
-  selectedPonto,
-  range,
-  setRange,
-}) => {
+const SimaDrawer: React.FC<Props> = ({ open, onOpenChange, selectedPonto, range, setRange }) => {
   // debug rápido: mostra quando o drawer abre e o ponto atual
   React.useEffect(() => {
     if (open) {
@@ -52,7 +46,10 @@ const SimaDrawer: React.FC<Props> = ({
         <DrawerHeader>
           <DrawerTitle className="space-y-4">
             <span className="block text-lg font-semibold">
-              Tabela de Dados{selectedPonto ? ` - ${selectedPonto.name ?? selectedPonto.rotulo ?? selectedPonto.id}` : ""}
+              Tabela de Dados
+              {selectedPonto
+                ? ` - ${selectedPonto.name ?? selectedPonto.rotulo ?? selectedPonto.id}`
+                : ""}
             </span>
 
             <div className="mt-4 p-2 border rounded-md bg-white">

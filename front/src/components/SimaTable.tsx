@@ -38,7 +38,10 @@ const calcMinWidth = (nCols: number) => Math.max(900, nCols * 140);
 const isRecordArray = (v: unknown): v is Record<string, unknown>[] =>
   Array.isArray(v) && (v.length === 0 || typeof v[0] === "object");
 
-function normalizePayload(payload: unknown): { online: Record<string, unknown>[]; offline: Record<string, unknown>[] } {
+function normalizePayload(payload: unknown): {
+  online: Record<string, unknown>[];
+  offline: Record<string, unknown>[];
+} {
   const online: Record<string, unknown>[] = [];
   const offline: Record<string, unknown>[] = [];
 
@@ -133,11 +136,27 @@ function extractTotals(payload: unknown): {
 
   const total = candidates.map(pickNumber).find((v) => v !== undefined);
 
-  const totalOnline = pickNumber(obj.online_total ?? obj.total_online ?? obj.onlineTotal ?? obj.meta?.online_total ?? obj.data?.online_total);
-  const totalOffline = pickNumber(obj.offline_total ?? obj.total_offline ?? obj.offlineTotal ?? obj.meta?.offline_total ?? obj.data?.offline_total);
+  const totalOnline = pickNumber(
+    obj.online_total ??
+      obj.total_online ??
+      obj.onlineTotal ??
+      obj.meta?.online_total ??
+      obj.data?.online_total,
+  );
+  const totalOffline = pickNumber(
+    obj.offline_total ??
+      obj.total_offline ??
+      obj.offlineTotal ??
+      obj.meta?.offline_total ??
+      obj.data?.offline_total,
+  );
 
-  const fallbackOnline = pickNumber(obj.data?.counts?.online ?? obj.data?.counts?.sima ?? obj.data?.counts?.total_online);
-  const fallbackOffline = pickNumber(obj.data?.counts?.offline ?? obj.data?.counts?.sima_offline ?? obj.data?.counts?.total_offline);
+  const fallbackOnline = pickNumber(
+    obj.data?.counts?.online ?? obj.data?.counts?.sima ?? obj.data?.counts?.total_online,
+  );
+  const fallbackOffline = pickNumber(
+    obj.data?.counts?.offline ?? obj.data?.counts?.sima_offline ?? obj.data?.counts?.total_offline,
+  );
 
   return {
     total: total ?? pickNumber(obj.data?.registers_total) ?? undefined,
@@ -199,11 +218,11 @@ export default function SimaTable({
       .map((r) =>
         String(
           r.idsima ??
-          r.idsimaoffline ??
-          r.idestacao ??
-          r.rotulo ??
-          (typeof r === "object" ? JSON.stringify(r).slice(0, 60) : String(r))
-        )
+            r.idsimaoffline ??
+            r.idestacao ??
+            r.rotulo ??
+            (typeof r === "object" ? JSON.stringify(r).slice(0, 60) : String(r)),
+        ),
       )
       .join("|");
   }
@@ -224,16 +243,30 @@ export default function SimaTable({
 
     function derivePathSegment(): { segment?: string; reason?: string } {
       if (selectedPoint) {
-        const rotulo = (selectedPoint["rotulo"] ?? selectedPoint["nome_estacao"] ?? selectedPoint["nome"] ?? selectedPoint["name"]) as
-          | string
-          | undefined;
-        const maybeIdest = selectedPoint["idestacao"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
-        const preferIdest = maybeIdest !== undefined && maybeIdest !== null && (typeof maybeIdest === "number" || /^\d+$/.test(String(maybeIdest)));
+        const rotulo = (selectedPoint["rotulo"] ??
+          selectedPoint["nome_estacao"] ??
+          selectedPoint["nome"] ??
+          selectedPoint["name"]) as string | undefined;
+        const maybeIdest =
+          selectedPoint["idestacao"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
+        const preferIdest =
+          maybeIdest !== undefined &&
+          maybeIdest !== null &&
+          (typeof maybeIdest === "number" || /^\d+$/.test(String(maybeIdest)));
 
-        const reserva = selectedPoint["reservatorio"] ?? selectedPoint["reservatorio_nome"] ?? selectedPoint["reservatorioName"];
-        const instituicao = selectedPoint["instituicao"] ?? selectedPoint["instituicao_nome"] ?? selectedPoint["instituicaoName"];
+        const reserva =
+          selectedPoint["reservatorio"] ??
+          selectedPoint["reservatorio_nome"] ??
+          selectedPoint["reservatorioName"];
+        const instituicao =
+          selectedPoint["instituicao"] ??
+          selectedPoint["instituicao_nome"] ??
+          selectedPoint["instituicaoName"];
         if (reserva && instituicao) {
-          return { segment: `${instituicao}-${reserva}`, reason: "instituicao_reservatorio_compose" };
+          return {
+            segment: `${instituicao}-${reserva}`,
+            reason: "instituicao_reservatorio_compose",
+          };
         }
 
         if (rotulo && String(rotulo).trim().length > 0) {
@@ -244,7 +277,8 @@ export default function SimaTable({
           return { segment: String(maybeIdest), reason: "idestacao_from_object" };
         }
 
-        const fallbackId = selectedPoint["idHexadecimal"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
+        const fallbackId =
+          selectedPoint["idHexadecimal"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
         if (fallbackId !== undefined && fallbackId !== null && String(fallbackId).trim() !== "") {
           return { segment: String(fallbackId), reason: "fallback_id_from_object" };
         }
@@ -256,7 +290,11 @@ export default function SimaTable({
         return { segment: String(selectedPointName).trim(), reason: "rotulo_from_name_prop" };
       }
 
-      if (selectedPointId !== null && selectedPointId !== undefined && String(selectedPointId).trim() !== "") {
+      if (
+        selectedPointId !== null &&
+        selectedPointId !== undefined &&
+        String(selectedPointId).trim() !== ""
+      ) {
         return { segment: String(selectedPointId), reason: "id_from_id_prop" };
       }
 
@@ -289,7 +327,12 @@ export default function SimaTable({
         const totals = extractTotals(payload);
         setTotalOnline(totals.totalOnline);
         setTotalOffline(totals.totalOffline);
-        setTotalCombined(totals.total ?? (totals.totalOnline && totals.totalOffline ? totals.totalOnline + totals.totalOffline : undefined));
+        setTotalCombined(
+          totals.total ??
+            (totals.totalOnline && totals.totalOffline
+              ? totals.totalOnline + totals.totalOffline
+              : undefined),
+        );
 
         // se é a página 1, grava assinatura para detectar backend que ignora page
         if (page === 1) {
@@ -311,7 +354,8 @@ export default function SimaTable({
 
           try {
             const payloadOffset = await tryFetchJSON(urlOffset, signal);
-            const { online: onlineOffset, offline: offlineOffset } = normalizePayload(payloadOffset);
+            const { online: onlineOffset, offline: offlineOffset } =
+              normalizePayload(payloadOffset);
             const sigOffset = signatureOf(onlineOffset as SimaRecord[]);
 
             // offset funcionou se assinatura for diferente
@@ -331,7 +375,9 @@ export default function SimaTable({
           // offset também não funcionou -> só baixa tudo se total conhecido e pequeno
           const knownTotal = totals.total ?? totals.totalOnline ?? totals.totalOffline;
           if (knownTotal !== undefined && knownTotal <= MAX_CLIENT_FETCH) {
-            console.info(`[SimaTable] baixando todos os ${knownTotal} registros (<= ${MAX_CLIENT_FETCH}) e aplicando paginação client-side`);
+            console.info(
+              `[SimaTable] baixando todos os ${knownTotal} registros (<= ${MAX_CLIENT_FETCH}) e aplicando paginação client-side`,
+            );
 
             // fetch completo (sem page/limit)
             const paramsFull = new URLSearchParams();
@@ -359,7 +405,7 @@ export default function SimaTable({
 
           // se não sabemos o total ou é grande demais -> abortamos e informamos
           throw new Error(
-            "Backend não está paginando corretamente e o total é desconhecido/grande. Ajuste a API para suportar page+limit ou offset+limit, ou retorne o 'total' no payload."
+            "Backend não está paginando corretamente e o total é desconhecido/grande. Ajuste a API para suportar page+limit ou offset+limit, ou retorne o 'total' no payload.",
           );
         }
 
@@ -367,7 +413,12 @@ export default function SimaTable({
         setDisplayOnline(maybeOnline as SimaRecord[]);
         setDisplayOffline(maybeOffline as SimaRecord[]);
       } catch (err: unknown) {
-        if (typeof err === "object" && err !== null && "name" in err && (err as any).name === "AbortError") {
+        if (
+          typeof err === "object" &&
+          err !== null &&
+          "name" in err &&
+          (err as any).name === "AbortError"
+        ) {
           console.debug("[SimaTable] fetch aborted");
         } else {
           console.error("[SimaTable] fetch error", err);
@@ -387,7 +438,7 @@ export default function SimaTable({
       setDisplayOffline((rawOffline ?? []).slice(off, off + limit));
       setLoading(false);
     } else {
-      const { segment, reason } = derivePathSegment();
+      const { segment } = derivePathSegment();
       if (!segment) {
         setDisplayOnline([]);
         setDisplayOffline([]);
@@ -402,7 +453,16 @@ export default function SimaTable({
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPoint, selectedPointName, selectedPointId, range?.start, range?.end, page, limit, apiBase]);
+  }, [
+    selectedPoint,
+    selectedPointName,
+    selectedPointId,
+    range?.start,
+    range?.end,
+    page,
+    limit,
+    apiBase,
+  ]);
 
   function exportCSV(which: "online" | "offline") {
     const data = which === "online" ? displayOnline : displayOffline;
@@ -414,10 +474,12 @@ export default function SimaTable({
         keys.map((k) => {
           const v = (row as Record<string, unknown>)[k];
           return v === undefined || v === null ? "" : String(v);
-        })
-      )
+        }),
+      ),
     );
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csv = rows
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -435,7 +497,10 @@ export default function SimaTable({
       <style>body{font-family:system-ui;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:6px 8px;white-space:nowrap}th{background:#f3f4f6}</style></head><body>`;
     html += `<h3>SIMA ${which}</h3><table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
     data.forEach((row) => {
-      html += "<tr>" + keys.map((k) => `<td>${renderValue((row as Record<string, unknown>)[k])}</td>`).join("") + "</tr>";
+      html +=
+        "<tr>" +
+        keys.map((k) => `<td>${renderValue((row as Record<string, unknown>)[k])}</td>`).join("") +
+        "</tr>";
     });
     html += "</tbody></table></body></html>";
     const w = window.open("", "_blank");
@@ -466,10 +531,15 @@ export default function SimaTable({
   const rowClass = (idx: number) => `group ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} text-sm`;
 
   // pagination helpers
-  const currentCount = view === "online" ? displayOnline.length : view === "offline" ? displayOffline.length : displayOnline.length + displayOffline.length;
+  const currentCount =
+    view === "online"
+      ? displayOnline.length
+      : view === "offline"
+        ? displayOffline.length
+        : displayOnline.length + displayOffline.length;
 
-  const knownTotalForView = view === "online" ? totalOnline : view === "offline" ? totalOffline : totalCombined;
-  const rawTotalForView = view === "online" ? (rawOnline ?? displayOnline).length : view === "offline" ? (rawOffline ?? displayOffline).length : (rawOnline ?? displayOnline).length + (rawOffline ?? displayOffline).length;
+  const knownTotalForView =
+    view === "online" ? totalOnline : view === "offline" ? totalOffline : totalCombined;
 
   // número de itens efetivamente retornados para a *página atual*
   const pageItemCount =
@@ -487,7 +557,6 @@ export default function SimaTable({
   // total de páginas só quando soubermos o total
   const totalPagesForView =
     knownTotalForView !== undefined ? Math.max(1, Math.ceil(knownTotalForView / limit)) : undefined;
-
 
   // Handlers de paginação (usam limites seguros)
   const handlePrev = () => {
@@ -511,13 +580,22 @@ export default function SimaTable({
 
         <div className="flex items-center gap-3">
           <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">
-            <button onClick={() => setView("online")} className={`px-3 py-2 border-none ${view === "online" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}>
+            <button
+              onClick={() => setView("online")}
+              className={`px-3 py-2 border-none ${view === "online" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
+            >
               Online
             </button>
-            <button onClick={() => setView("offline")} className={`px-3 py-2 border-none ${view === "offline" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}>
+            <button
+              onClick={() => setView("offline")}
+              className={`px-3 py-2 border-none ${view === "offline" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
+            >
               Offline
             </button>
-            <button onClick={() => setView("ambos")} className={`px-3 py-2 border-none ${view === "ambos" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}>
+            <button
+              onClick={() => setView("ambos")}
+              className={`px-3 py-2 border-none ${view === "ambos" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
+            >
               Ambos
             </button>
           </div>
@@ -525,14 +603,34 @@ export default function SimaTable({
           <div className="inline-flex gap-2 flex-wrap">
             {(view === "online" || view === "ambos") && (
               <>
-                <button onClick={() => exportCSV("online")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar Online CSV</button>
-                <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir Online</button>
+                <button
+                  onClick={() => exportCSV("online")}
+                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Exportar Online CSV
+                </button>
+                <button
+                  onClick={() => openTableInNewTab("online")}
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Abrir Online
+                </button>
               </>
             )}
             {(view === "offline" || view === "ambos") && (
               <>
-                <button onClick={() => exportCSV("offline")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar Offline CSV</button>
-                <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir Offline</button>
+                <button
+                  onClick={() => exportCSV("offline")}
+                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Exportar Offline CSV
+                </button>
+                <button
+                  onClick={() => openTableInNewTab("offline")}
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Abrir Offline
+                </button>
               </>
             )}
           </div>
@@ -542,11 +640,22 @@ export default function SimaTable({
       {loading && <p>Carregando...</p>}
       {error && <p className="text-red-600">{error}</p>}
 
-      <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "calc(100vh - 200px)", border: "1px solid #ddd", borderRadius: 6, paddingBottom: 16 }}>
+      <div
+        style={{
+          overflowX: "auto",
+          overflowY: "auto",
+          maxHeight: "calc(100vh - 200px)",
+          border: "1px solid #ddd",
+          borderRadius: 6,
+          paddingBottom: 16,
+        }}
+      >
         {(view === "online" || view === "ambos") && displayOnline.length > 0 && (
           <div style={{ minWidth: calcMinWidth(Object.keys(displayOnline[0]).length) }}>
             <Table>
-              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>Online</TableCaption>
+              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                Online
+              </TableCaption>
               <TableHeader>
                 <TableRow>{renderHeaderCells(displayOnline[0])}</TableRow>
               </TableHeader>
@@ -554,7 +663,16 @@ export default function SimaTable({
                 {displayOnline.map((row, rIdx) => (
                   <TableRow key={String(row.idsima ?? rIdx)} className={rowClass(rIdx)}>
                     {Object.values(row).map((value, idx) => (
-                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>{renderValue(value)}</TableCell>
+                      <TableCell
+                        key={idx}
+                        style={{
+                          padding: "8px 10px",
+                          whiteSpace: "nowrap",
+                          borderTop: "1px solid #eee",
+                        }}
+                      >
+                        {renderValue(value)}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -564,9 +682,13 @@ export default function SimaTable({
         )}
 
         {(view === "offline" || view === "ambos") && displayOffline.length > 0 && (
-          <div style={{ minWidth: calcMinWidth(Object.keys(displayOffline[0]).length), marginTop: 20 }}>
+          <div
+            style={{ minWidth: calcMinWidth(Object.keys(displayOffline[0]).length), marginTop: 20 }}
+          >
             <Table>
-              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>Offline</TableCaption>
+              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                Offline
+              </TableCaption>
               <TableHeader>
                 <TableRow>{renderHeaderCells(displayOffline[0])}</TableRow>
               </TableHeader>
@@ -574,7 +696,16 @@ export default function SimaTable({
                 {displayOffline.map((row, rIdx) => (
                   <TableRow key={String(row.idsimaoffline ?? rIdx)} className={rowClass(rIdx)}>
                     {Object.values(row).map((value, idx) => (
-                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>{renderValue(value)}</TableCell>
+                      <TableCell
+                        key={idx}
+                        style={{
+                          padding: "8px 10px",
+                          whiteSpace: "nowrap",
+                          borderTop: "1px solid #eee",
+                        }}
+                      >
+                        {renderValue(value)}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -587,7 +718,8 @@ export default function SimaTable({
       <div className="mt-2 flex items-center justify-between">
         <div>
           Página {page}
-          {totalPagesForView !== undefined ? ` de ${totalPagesForView}` : ""} — {currentCount} itens mostrados
+          {totalPagesForView !== undefined ? ` de ${totalPagesForView}` : ""} — {currentCount} itens
+          mostrados
           {totalCombined !== undefined && view === "ambos" ? ` — total: ${totalCombined}` : ""}
           {view === "online" && totalOnline !== undefined ? ` — total: ${totalOnline}` : ""}
           {view === "offline" && totalOffline !== undefined ? ` — total: ${totalOffline}` : ""}
@@ -595,9 +727,13 @@ export default function SimaTable({
         </div>
 
         <div className="space-x-2 flex items-center">
-          <button disabled={page <= 1} onClick={handlePrev} className="px-3 py-1 border rounded">Anterior</button>
+          <button disabled={page <= 1} onClick={handlePrev} className="px-3 py-1 border rounded">
+            Anterior
+          </button>
 
-          <button disabled={!hasNext} onClick={handleNext} className="px-3 py-1 border rounded">Próxima</button>
+          <button disabled={!hasNext} onClick={handleNext} className="px-3 py-1 border rounded">
+            Próxima
+          </button>
 
           <div className="inline-flex items-center gap-2">
             <label className="text-sm">Ir p/ página:</label>
