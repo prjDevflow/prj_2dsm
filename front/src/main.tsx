@@ -10,6 +10,7 @@ import SimaPage from "./pages/SimaPage";
 import BalcarPage from "./pages/BalcarPage";
 import InstituicaoPage from "./pages/Furnas/FurnasInstituicao.page";
 import { FurnasMapPage } from "@/pages/Furnas/furnasMap.page";
+import AboutPage from "./pages/AboutPage";
 
 import theme from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";
@@ -26,7 +27,8 @@ const routes = createBrowserRouter([
       { path: "sima", element: <SimaPage /> },
       { path: "balcar", element: <BalcarPage /> },
       { path: "furnas", element: <InstituicaoPage /> },
-      { path: "furnas/:instituicao", element: <FurnasMapPage /> }, // <--- aqui
+      { path: "furnas/:instituicao", element: <FurnasMapPage /> },
+      { path: "sobre", element: <AboutPage /> }, // <- rota adicionada
     ],
   },
 ]);
