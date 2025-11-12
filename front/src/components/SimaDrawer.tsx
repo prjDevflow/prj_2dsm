@@ -4,7 +4,6 @@ import SimaTable from "@/components/SimaTable";
 
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
@@ -86,9 +85,6 @@ const SimaDrawer: React.FC<Props> = ({ open, onOpenChange, selectedPonto, range,
           >
             Ok
           </Button>
-          <DrawerClose>
-            <Button variant="outline">Cancelar</Button>
-          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

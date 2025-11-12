@@ -1,4 +1,5 @@
-import { Outlet } from "react-router-dom";
+// src/AppLayout.tsx (ou src/pages/AppLayout.tsx conforme seu projeto)
+import { Outlet, useLocation, matchPath } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import GlobalStyle from "./styles/GlobalStyle";
 
@@ -9,6 +10,11 @@ import Footer from "./components/Footer";
 import theme from "./styles/theme";
 
 const AppLayout = () => {
+  const location = useLocation();
+
+  // Ajuste aqui a rota da landing, se for diferente de "/"
+  const isLanding = matchPath({ path: "/", end: true }, location.pathname) !== null;
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -28,7 +34,8 @@ const AppLayout = () => {
           <Outlet />
         </main>
 
-        <Footer />
+        {/* Footer aparece somente na landing page */}
+        {isLanding && <Footer />}
       </div>
     </ThemeProvider>
   );

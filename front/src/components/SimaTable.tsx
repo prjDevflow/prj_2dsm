@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Table,
   TableBody,
@@ -183,10 +183,16 @@ export default function SimaTable({
   const [rawOffline, setRawOffline] = useState<SimaRecord[] | null>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [view, setView] = useState<"online" | "offline" | "ambos">("online");
+  const [view] = useState<"online" | "offline" | "ambos">("online");
   const [error, setError] = useState<string | null>(null);
 
   const [page, setPage] = useState<number>(initialPage ?? 1);
+  const [pageInput, setPageInput] = useState<string>(String(page));
+
+  useEffect(() => {
+  setPageInput(String(page));
+}, [page]);
+
   const [limit] = useState<number>(initialLimit ?? 100);
 
   const [totalOnline, setTotalOnline] = useState<number | undefined>(undefined);
@@ -201,6 +207,12 @@ export default function SimaTable({
   // flag indicando que estamos em paginação client-side (após fetch completo seguro)
   const useClientPaginationRef = useRef<boolean>(false);
 
+  // --- column visibility UI ---
+  const [availableColumns, setAvailableColumns] = useState<string[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<Record<string, boolean>>({});
+  const [tempSelectedColumns, setTempSelectedColumns] = useState<Record<string, boolean>>({});
+  const [columnsOpen, setColumnsOpen] = useState(false);
+
   // reset page and client-pagination when changing point or range
   useEffect(() => {
     setPage(1);
@@ -209,6 +221,58 @@ export default function SimaTable({
     setRawOffline(null);
     prevSignatureRef.current = null;
   }, [selectedPoint, selectedPointId, selectedPointName, range?.start, range?.end]);
+
+  // quando os dados chegam, monta a lista de colunas disponíveis (união online+offline)
+  useEffect(() => {
+    const union = new Set<string>();
+    if (displayOnline && displayOnline.length > 0) {
+      Object.keys(displayOnline[0]).forEach((k) => union.add(k));
+    }
+    if (displayOffline && displayOffline.length > 0) {
+      Object.keys(displayOffline[0]).forEach((k) => union.add(k));
+    }
+    const cols = Array.from(union);
+    setAvailableColumns(cols);
+
+    // se o usuário ainda não escolheu colunas explicitamente, selecionar todas por padrão
+    if (Object.keys(selectedColumns).length === 0 && cols.length > 0) {
+      const all = Object.fromEntries(cols.map((c) => [c, true]));
+      setSelectedColumns(all);
+    }
+    // também atualiza tempSelectedColumns quando não houver seleção temporária
+    if (Object.keys(tempSelectedColumns).length === 0 && Object.keys(selectedColumns).length > 0) {
+      setTempSelectedColumns({ ...selectedColumns });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayOnline, displayOffline]);
+
+  // quando o dropdown abre, inicializa a cópia temporária com a seleção atual
+  useEffect(() => {
+    if (columnsOpen) {
+      // se ainda não há selectedColumns (primeira carga), cria padrão
+      if (Object.keys(selectedColumns).length === 0 && availableColumns.length > 0) {
+        const all = Object.fromEntries(availableColumns.map((c) => [c, true]));
+        setSelectedColumns(all);
+        setTempSelectedColumns(all);
+      } else {
+        setTempSelectedColumns({ ...selectedColumns });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnsOpen]);
+
+  function toggleTempColumn(col: string) {
+    setTempSelectedColumns((s) => ({ ...s, [col]: !s[col] }));
+  }
+
+  function selectAllTemp() {
+    setTempSelectedColumns(Object.fromEntries(availableColumns.map((c) => [c, true])));
+  }
+
+  function clearAllTemp() {
+    setTempSelectedColumns(Object.fromEntries(availableColumns.map((c) => [c, false])));
+  }
+
 
   // gera uma assinatura curta para detectar se os primeiros registros não mudaram
   function signatureOf(arr: SimaRecord[] | undefined | null) {
@@ -467,7 +531,9 @@ export default function SimaTable({
   function exportCSV(which: "online" | "offline") {
     const data = which === "online" ? displayOnline : displayOffline;
     if (!data || data.length === 0) return;
-    const keys = Object.keys(data[0]) as string[];
+    // use availableColumns order & visibility
+    const keys = availableColumns.filter((k) => selectedColumns[k]);
+    if (keys.length === 0) return;
     const rows: string[][] = [keys];
     data.forEach((row) =>
       rows.push(
@@ -492,7 +558,8 @@ export default function SimaTable({
   function openTableInNewTab(which: "online" | "offline") {
     const data = which === "online" ? displayOnline : displayOffline;
     if (!data || data.length === 0) return;
-    const keys = Object.keys(data[0]) as string[];
+    const keys = availableColumns.filter((k) => selectedColumns[k]);
+    if (keys.length === 0) return;
     let html = `<html><head><meta charset="utf-8"><title>SIMA ${which}</title>
       <style>body{font-family:system-ui;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:6px 8px;white-space:nowrap}th{background:#f3f4f6}</style></head><body>`;
     html += `<h3>SIMA ${which}</h3><table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
@@ -509,8 +576,8 @@ export default function SimaTable({
     w.document.close();
   }
 
-  const renderHeaderCells = (obj: Record<string, unknown>) =>
-    Object.keys(obj).map((key) => (
+  const renderHeaderCells = (cols: string[]) =>
+    cols.map((key) => (
       <TableHead
         key={key}
         style={{
@@ -531,17 +598,9 @@ export default function SimaTable({
   const rowClass = (idx: number) => `group ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} text-sm`;
 
   // pagination helpers
-  const currentCount =
-    view === "online"
-      ? displayOnline.length
-      : view === "offline"
-        ? displayOffline.length
-        : displayOnline.length + displayOffline.length;
 
-  const knownTotalForView =
-    view === "online" ? totalOnline : view === "offline" ? totalOffline : totalCombined;
+  const knownTotalForView = view === "online" ? totalOnline : view === "offline" ? totalOffline : totalCombined;
 
-  // número de itens efetivamente retornados para a *página atual*
   const pageItemCount =
     view === "online"
       ? displayOnline.length
@@ -549,29 +608,26 @@ export default function SimaTable({
         ? displayOffline.length
         : displayOnline.length + displayOffline.length;
 
-  // se tivermos total conhecido, usamos ele; caso contrário,
-  // assumimos que há próxima página quando a página atual veio completa (== limit)
   const hasNext =
     knownTotalForView !== undefined ? page * limit < knownTotalForView : pageItemCount === limit;
 
-  // total de páginas só quando soubermos o total
   const totalPagesForView =
     knownTotalForView !== undefined ? Math.max(1, Math.ceil(knownTotalForView / limit)) : undefined;
 
-  // Handlers de paginação (usam limites seguros)
   const handlePrev = () => {
     setPage((p) => Math.max(1, p - 1));
   };
 
   const handleNext = () => {
-    // evita ultrapassar total conhecido (se existir)
     if (totalPagesForView !== undefined) {
       setPage((p) => Math.min(totalPagesForView, p + 1));
     } else {
-      // sem total conhecido usa heurística hasNext
       if (hasNext) setPage((p) => p + 1);
     }
   };
+
+  // which columns are visible (keeps availableColumns order)
+  const visibleColumns = availableColumns.filter((c) => selectedColumns[c]);
 
   return (
     <div className="space-y-6">
@@ -579,58 +635,80 @@ export default function SimaTable({
         <h2 className="text-lg font-bold m-0">SIMA — Visualização de Dados</h2>
 
         <div className="flex items-center gap-3">
-          <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">
-            <button
-              onClick={() => setView("online")}
-              className={`px-3 py-2 border-none ${view === "online" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
-            >
-              Online
-            </button>
-            <button
-              onClick={() => setView("offline")}
-              className={`px-3 py-2 border-none ${view === "offline" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
-            >
-              Offline
-            </button>
-            <button
-              onClick={() => setView("ambos")}
-              className={`px-3 py-2 border-none ${view === "ambos" ? "bg-slate-900 text-white" : "bg-white text-gray-900"}`}
-            >
-              Ambos
-            </button>
-          </div>
+          <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden"></div>
 
-          <div className="inline-flex gap-2 flex-wrap">
-            {(view === "online" || view === "ambos") && (
-              <>
-                <button
-                  onClick={() => exportCSV("online")}
-                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Exportar Online CSV
-                </button>
-                <button
-                  onClick={() => openTableInNewTab("online")}
-                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Abrir Online
-                </button>
-              </>
-            )}
+          <div className="inline-flex gap-2 flex-wrap items-center">
             {(view === "offline" || view === "ambos") && (
               <>
-                <button
-                  onClick={() => exportCSV("offline")}
-                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Exportar Offline CSV
-                </button>
-                <button
-                  onClick={() => openTableInNewTab("offline")}
-                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Abrir Offline
-                </button>
+                <button onClick={() => exportCSV("offline")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar Offline CSV</button>
+                <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir Offline</button>
+              </>
+            )}
+
+            {/* botão colunas */}
+            <div className="relative">
+              <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded">
+                Filtros
+              </button>
+
+              {columnsOpen && (
+                <div className="absolute right-0 mt-2 w-64 max-h-124 bg-white border rounded shadow-lg z-50 flex flex-col">
+                  <div className="p-3 border-b flex justify-between items-center">
+                    <strong>Colunas</strong>
+                    <div className="flex gap-1">
+                      <button onClick={selectAllTemp} className="px-2 py-1 text-xs border rounded">Tudo</button>
+                      <button onClick={clearAllTemp} className="px-2 py-1 text-xs border rounded">Limpar</button>
+                    </div>
+                  </div>
+
+                  {/* area rolável com checkboxes (usa tempSelectedColumns enquanto aberto) */}
+                  <div className="p-3 overflow-auto flex-1">
+                    <div className="grid gap-2">
+                      {availableColumns.length === 0 && <div className="text-xs text-gray-500">Sem colunas disponíveis</div>}
+                      {availableColumns.map((col) => (
+                        <label key={col} className="inline-flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={!!tempSelectedColumns[col]}
+                            onChange={() => toggleTempColumn(col)}
+                          />
+                          <span className="truncate">{col}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* rodapé fixo: Cancelar descarta temp, Aplicar grava temp em selected */}
+                  <div className="p-3 border-t flex justify-end gap-2 bg-white">
+                    <button
+                      onClick={() => {
+                        // descarta temporário e fecha
+                        setTempSelectedColumns({ ...selectedColumns });
+                        setColumnsOpen(false);
+                      }}
+                      className="px-3 py-1 border rounded"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => {
+                        // aplica: grava temp em selectedColumns e fecha
+                        setSelectedColumns({ ...tempSelectedColumns });
+                        setColumnsOpen(false);
+                      }}
+                      className="px-3 py-1 bg-blue-600 text-white rounded"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {(view === "online" || view === "ambos") && (
+              <>
+                <button onClick={() => exportCSV("online")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar Online CSV</button>
+                <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir Online</button>
               </>
             )}
           </div>
@@ -640,39 +718,21 @@ export default function SimaTable({
       {loading && <p>Carregando...</p>}
       {error && <p className="text-red-600">{error}</p>}
 
-      <div
-        style={{
-          overflowX: "auto",
-          overflowY: "auto",
-          maxHeight: "calc(100vh - 200px)",
-          border: "1px solid #ddd",
-          borderRadius: 6,
-          paddingBottom: 16,
-        }}
-      >
-        {(view === "online" || view === "ambos") && displayOnline.length > 0 && (
-          <div style={{ minWidth: calcMinWidth(Object.keys(displayOnline[0]).length) }}>
+      <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "calc(100vh - 200px)", border: "1px solid #ddd", borderRadius: 6, paddingBottom: 16 }}>
+        {(view === "online" || view === "ambos") && displayOnline.length > 0 && visibleColumns.length > 0 && (
+          <div style={{ minWidth: calcMinWidth(visibleColumns.length) }}>
             <Table>
               <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
                 Online
               </TableCaption>
               <TableHeader>
-                <TableRow>{renderHeaderCells(displayOnline[0])}</TableRow>
+                <TableRow>{renderHeaderCells(visibleColumns)}</TableRow>
               </TableHeader>
               <TableBody>
                 {displayOnline.map((row, rIdx) => (
                   <TableRow key={String(row.idsima ?? rIdx)} className={rowClass(rIdx)}>
-                    {Object.values(row).map((value, idx) => (
-                      <TableCell
-                        key={idx}
-                        style={{
-                          padding: "8px 10px",
-                          whiteSpace: "nowrap",
-                          borderTop: "1px solid #eee",
-                        }}
-                      >
-                        {renderValue(value)}
-                      </TableCell>
+                    {visibleColumns.map((col, idx) => (
+                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>{renderValue((row as Record<string, unknown>)[col])}</TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -681,49 +741,37 @@ export default function SimaTable({
           </div>
         )}
 
-        {(view === "offline" || view === "ambos") && displayOffline.length > 0 && (
-          <div
-            style={{ minWidth: calcMinWidth(Object.keys(displayOffline[0]).length), marginTop: 20 }}
-          >
+        {(view === "offline" || view === "ambos") && displayOffline.length > 0 && visibleColumns.length > 0 && (
+          <div style={{ minWidth: calcMinWidth(visibleColumns.length), marginTop: 20 }}>
             <Table>
               <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
                 Offline
               </TableCaption>
               <TableHeader>
-                <TableRow>{renderHeaderCells(displayOffline[0])}</TableRow>
+                <TableRow>{renderHeaderCells(visibleColumns)}</TableRow>
               </TableHeader>
               <TableBody>
                 {displayOffline.map((row, rIdx) => (
                   <TableRow key={String(row.idsimaoffline ?? rIdx)} className={rowClass(rIdx)}>
-                    {Object.values(row).map((value, idx) => (
-                      <TableCell
-                        key={idx}
-                        style={{
-                          padding: "8px 10px",
-                          whiteSpace: "nowrap",
-                          borderTop: "1px solid #eee",
-                        }}
-                      >
-                        {renderValue(value)}
-                      </TableCell>
+                    {visibleColumns.map((col, idx) => (
+                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>{renderValue((row as Record<string, unknown>)[col])}</TableCell>
                     ))}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
+        )}
+
+        {/* se não houver colunas visíveis ou dados */}
+        {((view === "online" && displayOnline.length > 0) || (view === "offline" && displayOffline.length > 0) || (view === "ambos" && (displayOnline.length > 0 || displayOffline.length > 0))) && visibleColumns.length === 0 && (
+          <div className="p-4 text-sm text-gray-600">Nenhuma coluna selecionada — selecione colunas em <strong>Coluna</strong>.</div>
         )}
       </div>
 
       <div className="mt-2 flex items-center justify-between">
         <div>
           Página {page}
-          {totalPagesForView !== undefined ? ` de ${totalPagesForView}` : ""} — {currentCount} itens
-          mostrados
-          {totalCombined !== undefined && view === "ambos" ? ` — total: ${totalCombined}` : ""}
-          {view === "online" && totalOnline !== undefined ? ` — total: ${totalOnline}` : ""}
-          {view === "offline" && totalOffline !== undefined ? ` — total: ${totalOffline}` : ""}
-          {useClientPaginationRef.current ? " — (paginação client-side)" : ""}
         </div>
 
         <div className="space-x-2 flex items-center">
@@ -736,20 +784,45 @@ export default function SimaTable({
           </button>
 
           <div className="inline-flex items-center gap-2">
-            <label className="text-sm">Ir p/ página:</label>
-            <input
-              type="number"
-              min={1}
-              value={page}
-              onChange={(e) => {
-                const v = Number(e.target.value || 1);
-                if (!Number.isFinite(v) || v < 1) return;
-                const maxP = totalPagesForView ?? v;
-                setPage(Math.min(v, maxP));
-              }}
-              className="w-20 px-2 py-1 border rounded"
-            />
-          </div>
+  <label className="text-sm">Ir p/ página:</label>
+  <input
+    type="text"
+    inputMode="numeric"
+    pattern="[0-9]*"
+    value={pageInput}
+    onChange={(e) => {
+      // permite edição livre (incluindo string vazia)
+      const v = e.target.value;
+      // remover espaços e permitir apenas dígitos
+      const cleaned = v.replace(/[^\d]/g, "");
+      setPageInput(cleaned);
+    }}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        const v = Number(pageInput || "0");
+        if (!Number.isFinite(v) || v < 1) {
+          // se inválido, retorna ao page atual
+          setPageInput(String(page));
+          return;
+        }
+        const maxP = totalPagesForView ?? v;
+        setPage(Math.min(v, maxP));
+      }
+    }}
+    onBlur={() => {
+      // ao sair do campo, aplica a página (mesma validação)
+      const v = Number(pageInput || "0");
+      if (!Number.isFinite(v) || v < 1) {
+        setPageInput(String(page));
+        return;
+      }
+      const maxP = totalPagesForView ?? v;
+      setPage(Math.min(v, maxP));
+    }}
+    className="w-20 px-2 py-1 border rounded"
+    aria-label="Ir para página"
+  />
+</div>
         </div>
       </div>
     </div>

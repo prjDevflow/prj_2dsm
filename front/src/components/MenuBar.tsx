@@ -227,11 +227,9 @@ export default function MenuBar({ title }: { title?: string }) {
   // Mapeamento de rotas para títulos — adicione mais conforme necessário
   const pathToTitle: Record<string, string> = {
     "/sima": "DevFlow Analytics - SIMA",
-    // "/furnas": "DevFlow Analytics - Furnas",
     "/balcar": "DevFlow Analytics - Balcar",
     "/mapa": "DevFlow Analytics - Mapa",
-
-    // chave dinâmica com interpolação
+    "/sobre": "DevFlow Analytics - Sobre", // título para /sobre
     ...(instituicao && {
       [`/furnas/${instituicao}`]: `DevFlow Analytics - Furnas (${instituicao})`,
     }),
@@ -270,11 +268,8 @@ export default function MenuBar({ title }: { title?: string }) {
           </MenuItem>
 
           <MenuItem role="button" tabIndex={0} aria-label="Sobre">
-            <StyledLink to="/about">SOBRE</StyledLink>
-          </MenuItem>
-
-          <MenuItem role="button" tabIndex={0} aria-label="Contato">
-            <StyledLink to="/contact">CONTATO</StyledLink>
+            {/* link ajustado para /sobre */}
+            <StyledLink to="/sobre">SOBRE</StyledLink>
           </MenuItem>
         </DesktopMenu>
 
@@ -296,11 +291,9 @@ export default function MenuBar({ title }: { title?: string }) {
           <MobileLink to="/graficos" onClick={() => setIsOpen(false)}>
             GRAFICOS
           </MobileLink>
-          <MobileLink to="/about" onClick={() => setIsOpen(false)}>
+          {/* link ajustado para /sobre */}
+          <MobileLink to="/sobre" onClick={() => setIsOpen(false)}>
             SOBRE
-          </MobileLink>
-          <MobileLink to="/contact" onClick={() => setIsOpen(false)}>
-            CONTATO
           </MobileLink>
         </MobileMenu>
       )}
