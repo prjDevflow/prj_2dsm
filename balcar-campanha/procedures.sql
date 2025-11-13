@@ -73,7 +73,7 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT
-        (COALESCE(t.datamedida, c.datainicio) + COALESCE(t.horamedida, TIME '00:00'))::timestamp AS datahora,
+        (COALESCE(t.datamedida, c.datainicio))::timestamp AS datahora,  -- sem hora
         t.ch4::DOUBLE PRECISION,
         t.batimetria::DOUBLE PRECISION,
         t.tempar::DOUBLE PRECISION,
@@ -111,3 +111,4 @@ BEGIN
     LIMIT COALESCE(p_limit, NULL);
 END;
 $$;
+
