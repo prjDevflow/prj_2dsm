@@ -1,44 +1,7 @@
 
 
 
-CREATE OR REPLACE FUNCTION buscar_sitios_por_instituicao(
-    p_idinstituicao integer
-)
-RETURNS TABLE (
-    idsitio integer,
-    nome_sitio varchar(100),
-    lat double precision,
-    lng double precision,
-    descricao text,
-    nome_reservatorio varchar(50),
-    nome_instituicao varchar(50)
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY
-    SELECT DISTINCT
-        s.idsitio,
-        s.nome AS nome_sitio,
-        s.lat,
-        s.lng,
-        s.descricao::text,
-        r.nome AS nome_reservatorio,
-        i.nome AS nome_instituicao
-    FROM
-        tbsitio s
-    JOIN
-        tbreservatorio r ON s.idreservatorio = r.idreservatorio
-    JOIN
-        tbcampanha c ON r.idreservatorio = c.idreservatorio
-    JOIN
-        tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    WHERE
-        i.idinstituicao = p_idinstituicao
-    ORDER BY
-        s.nome;
-END;
-$$;
+
 
 
 

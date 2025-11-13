@@ -9,11 +9,8 @@ export const furnasPool = new Pool({
   password: String(process.env.DB_FURNAS_PASSWORD),
   database: process.env.DB_FURNAS_NAME,
   port: Number(process.env.DB_FURNAS_PORT),
-  ssl: {
-    rejectUnauthorized: false, // Render exige SSL, mas não requer certificado
-  },
+  ssl: process.env.DB_FURNAS_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
-
 export const simaPool = new Pool({
   host: process.env.DB_SIMA_HOST,
   user: process.env.DB_SIMA_USER,
