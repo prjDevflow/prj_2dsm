@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 -- =====================================
 -- PROCEDURE: buscar_reservatorios_por_instituicao
 -- =====================================
@@ -19,8 +12,7 @@ RETURNS TABLE (
     lng DOUBLE PRECISION,
     nome_instituicao VARCHAR(50)
 )
-LANGUAGE plpgsql
-AS $$
+LANGUAGE plpgsql AS $$
 BEGIN
     RETURN QUERY
     SELECT DISTINCT
@@ -29,18 +21,14 @@ BEGIN
         r.lat::DOUBLE PRECISION,
         r.lng::DOUBLE PRECISION,
         i.nome::VARCHAR(50) AS nome_instituicao
-    FROM
-        tbreservatorio r
-    JOIN
-        tbcampanha c ON r.idreservatorio = c.idreservatorio
-    JOIN
-        tbinstituicao i ON c.idinstituicao = i.idinstituicao
-    WHERE
-        (p_nome_instituicao IS NULL OR i.nome ILIKE '%' || TRIM(p_nome_instituicao) || '%')
-    ORDER BY
-        r.nome;
+    FROM tbreservatorio r
+    JOIN tbcampanha c ON r.idreservatorio = c.idreservatorio
+    JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
+    WHERE (p_nome_instituicao IS NULL OR i.nome ILIKE '%' || TRIM(p_nome_instituicao) || '%')
+    ORDER BY nome_reservatorio;
 END;
 $$;
+
 
 -- =====================================
 -- PROCEDURE: buscar_geral
@@ -77,7 +65,8 @@ RETURNS TABLE (
     tsdfundo DOUBLE PRECISION,
     sitio_nome TEXT,
     instituicao_nome TEXT,
-    reservatorio_nome TEXT
+    reservatorio_nome TEXT,
+    total_count BIGINT
 )
 LANGUAGE plpgsql
 AS $$
@@ -109,7 +98,8 @@ BEGIN
         t.tsdfundo::DOUBLE PRECISION,
         s.nome::TEXT AS sitio_nome,
         i.nome::TEXT AS instituicao_nome,
-        r.nome::TEXT AS reservatorio_nome
+        r.nome::TEXT AS reservatorio_nome,
+        COUNT(*) OVER() AS total_count
     FROM tbfluxoinpe t
     JOIN tbcampanha c ON t.idcampanha = c.idcampanha
     JOIN tbinstituicao i ON c.idinstituicao = i.idinstituicao
@@ -117,17 +107,7 @@ BEGIN
     LEFT JOIN tbsitio s ON s.idsitio = t.idsitio
     WHERE r.idreservatorio = p_idreservatorio
     ORDER BY datahora DESC
-    /* paginação opcional */
     OFFSET COALESCE(p_offset, 0)
     LIMIT COALESCE(p_limit, NULL);
 END;
 $$;
-
-
-
-
-
-
-
-
-
