@@ -1,17 +1,16 @@
 import React from "react";
 import CalendarPicker from "@/components/CalendarPicker";
 import SimaTable from "@/components/SimaTable";
-
+ 
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-
+ 
 type PontoColeta = {
   id: number | string;
   name?: string;
@@ -20,9 +19,9 @@ type PontoColeta = {
   longitude: number;
   type?: string;
 };
-
+ 
 type Range = { start?: Date | null; end?: Date | null };
-
+ 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -31,27 +30,30 @@ type Props = {
   range: Range;
   setRange: (r: Range) => void;
 };
-
-const SimaDrawer: React.FC<Props> = ({ open, onOpenChange, selectedPonto, range, setRange }) => {
+ 
+const SimaDrawer: React.FC<Props> = ({
+  open,
+  onOpenChange,
+  selectedPonto,
+  range,
+  setRange,
+}) => {
   // debug rápido: mostra quando o drawer abre e o ponto atual
   React.useEffect(() => {
     if (open) {
       console.debug("[SimaDrawer] abriu drawer, selectedPonto:", selectedPonto);
     }
   }, [open, selectedPonto]);
-
+ 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="space-y-4">
             <span className="block text-lg font-semibold">
-              Tabela de Dados
-              {selectedPonto
-                ? ` - ${selectedPonto.name ?? selectedPonto.rotulo ?? selectedPonto.id}`
-                : ""}
+              Tabela de Dados{selectedPonto ? ` - ${selectedPonto.name ?? selectedPonto.rotulo ?? selectedPonto.id}` : ""}
             </span>
-
+ 
             <div className="mt-4 p-2 border rounded-md bg-white">
               {/* CalendarPicker sem seletor de estação */}
               <CalendarPicker
@@ -62,7 +64,7 @@ const SimaDrawer: React.FC<Props> = ({ open, onOpenChange, selectedPonto, range,
                   setRange(r);
                 }}
               />
-
+ 
               {/* SimaTable: envio tanto do id quanto do objeto completo para mais robustez */}
               <div className="mt-4">
                 <SimaTable
@@ -76,7 +78,7 @@ const SimaDrawer: React.FC<Props> = ({ open, onOpenChange, selectedPonto, range,
             </div>
           </DrawerTitle>
         </DrawerHeader>
-
+ 
         <DrawerFooter>
           <Button
             onClick={() => {
@@ -86,13 +88,12 @@ const SimaDrawer: React.FC<Props> = ({ open, onOpenChange, selectedPonto, range,
           >
             Ok
           </Button>
-          <DrawerClose>
-            <Button variant="outline">Cancelar</Button>
-          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );
 };
-
+ 
 export default SimaDrawer;
+ 
+ 

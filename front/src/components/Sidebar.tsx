@@ -5,17 +5,17 @@ import { Sliders, ChevronLeft, ChevronDown } from "lucide-react";
 import "../styles/Sidebar.css";
 import { useColetas } from "../hooks/useColetas";
 import type { PontoColeta } from "../types/ponto";
-
+ 
 interface SidebarProps {
   logoSrc?: string;
   variant?: "sima" | "furnas" | "balcar";
   onSelectPoint?: (p: PontoColeta) => void;
 }
-
+ 
 const SIDEBAR_WIDTH = 300;
 const FOOTER_HEIGHT = 0;
 const HEADER_HEIGHT = "32px";
-
+ 
 const Backdrop = styled.div<{ $visible: boolean }>`
   position: fixed;
   inset: 0;
@@ -26,7 +26,7 @@ const Backdrop = styled.div<{ $visible: boolean }>`
   transition: opacity 220ms ease;
   ${(p) => p.$visible && `opacity:1; visibility:visible;`}
 `;
-
+ 
 const SidebarWrapper = styled.aside<{ open: boolean }>`
   position: fixed;
   top: ${HEADER_HEIGHT};
@@ -50,7 +50,7 @@ const SidebarWrapper = styled.aside<{ open: boolean }>`
     border-radius: 0 12px 12px 0;
   }
 `;
-
+ 
 const ToggleHandle = styled.button<{ open: boolean }>`
   position: absolute;
   right: -42px;
@@ -76,7 +76,7 @@ const ToggleHandle = styled.button<{ open: boolean }>`
     outline: 3px solid rgba(255, 255, 255, 0.12);
   }
 `;
-
+ 
 const LogoFullWrap = styled.div`
   width: 100%;
   margin: 0;
@@ -85,7 +85,7 @@ const LogoFullWrap = styled.div`
   display: block;
   overflow: hidden;
 `;
-
+ 
 const LogoFullImg = styled.img<{ open: boolean }>`
   width: 100%;
   height: 220px;
@@ -101,7 +101,7 @@ const LogoFullImg = styled.img<{ open: boolean }>`
     height: 160px;
   }
 `;
-
+ 
 const SidebarContent = styled.div`
   padding: 1.25rem;
   overflow-y: auto;
@@ -119,7 +119,7 @@ const SidebarContent = styled.div`
     background-clip: padding-box;
   }
 `;
-
+ 
 const FiltersButton = styled.button`
   margin-top: 0.25rem;
   width: 100%;
@@ -144,7 +144,7 @@ const FiltersButton = styled.button`
     outline: 3px solid rgba(255, 255, 255, 0.12);
   }
 `;
-
+ 
 const Section = styled.div`
   margin-top: 1rem;
   background: rgba(255, 255, 255, 0.03);
@@ -152,7 +152,7 @@ const Section = styled.div`
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.03);
 `;
-
+ 
 const SectionHeader = styled.button`
   width: 100%;
   display: flex;
@@ -169,7 +169,7 @@ const SectionHeader = styled.button`
     outline: 3px solid rgba(255, 255, 255, 0.08);
   }
 `;
-
+ 
 const SectionBody = styled.div<{ open: boolean }>`
   padding: 0.75rem;
   max-height: ${(p) => (p.open ? "min(52vh, 520px)" : "0")};
@@ -181,17 +181,15 @@ const SectionBody = styled.div<{ open: boolean }>`
   overflow: auto; /* importante: permitir rolagem interna */
   -webkit-overflow-scrolling: touch;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent);
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
+  &::-webkit-scrollbar { width: 10px; }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255,255,255,0.06);
     border-radius: 99px;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
 `;
-
+ 
 const Row = styled.div`
   display: flex;
   justify-content: space-between;
@@ -201,7 +199,7 @@ const Row = styled.div`
   font-weight: 500;
   user-select: none;
 `;
-
+ 
 const PointRow = styled.button`
   display: flex;
   justify-content: flex-start;
@@ -221,10 +219,10 @@ const PointRow = styled.button`
     transform: translateX(2px);
   }
   &:focus {
-    outline: 3px solid rgba(255, 255, 255, 0.06);
+    outline: 3px solid rgba(255,255,255,0.06);
   }
 `;
-
+ 
 const Rotating = styled.span<{ open: boolean }>`
   display: inline-flex;
   align-items: center;
@@ -232,32 +230,36 @@ const Rotating = styled.span<{ open: boolean }>`
   transition: transform 220ms ease;
   transform: rotate(${(p) => (p.open ? "180deg" : "0deg")});
 `;
-
+ 
 const Hint = styled.div`
   margin-top: 0.75rem;
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.85);
   opacity: 0.95;
 `;
-
+ 
 const SearchInput = styled.input`
   width: 100%;
   padding: 0.5rem 0.6rem;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
   color: inherit;
   font-size: 0.9rem;
   margin-bottom: 0.6rem;
 `;
-
+ 
 /* ---------- componente ---------- */
-export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: SidebarProps) {
+export default function Sidebar({
+  logoSrc,
+  variant = "sima",
+  onSelectPoint,
+}: SidebarProps) {
   const [open, setOpen] = useState(false);
-
+ 
   const defaultFiltersOpen = variant === "sima" ? true : false;
   const [filtersOpen, setFiltersOpen] = useState<boolean>(defaultFiltersOpen);
-
+ 
   const initialSections: Record<string, boolean> = {
     instituicao: variant === "furnas",
     reservatorio: variant === "balcar",
@@ -265,9 +267,9 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
     pontos: true,
   };
   const [openSection, setOpenSection] = useState<Record<string, boolean>>(initialSections);
-
+ 
   const sidebarRef = useRef<HTMLElement | null>(null);
-
+ 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
@@ -275,7 +277,7 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
-
+ 
   useEffect(() => {
     if (open) {
       const prev = document.body.style.overflow;
@@ -287,7 +289,7 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
     }
     return;
   }, [open]);
-
+ 
   useEffect(() => {
     const el = sidebarRef.current;
     if (!el) return;
@@ -300,9 +302,9 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
-
+ 
   const toggleSection = (key: string) => setOpenSection((s) => ({ ...s, [key]: !s[key] }));
-
+ 
   // === dados de pontos via useColetas ===
   type ApiPonto = {
     id?: number | string;
@@ -318,11 +320,11 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
     reservatorio?: string;
     instituicao?: string;
   };
-
+ 
   const { data: pontos = [], isLoading, isError } = useColetas(variant);
-
+ 
   const [search, setSearch] = useState("");
-
+ 
   // filtrar lista localmente (por rotulo/name)
   const filteredPontos = useMemo(() => {
     if (!pontos || pontos.length === 0) return [];
@@ -330,15 +332,10 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
     if (!q) return pontos;
     return (pontos as ApiPonto[]).filter((p) => {
       const label = (p.rotulo ?? p.name ?? p.nome ?? String(p.id ?? "")).toLowerCase();
-      return (
-        label.includes(q) ||
-        String(p.id ?? p.idHexadecimal ?? p.idestacao ?? "")
-          .toLowerCase()
-          .includes(q)
-      );
+      return label.includes(q) || String(p.id ?? p.idHexadecimal ?? p.idestacao ?? "").toLowerCase().includes(q);
     });
   }, [pontos, search]);
-
+ 
   // --------------------------------------------------------------------
   // clicar no nome do reservatório -> abre tabela (via callback)
   // prioridade: idestacao (numérico) -> idHexadecimal -> id -> _id -> nome -> rotulo -> name
@@ -347,15 +344,12 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
     const maybeIdest = p.idestacao ?? p.id ?? p._id ?? null;
     const preferIdest =
       maybeIdest !== null &&
-      (typeof maybeIdest === "number" ||
-        (typeof maybeIdest === "string" && /^\d+$/.test(maybeIdest)));
-
+      (typeof maybeIdest === "number" || (typeof maybeIdest === "string" && /^\d+$/.test(maybeIdest)));
+ 
     const chosenId = preferIdest
-      ? typeof maybeIdest === "string"
-        ? Number(maybeIdest)
-        : maybeIdest
+      ? (typeof maybeIdest === "string" ? Number(maybeIdest) : maybeIdest)
       : (p.idHexadecimal ?? p.id ?? p._id ?? p.nome ?? p.nome_estacao ?? p.rotulo ?? p.name ?? "");
-
+ 
     const point: PontoColeta = {
       id: chosenId as any,
       name: (p.nome ?? p.nome_estacao ?? p.name ?? p.rotulo) as string | undefined,
@@ -363,15 +357,15 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
       latitude: p.latitude ?? 0,
       longitude: p.longitude ?? 0,
     };
-
+ 
     onSelectPoint?.(point);
     setOpen(false);
   };
-
+ 
   return (
     <>
       <Backdrop $visible={open} aria-hidden={!open} onClick={() => setOpen(false)} />
-
+ 
       <SidebarWrapper open={open} aria-hidden={!open} ref={sidebarRef}>
         <ToggleHandle
           onClick={() => setOpen((s) => !s)}
@@ -388,11 +382,11 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
             }}
           />
         </ToggleHandle>
-
+ 
         <LogoFullWrap>
           <LogoFullImg src={logoSrc ?? "/logo-team.png"} alt="Logo do time" open={open} />
         </LogoFullWrap>
-
+ 
         <SidebarContent>
           <FiltersButton
             onClick={() => setFiltersOpen((s) => !s)}
@@ -404,7 +398,7 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
               {filtersOpen ? "Ocultar" : "Mostrar"}
             </span>
           </FiltersButton>
-
+ 
           {filtersOpen && (
             <>
               {variant !== "sima" && (
@@ -442,18 +436,15 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
                   </SectionBody>
                 </Section>
               )}
-
+ 
               <Section>
-                <SectionHeader
-                  onClick={() => toggleSection("pontos")}
-                  aria-expanded={!!openSection.pontos}
-                >
+                <SectionHeader onClick={() => toggleSection("pontos")} aria-expanded={!!openSection.pontos}>
                   <span>RESERVATÓRIOS</span>
                   <Rotating open={!!openSection.pontos}>
                     <ChevronDown color="white" size={16} />
                   </Rotating>
                 </SectionHeader>
-
+ 
                 <SectionBody open={!!openSection.pontos}>
                   <SearchInput
                     placeholder="Buscar reservatório por nome ou id..."
@@ -461,34 +452,17 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
                     onChange={(e) => setSearch(e.target.value)}
                     aria-label="Buscar reservatórios"
                   />
-
+ 
                   {isLoading && <Hint>Carregando pontos...</Hint>}
                   {isError && <Hint>Erro ao carregar pontos.</Hint>}
-
-                  {!isLoading && filteredPontos.length === 0 && (
-                    <Hint>Nenhum ponto encontrado.</Hint>
-                  )}
-
+ 
+                  {!isLoading && filteredPontos.length === 0 && <Hint>Nenhum ponto encontrado.</Hint>}
+ 
                   {!isLoading &&
                     (filteredPontos as ApiPonto[]).map((p, idx) => {
-                      const id =
-                        p.id ??
-                        p.idHexadecimal ??
-                        p.idestacao ??
-                        p._id ??
-                        p.nome ??
-                        p.nome_estacao ??
-                        p.rotulo ??
-                        p.name ??
-                        idx;
-                      const label =
-                        p.rotulo ??
-                        p.name ??
-                        p.nome ??
-                        p.nome_estacao ??
-                        p.reservatorio ??
-                        `Ponto ${id}`;
-
+                      const id = p.id ?? p.idHexadecimal ?? p.idestacao ?? p._id ?? p.nome ?? p.nome_estacao ?? p.rotulo ?? p.name ?? idx;
+                      const label = p.rotulo ?? p.name ?? p.nome ?? p.nome_estacao ?? p.reservatorio ?? `Ponto ${id}`;
+ 
                       return (
                         <PointRow
                           key={String(id ?? idx)}
@@ -496,15 +470,7 @@ export default function Sidebar({ logoSrc, variant = "sima", onSelectPoint }: Si
                           aria-label={`Abrir tabela do reservatório ${label}`}
                           title={label}
                         >
-                          <span
-                            style={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {label}
-                          </span>
+                          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
                         </PointRow>
                       );
                     })}

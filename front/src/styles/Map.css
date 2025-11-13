@@ -1,5 +1,5 @@
 /* src/styles/Animations.css */
-
+ 
 /* ------------------------------ */
 /* 🔹 Reset básico                */
 /* ------------------------------ */
@@ -8,23 +8,15 @@
 }
 .leaflet-container {
   z-index: 0 !important; /* coloca o mapa por baixo */
-  position: relative; /* garante posicionamento */
+  position: relative;    /* garante posicionamento */
 }
 body {
   margin: 0;
   padding: 0;
   font-family: "Arial", sans-serif;
 }
-
-p {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-
+ 
+ 
 .map-container {
   margin-bottom: -30px;
   margin-left: -34px;
@@ -32,7 +24,7 @@ p {
   height: 90vh;
   width: 103%;
 }
-
+ 
 /* ------------------------------ */
 /* 🔹 Overlay escuro opcional     */
 /* ------------------------------ */
@@ -48,12 +40,12 @@ p {
   transition: opacity 0.3s ease-in-out;
   pointer-events: none;
 }
-
+ 
 .drawer-overlay.active {
   opacity: 1;
   pointer-events: auto;
 }
-
+ 
 /* ------------------------------ */
 /* 🔹 Responsividade              */
 /* ------------------------------ */
@@ -61,25 +53,25 @@ p {
   .sidebar-drawer-open {
     transform: translateX(-100%);
   }
-
+ 
   .footer-drawer-open {
     transform: translateY(150%);
   }
 }
-
+ 
 @media (max-width: 480px) {
   .footer-drawer-open {
     transform: translateY(120%);
   }
 }
-
+ 
 /* ------------------------------ */
 /* 🔹 Animação do conteúdo        */
 /* ------------------------------ */
 .main-content {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
+ 
 .main-content.drawer-open {
   transform: scale(0.95);
   filter: blur(1px);
