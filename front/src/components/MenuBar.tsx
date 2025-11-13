@@ -23,10 +23,10 @@ const Nav = styled.nav`
   color: ${({ theme }) => theme.colors.text.inverse};
   width: 100%;
   box-shadow: ${({ theme }) => theme.shadows.small};
-  position: fixed;
-  top: 32px;
-  left: 0;
-  z-index: 1100;
+  // position: fixed;
+  // top: 32px;
+  // left: 0;
+  // z-index: 1100;
 `;
 
 const TopContainer = styled.div`

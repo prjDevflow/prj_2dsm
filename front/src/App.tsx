@@ -18,8 +18,7 @@ const AppLayout = () => {
 
         <main
           style={{
-            minHeight: "calc(100vh - 3rem - 56px)",
-            paddingTop: "1rem",
+            // paddingTop: "1rem",
             paddingBottom: "72px",
             flex: 1,
           }}
