@@ -95,5 +95,3 @@ const SimaDrawer: React.FC<Props> = ({
 };
  
 export default SimaDrawer;
- 
- 
