@@ -7,6 +7,7 @@ import { getDataByIdFurnasController } from "./useCases/getDataByIdFurnas";
 import { getDataByIdBalcarController } from "./useCases/getDataByIdBalcar";
 import { getDataForGraphicsController } from "./useCases/getDataForGraphics";
 import { getFurnasDataController } from "./useCases/getFurnasData";
+import { getDataForSimaGraphicsController } from "./useCases/getDataForSimaGraphics";
 
 
 const router = express.Router();
@@ -56,7 +57,7 @@ router.get("/balcar/:id", (req: Request, res: Response) => {
 });
 
 router.get("/graphics", (req: Request, res: Response) => {
-  return getDataForGraphicsController.handle(req, res);
+  return getDataForSimaGraphicsController.handle(req, res);
 });
 
 

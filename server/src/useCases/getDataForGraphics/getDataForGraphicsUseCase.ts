@@ -17,15 +17,42 @@ export class GetDataForGraphicsUseCase {
         });
         break;
 
-      case "temperatura":
-        result = await this.simaRepository.getDataByTemperatura({
-          rotulo: data.rotulo,
-          dataFim: data.dateEnd,
-          dataInicio: data.dateInit,
-          limit: data.limit,
-          offSet: data.offset,
-        });
-        break;
+      // case "temperatura1":
+      //   result = await this.simaRepository.getDataByTemperatura1({
+      //     rotulo: data.rotulo,
+      //     dataFim: data.dateEnd,
+      //     dataInicio: data.dateInit,
+      //     limit: data.limit,
+      //     offSet: data.offset,
+      //   });
+      //   break;
+      //   case "temperatura2":
+      //   result = await this.simaRepository.getDataByTemperatura2({
+      //     rotulo: data.rotulo,
+      //     dataFim: data.dateEnd,
+      //     dataInicio: data.dateInit,
+      //     limit: data.limit,
+      //     offSet: data.offset,
+      //   });
+      //   break;
+      //   case "temperatura3":
+      //   result = await this.simaRepository.getDataByTemperatura3({
+      //     rotulo: data.rotulo,
+      //     dataFim: data.dateEnd,
+      //     dataInicio: data.dateInit,
+      //     limit: data.limit,
+      //     offSet: data.offset,
+      //   });
+      //   break;
+      //   case "temperatura4":
+      //   result = await this.simaRepository.getDataByTemperatura4({
+      //     rotulo: data.rotulo,
+      //     dataFim: data.dateEnd,
+      //     dataInicio: data.dateInit,
+      //     limit: data.limit,
+      //     offSet: data.offset,
+      //   });
+      //   break;
 
 
         case "oxigenioDissolvido":
