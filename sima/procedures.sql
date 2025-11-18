@@ -10,7 +10,9 @@ CREATE OR REPLACE FUNCTION public.buscar_co2(p_rotulo text DEFAULT NULL, p_data_
 -- =========================
 -- TEMPERATURAS
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_temperaturas(
+
+-- buscar_tempag1
+CREATE OR REPLACE FUNCTION buscar_tempag1(
   p_rotulo TEXT DEFAULT NULL,
   data_inicio TIMESTAMP DEFAULT NULL,
   data_fim TIMESTAMP DEFAULT NULL,
@@ -20,12 +22,7 @@ CREATE OR REPLACE FUNCTION buscar_temperaturas(
 RETURNS TABLE (
   datahora TIMESTAMP,
   tempag1 FLOAT,
-  tempag2 FLOAT,
-  tempag3 FLOAT,
-  tempag4 FLOAT,
-  tempar FLOAT,
-  tempar_r FLOAT,
-  rotulo TEXT -- Aqui estamos esperando a coluna `rotulo` da tabela `tbestacao`
+  rotulo TEXT
 )
 AS $$
 BEGIN
@@ -33,12 +30,172 @@ BEGIN
   SELECT 
     s.datahora,
     s.tempag1,
+    e.rotulo::TEXT
+  FROM tbsima s
+  JOIN tbestacao e ON s.idestacao = e.idestacao
+  WHERE 
+    (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') 
+    AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+    AND (data_fim IS NULL OR s.datahora <= data_fim)
+  ORDER BY s.datahora DESC
+  OFFSET offset_param 
+  LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- buscar_tempag2
+CREATE OR REPLACE FUNCTION buscar_tempag2(
+  p_rotulo TEXT DEFAULT NULL,
+  data_inicio TIMESTAMP DEFAULT NULL,
+  data_fim TIMESTAMP DEFAULT NULL,
+  offset_param INT DEFAULT 0,
+  limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+  datahora TIMESTAMP,
+  tempag2 FLOAT,
+  rotulo TEXT
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    s.datahora,
     s.tempag2,
+    e.rotulo::TEXT
+  FROM tbsima s
+  JOIN tbestacao e ON s.idestacao = e.idestacao
+  WHERE 
+    (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') 
+    AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+    AND (data_fim IS NULL OR s.datahora <= data_fim)
+  ORDER BY s.datahora DESC
+  OFFSET offset_param 
+  LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- buscar_tempag3
+CREATE OR REPLACE FUNCTION buscar_tempag3(
+  p_rotulo TEXT DEFAULT NULL,
+  data_inicio TIMESTAMP DEFAULT NULL,
+  data_fim TIMESTAMP DEFAULT NULL,
+  offset_param INT DEFAULT 0,
+  limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+  datahora TIMESTAMP,
+  tempag3 FLOAT,
+  rotulo TEXT
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    s.datahora,
     s.tempag3,
+    e.rotulo::TEXT
+  FROM tbsima s
+  JOIN tbestacao e ON s.idestacao = e.idestacao
+  WHERE 
+    (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') 
+    AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+    AND (data_fim IS NULL OR s.datahora <= data_fim)
+  ORDER BY s.datahora DESC
+  OFFSET offset_param 
+  LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- buscar_tempag4
+CREATE OR REPLACE FUNCTION buscar_tempag4(
+  p_rotulo TEXT DEFAULT NULL,
+  data_inicio TIMESTAMP DEFAULT NULL,
+  data_fim TIMESTAMP DEFAULT NULL,
+  offset_param INT DEFAULT 0,
+  limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+  datahora TIMESTAMP,
+  tempag4 FLOAT,
+  rotulo TEXT
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    s.datahora,
     s.tempag4,
+    e.rotulo::TEXT
+  FROM tbsima s
+  JOIN tbestacao e ON s.idestacao = e.idestacao
+  WHERE 
+    (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') 
+    AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+    AND (data_fim IS NULL OR s.datahora <= data_fim)
+  ORDER BY s.datahora DESC
+  OFFSET offset_param 
+  LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- buscar_tempar
+CREATE OR REPLACE FUNCTION buscar_tempar(
+  p_rotulo TEXT DEFAULT NULL,
+  data_inicio TIMESTAMP DEFAULT NULL,
+  data_fim TIMESTAMP DEFAULT NULL,
+  offset_param INT DEFAULT 0,
+  limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+  datahora TIMESTAMP,
+  tempar FLOAT,
+  rotulo TEXT
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    s.datahora,
     s.tempar,
+    e.rotulo::TEXT
+  FROM tbsima s
+  JOIN tbestacao e ON s.idestacao = e.idestacao
+  WHERE 
+    (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%') 
+    AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+    AND (data_fim IS NULL OR s.datahora <= data_fim)
+  ORDER BY s.datahora DESC
+  OFFSET offset_param 
+  LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- buscar_tempar_r
+CREATE OR REPLACE FUNCTION buscar_tempar_r(
+  p_rotulo TEXT DEFAULT NULL,
+  data_inicio TIMESTAMP DEFAULT NULL,
+  data_fim TIMESTAMP DEFAULT NULL,
+  offset_param INT DEFAULT 0,
+  limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+  datahora TIMESTAMP,
+  tempar_r FLOAT,
+  rotulo TEXT
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    s.datahora,
     s.tempar_r,
-    e.rotulo::TEXT -- Certifique-se de que a tabela `tbestacao` tem a coluna `rotulo`
+    e.rotulo::TEXT
   FROM tbsima s
   JOIN tbestacao e ON s.idestacao = e.idestacao
   WHERE 
@@ -53,11 +210,44 @@ $$ LANGUAGE plpgsql;
 
 
 
+
 -- =========================
 -- OXIGÊNIO DISSOLVIDO (DO)
 -- =========================
 
-CREATE OR REPLACE FUNCTION buscar_do(
+CREATE OR REPLACE FUNCTION buscar_sonda_dosat(
+    p_rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
+    sonda_dosat FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.datahora, 
+        s.sonda_dosat, 
+        e.rotulo::TEXT
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param 
+    LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION buscar_sonda_do(
     p_rotulo TEXT DEFAULT NULL,
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
@@ -67,21 +257,26 @@ CREATE OR REPLACE FUNCTION buscar_do(
 RETURNS TABLE (
     datahora TIMESTAMP,
     sonda_do FLOAT,
-    sonda_dosat FLOAT,
     nome_estacao TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_do, s.sonda_dosat, e.rotulo::TEXT -- Conversão explícita para TEXT
+    SELECT 
+        s.datahora, 
+        s.sonda_do, 
+        e.rotulo::TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
     ORDER BY s.datahora DESC
-    OFFSET offset_param LIMIT limit_param;
+    OFFSET offset_param 
+    LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
@@ -145,7 +340,7 @@ $$ LANGUAGE plpgsql;
 -- =========================
 -- NUTRIENTES
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_nutrientes(
+CREATE OR REPLACE FUNCTION buscar_sonda_nh4(
     p_rotulo TEXT DEFAULT NULL,
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
@@ -155,21 +350,58 @@ CREATE OR REPLACE FUNCTION buscar_nutrientes(
 RETURNS TABLE (
     datahora TIMESTAMP,
     sonda_nh4 FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.datahora,
+        s.sonda_nh4,
+        e.rotulo::TEXT
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param 
+    LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION buscar_sonda_no3(
+    p_rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
     sonda_no3 FLOAT,
     nome_estacao TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.sonda_nh4, s.sonda_no3, e.rotulo::TEXT -- Conversão explícita para TEXT
+    SELECT 
+        s.datahora,
+        s.sonda_no3,
+        e.rotulo::TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
     ORDER BY s.datahora DESC
-    OFFSET offset_param LIMIT limit_param;
+    OFFSET offset_param 
+    LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- =========================
@@ -233,7 +465,7 @@ $$ LANGUAGE plpgsql;
 -- =========================
 -- RADIAÇÃO
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_radiacao(
+CREATE OR REPLACE FUNCTION buscar_radincid(
     p_rotulo TEXT DEFAULT NULL,
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
@@ -243,27 +475,64 @@ CREATE OR REPLACE FUNCTION buscar_radiacao(
 RETURNS TABLE (
     datahora TIMESTAMP,
     radincid FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.datahora,
+        s.radincid,
+        e.rotulo::TEXT
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param 
+    LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION buscar_radrefl(
+    p_rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
     radrefl FLOAT,
     nome_estacao TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.radincid, s.radrefl, e.rotulo::TEXT  -- Conversão explícita para TEXT
+    SELECT 
+        s.datahora,
+        s.radrefl,
+        e.rotulo::TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
     ORDER BY s.datahora DESC
-    OFFSET offset_param LIMIT limit_param;
+    OFFSET offset_param 
+    LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
+
+
 
 
 -- =========================
 -- VENTO (VETOR)
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_vento_vetor(
+CREATE OR REPLACE FUNCTION buscar_dirvt(
     p_rotulo TEXT DEFAULT NULL,
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
@@ -273,29 +542,123 @@ CREATE OR REPLACE FUNCTION buscar_vento_vetor(
 RETURNS TABLE (
     datahora TIMESTAMP,
     dirvt FLOAT,
-    intensvt FLOAT,
-    u_vel FLOAT,
-    v_vel FLOAT,
     nome_estacao TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.dirvt, s.intensvt, s.u_vel, s.v_vel, e.rotulo::TEXT  -- Conversão explícita para TEXT
+    SELECT 
+        s.datahora,
+        s.dirvt,
+        e.rotulo::TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
     ORDER BY s.datahora DESC
     OFFSET offset_param LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
 
 
+
+
+CREATE OR REPLACE FUNCTION buscar_intensvt(
+    p_rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
+    intensvt FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.datahora,
+        s.intensvt,
+        e.rotulo::TEXT
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION buscar_u_vel(
+    p_rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
+    u_vel FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.datahora,
+        s.u_vel,
+        e.rotulo::TEXT
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION buscar_v_vel(
+    p_rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
+    v_vel FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.datahora,
+        s.v_vel,
+        e.rotulo::TEXT
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
 -- =========================
 -- CORRENTES
 -- =========================
-CREATE OR REPLACE FUNCTION buscar_correntes(
+CREATE OR REPLACE FUNCTION buscar_corr_norte(
     p_rotulo TEXT DEFAULT NULL,
     data_inicio TIMESTAMP DEFAULT NULL,
     data_fim TIMESTAMP DEFAULT NULL,
@@ -305,19 +668,54 @@ CREATE OR REPLACE FUNCTION buscar_correntes(
 RETURNS TABLE (
     datahora TIMESTAMP,
     corr_norte FLOAT,
+    nome_estacao TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.datahora,
+        s.corr_norte,
+        e.rotulo::TEXT
+    FROM tbsima s
+    JOIN tbestacao e ON s.idestacao = e.idestacao
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
+    ORDER BY s.datahora DESC
+    OFFSET offset_param 
+    LIMIT limit_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION buscar_corr_leste(
+    p_rotulo TEXT DEFAULT NULL,
+    data_inicio TIMESTAMP DEFAULT NULL,
+    data_fim TIMESTAMP DEFAULT NULL,
+    offset_param INT DEFAULT 0,
+    limit_param INT DEFAULT 9999
+)
+RETURNS TABLE (
+    datahora TIMESTAMP,
     corr_leste FLOAT,
     nome_estacao TEXT
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT s.datahora, s.corr_norte, s.corr_leste, e.rotulo::TEXT  -- Conversão explícita para TEXT
+    SELECT 
+        s.datahora,
+        s.corr_leste,
+        e.rotulo::TEXT
     FROM tbsima s
     JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
+    WHERE 
+        (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
+        AND (data_inicio IS NULL OR s.datahora >= data_inicio)
+        AND (data_fim IS NULL OR s.datahora <= data_fim)
     ORDER BY s.datahora DESC
-    OFFSET offset_param LIMIT limit_param;
+    OFFSET offset_param 
+    LIMIT limit_param;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -351,46 +749,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-
--- =========================
--- QUALIDADE DA ÁGUA (COMBINADO)
--- =========================
-CREATE OR REPLACE FUNCTION buscar_qualidade_agua(
-    p_rotulo TEXT DEFAULT NULL,
-    data_inicio TIMESTAMP DEFAULT NULL,
-    data_fim TIMESTAMP DEFAULT NULL,
-    offset_param INT DEFAULT 0,
-    limit_param INT DEFAULT 9999
-)
-RETURNS TABLE (
-    datahora TIMESTAMP,
-    tempag1 FLOAT,
-    tempag2 FLOAT,
-    tempag3 FLOAT,
-    tempag4 FLOAT,
-    sonda_temp FLOAT,
-    sonda_cond FLOAT,
-    sonda_do FLOAT,
-    sonda_dosat FLOAT,
-    sonda_ph FLOAT,
-    sonda_chl FLOAT,
-    sonda_turb FLOAT,
-    nome_estacao TEXT
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT s.datahora, s.tempag1, s.tempag2, s.tempag3, s.tempag4,
-           s.sonda_temp, s.sonda_cond, s.sonda_do, s.sonda_dosat,
-           s.sonda_ph, s.sonda_chl, s.sonda_turb, e.rotulo::TEXT  -- Conversão explícita para TEXT
-    FROM tbsima s
-    JOIN tbestacao e ON s.idestacao = e.idestacao
-    WHERE (p_rotulo IS NULL OR e.rotulo ILIKE '%' || p_rotulo || '%')
-      AND (data_inicio IS NULL OR s.datahora >= data_inicio)
-      AND (data_fim IS NULL OR s.datahora <= data_fim)
-    ORDER BY s.datahora DESC
-    OFFSET offset_param LIMIT limit_param;
-END;
-$$ LANGUAGE plpgsql;
 
 
 
