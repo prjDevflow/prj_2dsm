@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 const FooterBar = styled.footer`
   position: fixed;
+  // padding: 24px 0px;
   left: 0;
   right: 0;
   bottom: 0;

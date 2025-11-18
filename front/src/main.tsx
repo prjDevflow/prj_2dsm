@@ -15,7 +15,8 @@ import AboutPage from "./pages/AboutPage";
 import theme from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";
 import "./index.css";
- 
+import { GraphicsPage } from "./pages/graphics/page";
+
 const queryClient = new QueryClient();
  
 const routes = createBrowserRouter([
@@ -27,8 +28,8 @@ const routes = createBrowserRouter([
       { path: "sima", element: <SimaPage /> },
       { path: "balcar", element: <BalcarPage /> },
       { path: "furnas", element: <InstituicaoPage /> },
-      { path: "furnas/:instituicao", element: <FurnasMapPage /> },
-      { path: "sobre", element: <AboutPage /> }, // <- rota adicionada
+      { path: "graficos", element: <GraphicsPage /> },
+      { path: "furnas/:instituicao", element: <FurnasMapPage /> }, // <--- aqui
     ],
   },
 ]);
