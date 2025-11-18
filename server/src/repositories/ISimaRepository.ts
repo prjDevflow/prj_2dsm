@@ -26,24 +26,58 @@ export interface ISimaRepository {
     offSet?: number;
     limit?: number;
   }): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]>;
-  getDataByTemperatura(params: {
-    rotulo: string;
-    dataInicio?: Date;
-    dataFim?: Date;
-    offSet?: number;
-    limit?: number;
-  }): Promise<
-    {
-      date: Date;
-      tempag1: number;
-      tempag2: number;
-      tempag3: number;
-      tempag4: number;
-      tempar: number;
-      tempar_r: number;
-      rotulo: string;
-    }[]
-  >;
+  // getDataByTemperatura1(params: {
+  //   rotulo: string;
+  //   dataInicio?: Date;
+  //   dataFim?: Date;
+  //   offSet?: number;
+  //   limit?: number;
+  // }): Promise<
+  //   {
+  //     date: Date;
+  //     value: Number;
+  //     rotulo: string;
+  //   }[]
+  // >;
+  //  getDataByTemperatura2(params: {
+  //   rotulo: string;
+  //   dataInicio?: Date;
+  //   dataFim?: Date;
+  //   offSet?: number;
+  //   limit?: number;
+  // }): Promise<
+  //   {
+  //     date: Date;
+  //     value: Number;
+  //     rotulo: string;
+  //   }[]
+  // >;
+  //  getDataByTemperatura3(params: {
+  //   rotulo: string;
+  //   dataInicio?: Date;
+  //   dataFim?: Date;
+  //   offSet?: number;
+  //   limit?: number;
+  // }): Promise<
+  //   {
+  //     date: Date;
+  //     value: Number;
+  //     rotulo: string;
+  //   }[]
+  // >;
+  //  getDataByTemperatura4(params: {
+  //   rotulo: string;
+  //   dataInicio?: Date;
+  //   dataFim?: Date;
+  //   offSet?: number;
+  //   limit?: number;
+  // }): Promise<
+  //   {
+  //     date: Date;
+  //     value: Number;
+  //     rotulo: string;
+  //   }[]
+  // >;
   getDataByOxigenioDissolvido(params: {
     rotulo: string;
     dataInicio?: Date;
@@ -146,4 +180,15 @@ export interface ISimaRepository {
       nome_estacao: string;
     }[]
   >;
+   getDataByType(params: {
+    tipoDado: string;
+    rotulo?: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+    instituicao?: string;
+    idReservatorio?: string;
+  }): Promise<{ registers: any[]; total: number }>;
+
 }

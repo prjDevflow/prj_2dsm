@@ -34,6 +34,50 @@ export class PostgresSimaRepository implements ISimaRepository {
     return coordinates;
   }
 
+  async getDataByType(params: {
+    tipoDado: string;
+    rotulo?: string;
+    offset: number;
+    limit?: number;
+    dateInit?: Date;
+    dateEnd?: Date;
+
+  }): Promise<{ registers: any[]; total: number }> {
+    // Mapeamento dos tipos de dado para procedures
+    const procedureMap: Record<string, string> = {
+      carbono: "buscar_co2",
+      temperatura: "buscar_temperaturas",
+      oxigenioDissolvido: "buscar_do",
+      ph: "buscar_ph",
+      clorofila: "buscar_clorofila",
+      nutrientes: "buscar_nutrientes",
+      condutividade: "buscar_condutividade",
+      turbidez: "buscar_turbidez",
+      radiacao: "buscar_radiacao",
+      vento: "buscar_vento_vetor",
+      correntes: "buscar_correntes",
+      precipitacao: "buscar_precipitacao",
+      qualidadeAgua: "buscar_qualidade_agua",
+    };
+    const procedure = procedureMap[params.tipoDado];
+    if (!procedure) throw new Error("Tipo de dado não suportado");
+    const query = `SELECT * FROM ${procedure}($1, $2, $3, $4, $5)`;
+    const values = [
+
+      params.rotulo ?? null,
+      params.dateInit ?? null,
+      params.dateEnd ?? null,
+      params.offset ?? 0,
+      params.limit ?? 20,
+      // Adapte conforme assinatura da procedure
+    ];
+    const { rows } = await simaPool.query(query, values);
+    return {
+      registers: rows,
+      total: rows.length,
+    };
+  }
+
   async getAll(params: {
     offset?: number;
     limit?: number;
@@ -110,7 +154,7 @@ export class PostgresSimaRepository implements ISimaRepository {
   }
 
   async getDataById(params: {
-    id: string; 
+    id: string;
     offset: number;
     limit?: number;
     dateInit?: Date;
@@ -160,375 +204,375 @@ export class PostgresSimaRepository implements ISimaRepository {
     return { registers, total: registers.length };
   }
 
-async getDataByCarbono(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]> {
+  async getDataByCarbono(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`,
-    values
-  );
+    const { rows } = await simaPool.query(
+      `SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`,
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,             // veio do DB como datahora.
-    carbonoLow: row.co2_low,        // veio como co2_low
-    carbonoHigh: row.co2_high,      // veio como co2_high
-    estacao: row.nome_estacao        // veio como nome_estacao
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,             // veio do DB como datahora.
+      carbonoLow: row.co2_low,        // veio como co2_low
+      carbonoHigh: row.co2_high,      // veio como co2_high
+      estacao: row.nome_estacao        // veio como nome_estacao
+    }));
 
-  return data;
-}
-async getDataByTemperatura(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
-  date: Date; 
-  tempag1: number; 
-  tempag2: number; 
-  tempag3: number; 
-  tempag4: number; 
-  tempar: number; 
-  tempar_r: number; 
-  rotulo: string; 
-}[]> {
+    return data;
+  }
+  // async getDataByTemperatura(params: {
+  //   rotulo: string;
+  //   dataInicio?: Date;
+  //   dataFim?: Date;
+  //   offSet?: number;
+  //   limit?: number;
+  // }): Promise<{
+  //   date: Date;
+  //   tempag1: number;
+  //   tempag2: number;
+  //   tempag3: number;
+  //   tempag4: number;
+  //   tempar: number;
+  //   tempar_r: number;
+  //   rotulo: string;
+  // }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+  //   const values = [
+  //     params.rotulo ?? null,
+  //     params.dataInicio ?? null,
+  //     params.dataFim ?? null,
+  //     params.offSet ?? 0,
+  //     params.limit ?? 20
+  //   ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
-      datahora,
-      tempag1,
-      tempag2,
-      tempag3,
-      tempag4,
-      tempar,
-      tempar_r,
-      rotulo
-    FROM buscar_temperaturas($1, $2, $3, $4, $5)`,
-    values
-  );
+  //   const { rows } = await simaPool.query(
+  //     `SELECT
+  //     datahora,
+  //     tempag1,
+  //     tempag2,
+  //     tempag3,
+  //     tempag4,
+  //     tempar,
+  //     tempar_r,
+  //     rotulo
+  //   FROM buscar_temperaturas($1, $2, $3, $4, $5)`,
+  //     values
+  //   );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,           // Data da medição
-    tempag1: row.tempag1,         // Temperatura do sensor 1
-    tempag2: row.tempag2,         // Temperatura do sensor 2
-    tempag3: row.tempag3,         // Temperatura do sensor 3
-    tempag4: row.tempag4,         // Temperatura do sensor 4
-    tempar: row.tempar,           // Temperatura do ar
-    tempar_r: row.tempar_r,       // Temperatura do ar corrigido (se aplicável)
-    rotulo: row.rotulo // Nome da estação
-  }));
+  //   const data = rows.map((row: any) => ({
+  //     date: row.datahora,           // Data da medição
+  //     tempag1: row.tempag1,         // Temperatura do sensor 1
+  //     tempag2: row.tempag2,         // Temperatura do sensor 2
+  //     tempag3: row.tempag3,         // Temperatura do sensor 3
+  //     tempag4: row.tempag4,         // Temperatura do sensor 4
+  //     tempar: row.tempar,           // Temperatura do ar
+  //     tempar_r: row.tempar_r,       // Temperatura do ar corrigido (se aplicável)
+  //     rotulo: row.rotulo // Nome da estação
+  //   }));
 
-  return data;
-}
+  //   return data;
+  // }
 
-async getDataByOxigenioDissolvido(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
-  date: Date; sonda_do: number; sonda_dosat: number; nome_estacao: string
-}[]> {
+  async getDataByOxigenioDissolvido(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; sonda_do: number; sonda_dosat: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       sonda_do,
       sonda_dosat,
       nome_estacao
     
     FROM buscar_do($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,           // Data da medição
-    sonda_do: row.sonda_do,         // Temperatura do sensor 1
-    sonda_dosat: row.sonda_dosat,         // Temperatura do sensor 2
-    nome_estacao: row.nome_estacao,         // Temperatura do sensor 3
-   
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,           // Data da medição
+      sonda_do: row.sonda_do,         // Temperatura do sensor 1
+      sonda_dosat: row.sonda_dosat,         // Temperatura do sensor 2
+      nome_estacao: row.nome_estacao,         // Temperatura do sensor 3
 
-  return data;
-}
-async getDataByPh(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
- date: Date; sonda_ph: number; nome_estacao: string
-}[]> {
+    }));
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    return data;
+  }
+  async getDataByPh(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; sonda_ph: number; nome_estacao: string
+  }[]> {
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
+
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       sonda_ph,
       nome_estacao
     
     FROM buscar_ph($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    sonda_ph: row.sonda_ph,     
-    nome_estacao: row.nome_estacao,         
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      sonda_ph: row.sonda_ph,
+      nome_estacao: row.nome_estacao,
+    }));
 
-  return data;
-}
+    return data;
+  }
 
-async getDataByClorofila(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
- date: Date; sonda_chl: number; nome_estacao: string
-}[]> {
+  async getDataByClorofila(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; sonda_chl: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       sonda_chl,
       nome_estacao
     
     FROM buscar_clorofila($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    sonda_chl: row.sonda_chl,     
-    nome_estacao: row.nome_estacao,         
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      sonda_chl: row.sonda_chl,
+      nome_estacao: row.nome_estacao,
+    }));
 
-  return data;
-}
+    return data;
+  }
 
-async getDataByNutrientes(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
- date: Date; sonda_nh4: number; sonda_no3: number; nome_estacao: string
-}[]> {
+  async getDataByNutrientes(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; sonda_nh4: number; sonda_no3: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       sonda_nh4,
       sonda_no3,
       nome_estacao
     
     FROM buscar_nutrientes($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    sonda_nh4: row.sonda_nh4,
-    sonda_no3: row.sonda_no3,     
-    nome_estacao: row.nome_estacao,         
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      sonda_nh4: row.sonda_nh4,
+      sonda_no3: row.sonda_no3,
+      nome_estacao: row.nome_estacao,
+    }));
 
-  return data;
-}
-async getDataByCondutividade(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
- date: Date; sonda_cond: number; nome_estacao: string
-}[]> {
+    return data;
+  }
+  async getDataByCondutividade(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; sonda_cond: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       sonda_cond,
       nome_estacao
     
     FROM buscar_condutividade($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    sonda_cond: row.sonda_cond,    
-    nome_estacao: row.nome_estacao,         
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      sonda_cond: row.sonda_cond,
+      nome_estacao: row.nome_estacao,
+    }));
 
-  return data;
-}
-async getDataByTurbidez(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
- date: Date; sonda_turb: number; nome_estacao: string
-}[]> {
+    return data;
+  }
+  async getDataByTurbidez(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; sonda_turb: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       sonda_turb,
       nome_estacao
     
     FROM buscar_turbidez($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-  sonda_turb: row.sonda_turb,   
-    nome_estacao: row.nome_estacao,         
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      sonda_turb: row.sonda_turb,
+      nome_estacao: row.nome_estacao,
+    }));
 
-  return data;
-}
-async getDataByRadiacao(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
-date: Date; radincid: number; radrefl: number; nome_estacao: string
-}[]> {
+    return data;
+  }
+  async getDataByRadiacao(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; radincid: number; radrefl: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       radincid,
       radrefl,
       nome_estacao
     
     FROM buscar_radiacao($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    radincid: row.radincid,
-    radrefl: row.radrefl,
-    nome_estacao: row.nome_estacao
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      radincid: row.radincid,
+      radrefl: row.radrefl,
+      nome_estacao: row.nome_estacao
+    }));
 
-  return data;
-}
-async getDataByVentoVetor(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
-  date: Date;
-      dirvt: number;
-      intensvt: number;
-      u_vel: number;
-      v_vel: number;
-      nome_estacao: string;
-}[]> {
+    return data;
+  }
+  async getDataByVentoVetor(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date;
+    dirvt: number;
+    intensvt: number;
+    u_vel: number;
+    v_vel: number;
+    nome_estacao: string;
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       dirvt,
       intensvt,
@@ -537,127 +581,127 @@ async getDataByVentoVetor(params: {
       nome_estacao
     
     FROM buscar_vento_vetor($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    dirvt: row.dirvt,
-    intensvt: row.intensvt,
-    u_vel: row.u_vel,
-    v_vel: row.v_vel,
-    nome_estacao: row.nome_estacao
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      dirvt: row.dirvt,
+      intensvt: row.intensvt,
+      u_vel: row.u_vel,
+      v_vel: row.v_vel,
+      nome_estacao: row.nome_estacao
+    }));
 
-  return data;
-}
+    return data;
+  }
 
-async getDataByCorrentes(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
- date: Date; corr_norte: number; corr_leste: number; nome_estacao: string
-}[]> {
+  async getDataByCorrentes(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; corr_norte: number; corr_leste: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       corr_norte,
       corr_leste,
       nome_estacao
     
     FROM buscar_correntes($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    corr_norte: row.corr_norte,
-    corr_leste: row.corr_leste,
-    nome_estacao: row.nome_estacao
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      corr_norte: row.corr_norte,
+      corr_leste: row.corr_leste,
+      nome_estacao: row.nome_estacao
+    }));
 
-  return data;
-}
-async getDataByPrecipitacao(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
-date: Date; precipitacao: number; nome_estacao: string
-}[]> {
+    return data;
+  }
+  async getDataByPrecipitacao(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date; precipitacao: number; nome_estacao: string
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       precipitacao,
       nome_estacao
     
     FROM buscar_precipitacao($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    precipitacao: row.precipitacao,
-    nome_estacao: row.nome_estacao
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      precipitacao: row.precipitacao,
+      nome_estacao: row.nome_estacao
+    }));
 
-  return data;
-}
-async getDataByQualidadeAgua(params: {
-  rotulo: string;
-  dataInicio?: Date;
-  dataFim?: Date;
-  offSet?: number;
-  limit?: number;
-}): Promise<{ 
-date: Date;
-      tempag1: number;
-      tempag2: number;
-      tempag3: number;
-      tempag4: number;
-      sonda_temp: number;
-      sonda_cond: number;
-      sonda_do: Number;
-      sonda_dosat: number;
-      sonda_ph: Number;
-      sonda_chl: Number;
-      sonda_turb: number;
-      nome_estacao: string;
-}[]> {
+    return data;
+  }
+  async getDataByQualidadeAgua(params: {
+    rotulo: string;
+    dataInicio?: Date;
+    dataFim?: Date;
+    offSet?: number;
+    limit?: number;
+  }): Promise<{
+    date: Date;
+    tempag1: number;
+    tempag2: number;
+    tempag3: number;
+    tempag4: number;
+    sonda_temp: number;
+    sonda_cond: number;
+    sonda_do: Number;
+    sonda_dosat: number;
+    sonda_ph: Number;
+    sonda_chl: Number;
+    sonda_turb: number;
+    nome_estacao: string;
+  }[]> {
 
-  const values = [
-    params.rotulo ?? null,
-    params.dataInicio ?? null,
-    params.dataFim ?? null,
-    params.offSet ?? 0,
-    params.limit ?? 20
-  ];
+    const values = [
+      params.rotulo ?? null,
+      params.dataInicio ?? null,
+      params.dataFim ?? null,
+      params.offSet ?? 0,
+      params.limit ?? 20
+    ];
 
-  const { rows } = await simaPool.query(
-    `SELECT
+    const { rows } = await simaPool.query(
+      `SELECT
       datahora,
       tempag1,
       tempag2,
@@ -673,26 +717,26 @@ date: Date;
       nome_estacao
     
     FROM buscar_qualidade_agua($1, $2, $3, $4, $5)`,
-    values
-  );
+      values
+    );
 
-  const data = rows.map((row: any) => ({
-    date: row.datahora,          
-    tempag1: row.tempag1,
-    tempag2: row.tempag2,
-    tempag3: row.tempag3, 
-    tempag4: row.tempag4,
-    sonda_temp: row.sonda_temp,
-    sonda_cond: row.sonda_cond,
-    sonda_do: row.sonda_do,
-    sonda_dosat: row.sonda_dosat,
-    sonda_ph: row.sonda_ph,
-    sonda_chl: row.sonda_chl,
-    sonda_turb: row.sonda_turb,
-    precipitacao: row.precipitacao,
-    nome_estacao: row.nome_estacao
-  }));
+    const data = rows.map((row: any) => ({
+      date: row.datahora,
+      tempag1: row.tempag1,
+      tempag2: row.tempag2,
+      tempag3: row.tempag3,
+      tempag4: row.tempag4,
+      sonda_temp: row.sonda_temp,
+      sonda_cond: row.sonda_cond,
+      sonda_do: row.sonda_do,
+      sonda_dosat: row.sonda_dosat,
+      sonda_ph: row.sonda_ph,
+      sonda_chl: row.sonda_chl,
+      sonda_turb: row.sonda_turb,
+      precipitacao: row.precipitacao,
+      nome_estacao: row.nome_estacao
+    }));
 
-  return data;
-}
+    return data;
+  }
 }
