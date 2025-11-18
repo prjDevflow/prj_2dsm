@@ -1,4 +1,4 @@
-// src/pages/SimaPage.tsx
+
 import Sidebar from "../components/Sidebar";
 import Map from "../components/Map"; // se quiser mostrar um mapa só nessa página
 

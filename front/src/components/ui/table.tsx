@@ -51,12 +51,15 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   );
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+function TableHead({ className, style, ...props }: React.ComponentProps<"th">) {
+  // força textAlign center, mas permite que props.style sobrescreva outras propriedades
+  const mergedStyle = { textAlign: "center" as const, ...(style as React.CSSProperties) };
   return (
     <th
       data-slot="table-head"
+      style={mergedStyle}
       className={cn(
-        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        "text-foreground h-10 px-2 align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className,
       )}
       {...props}
@@ -64,10 +67,13 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   );
 }
 
-function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+function TableCell({ className, style, ...props }: React.ComponentProps<"td">) {
+  // caso queira centralizar também as células do corpo, mantém textAlign center aqui
+  const mergedStyle = { textAlign: "center" as const, ...(style as React.CSSProperties) };
   return (
     <td
       data-slot="table-cell"
+      style={mergedStyle}
       className={cn(
         "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className,
