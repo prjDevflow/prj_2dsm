@@ -28,6 +28,54 @@ export interface BalcarRecord extends Record<string, unknown> {
   total_count?: string | number;
   [k: string]: unknown;
 }
+
+// Mapeamento dos nomes das colunas para Balcar
+const COLUMN_MAPPING: Record<string, string> = {
+  // Datas (primeiros itens como solicitado)
+  datahora: "Data e Hora",
+  
+  // Localização e identificação
+  sitio_nome: "Nome do Sítio",
+  instituicao_nome: "Nome da Instituição",
+  reservatorio_nome: "Nome do Reservatório",
+  
+  // Parâmetros físicos
+  batimetria: "Batimetria",
+  tempar: "Temperatura do Ar",
+  tempcupula: "Temperatura da Cúpula",
+  tempaguasubsuperficie: "Temperatura da Água Subsuperfície",
+  tempaguameio: "Temperatura da Água Meio",
+  tempaguafundo: "Temperatura da Água Fundo",
+  
+  // Parâmetros químicos
+  phsubsuperficie: "pH Subsuperfície",
+  phmeio: "pH Meio",
+  phfundo: "pH Fundo",
+  orpsubsuperficie: "ORP Subsuperfície",
+  orpmeio: "ORP Meio",
+  orpfundo: "ORP Fundo",
+  condutividadesubsuperficie: "Condutividade Subsuperfície",
+  condutividademeio: "Condutividade Meio",
+  condutividadefundo: "Condutividade Fundo",
+  odsubsuperficie: "Oxigênio Dissolvido Subsuperfície",
+  odmeio: "Oxigênio Dissolvido Meio",
+  odfundo: "Oxigênio Dissolvido Fundo",
+  tsdsubsuperficie: "TSD Subsuperfície",
+  tsdmeio: "TSD Meio",
+  tsdfundo: "TSD Fundo",
+  
+  // Gases (elementos químicos mantidos como estão)
+  ch4: "CH4",
+};
+
+// Ordem prioritária para as colunas (datas primeiro)
+const COLUMN_PRIORITY = [
+  'datahora',
+  'sitio_nome',
+  'instituicao_nome', 
+  'reservatorio_nome',
+  'batimetria'
+];
  
 interface Props {
   selectedPointId?: number | string | null;
@@ -173,8 +221,20 @@ function extractColumnsFromData(records: BalcarRecord[]): string[] {
     });
   });
  
-  return Array.from(columns).sort();
+  return Array.from(columns);
 }
+
+// Função para obter o nome amigável da coluna
+const getColumnLabel = (columnKey: string): string => {
+  return COLUMN_MAPPING[columnKey] || columnKey;
+};
+
+// Função para ordenar colunas com prioridade
+const sortColumnsWithPriority = (columns: string[]): string[] => {
+  const priorityColumns = COLUMN_PRIORITY.filter(col => columns.includes(col));
+  const otherColumns = columns.filter(col => !COLUMN_PRIORITY.includes(col)).sort();
+  return [...priorityColumns, ...otherColumns];
+};
  
 export default function BalcarTable({
   selectedPointId = null,
@@ -218,10 +278,12 @@ export default function BalcarTable({
     const allRecords = [...displayOnline, ...displayOffline];
     if (allRecords.length > 0) {
       const columns = extractColumnsFromData(allRecords);
-      setAvailableColumns(columns);
+      // Ordenar colunas com prioridade
+      const sortedColumns = sortColumnsWithPriority(columns);
+      setAvailableColumns(sortedColumns);
      
       const defaultSelected: Record<string, boolean> = {};
-      columns.forEach(col => {
+      sortedColumns.forEach(col => {
         defaultSelected[col] = true;
       });
       setSelectedColumns(defaultSelected);
@@ -471,13 +533,14 @@ export default function BalcarTable({
       [col]: !prev[col],
     }));
   };
- 
+
   function exportCSV(which: "online" | "offline" = "online") {
     const data = which === "online" ? displayOnline : displayOffline;
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
-    const rowsOut: string[][] = [keys];
+    const headers = keys.map(k => getColumnLabel(k));
+    const rowsOut: string[][] = [headers];
     data.forEach((row) =>
       rowsOut.push(keys.map((k) => {
         const v = (row as Record<string, unknown>)[k];
@@ -499,9 +562,10 @@ export default function BalcarTable({
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
+    const headers = keys.map(k => getColumnLabel(k));
     let html = `<html><head><meta charset="utf-8"><title>Balcar ${which}</title>
       <style>body{font-family:system-ui;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:6px 8px;white-space:nowrap}th{background:#f3f4f6}</style></head><body>`;
-    html += `<h3>Balcar ${which}</h3><table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
+    html += `<h3>Balcar ${which}</h3><table><thead><tr>${headers.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
     data.forEach((row) => {
       html += "<tr>" + keys.map((k) => `<td>${renderValue((row as Record<string, unknown>)[k])}</td>`).join("") + "</tr>";
     });
@@ -527,7 +591,7 @@ export default function BalcarTable({
           padding: "8px 10px",
         }}
       >
-        {key}
+        {getColumnLabel(key)}
       </TableHead>
     ));
  
@@ -561,8 +625,8 @@ export default function BalcarTable({
         <div className="flex items-center gap-3">
           <div className="inline-flex gap-2 flex-wrap items-center">
             <div className="relative">
-              <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded">
-                Colunas
+              <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">
+                Filtros
               </button>
  
               {columnsOpen && (
@@ -570,8 +634,8 @@ export default function BalcarTable({
                   <div className="p-1 border-b flex justify-between items-center">
                     <strong>Colunas</strong>
                     <div className="flex gap-1">
-                      <button onClick={selectAllTemp} className="px-2 py-1 text-xs border rounded">Tudo</button>
-                      <button onClick={clearAllTemp} className="px-2 py-1 text-xs border rounded">Limpar</button>
+                      <button onClick={selectAllTemp} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Tudo</button>
+                      <button onClick={clearAllTemp} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Limpar</button>
                     </div>
                   </div>
  
@@ -585,7 +649,7 @@ export default function BalcarTable({
                             checked={!!tempSelectedColumns[col]}
                             onChange={() => toggleTempColumn(col)}
                           />
-                          <span className="truncate">{col}</span>
+                          <span className="truncate" title={getColumnLabel(col)}>{getColumnLabel(col)}</span>
                         </label>
                       ))}
                     </div>
@@ -615,8 +679,8 @@ export default function BalcarTable({
               )}
             </div>
  
-            <button onClick={() => exportCSV("online")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar CSV</button>
-            <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir</button>
+            <button onClick={() => exportCSV("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Exportar CSV</button>
+            <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Abrir Online</button>
           </div>
         </div>
       </div>
@@ -629,7 +693,7 @@ export default function BalcarTable({
           <div style={{ minWidth: calcMinWidth(visibleColumns.length) }}>
             <Table>
               <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
-                Online - Mostrando {displayOnline.length} registros
+                Online
                 {knownTotalForView && ` de ${knownTotalForView} totais`}
               </TableCaption>
               <TableHeader>
@@ -702,7 +766,7 @@ export default function BalcarTable({
           <button
             disabled={page <= 1}
             onClick={handlePrev}
-            className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer"
           >
             Anterior
           </button>
@@ -710,7 +774,7 @@ export default function BalcarTable({
           <button
             disabled={!hasNext.current}
             onClick={handleNext}
-            className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer"
           >
             Próxima
           </button>

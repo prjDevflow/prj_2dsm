@@ -34,23 +34,156 @@ interface Props {
   apiBase?: string; // default para furnas
 }
 
+// Mapeamento dos nomes das colunas
+const COLUMN_MAPPING: Record<string, string> = {
+  // Datas (primeiros itens como solicitado)
+  datamedida: "Data da Medida",
+  datainicio: "Data Início",
+  datafim: "Data Fim",
+  horamedida: "Hora da Medida",
+  intervalo: "Intervalo",
+  
+  // Localização
+  lat: "Latitude",
+  lng: "Longitude",
+  altitude: "Altitude",
+  
+  // Identificadores
+  idsitio: "ID Sítio",
+  idcampanha: "ID Campanha",
+  idbolhas: "ID Bolhas",
+  idhoriba: "ID Horiba",
+  idcarbono: "ID Carbono",
+  iddifusao: "ID Difusão",
+  idinstituicao: "ID Instituição",
+  idreservatorio: "ID Reservatório",
+  idfluxocarbono: "ID Fluxo Carbono",
+  idfluxodifusivo: "ID Fluxo Difusivo",
+  idgasesembolhas: "ID Gases em Bolhas",
+  idbioticocoluna: "ID Biótico Coluna",
+  idabioticocoluna: "ID Abiótico Coluna",
+  idfluxobolhasinpe: "ID Fluxo Bolhas INPE",
+  idbioticosuperficie: "ID Biótico Superfície",
+  idfluxodifusivoinpe: "ID Fluxo Difusivo INPE",
+  idmedidacampocoluna: "ID Medida Campo Coluna",
+  idabioticosuperficie: "ID Abiótico Superfície",
+  iddupladessorcaoagua: "ID Dupla Dessorção Água",
+  idconcentracaogasagua: "ID Concentração Gás Água",
+  idnutrientessedimento: "ID Nutrientes Sedimento",
+  idmedidacamposuperficie: "ID Medida Campo Superfície",
+  idconcentracaogassedimento: "ID Concentração Gás Sedimento",
+  idaguamateriaorganicasedimento: "ID Água Matéria Orgânica Sedimento",
+  idvariaveisfisicasquimicasdaagua: "ID Variáveis Físico-Químicas da Água",
+  idparametrosbiologicosfisicosagua: "ID Parâmetros Biológicos Físicos Água",
+  idionsnaaguaintersticialdosedimento: "ID Íons na Água Intersticial do Sedimento",
+  
+  // Parâmetros físicos
+  tempagua: "Temperatura da Água",
+  tempsolo: "Temperatura do Solo",
+  tempar: "Temperatura do Ar",
+  turbidez: "Turbidez",
+  secchi: "Disco de Secchi",
+  vento: "Velocidade do Vento",
+  altura: "Altura",
+  profundidade: "Profundidade",
+  batimetria: "Batimetria",
+  condutividade: "Condutividade",
+  redox: "Potencial Redox",
+  intensidadeluminosa: "Intensidade Luminosa",
+  
+  // Parâmetros químicos gerais
+  ph: "pH",
+  tds: "Sólidos Totais Dissolvidos (TDS)",
+  tdc: "Carbono Total Dissolvido",
+  toc: "Carbono Orgânico Total",
+  doc: "Carbono Orgânico Dissolvido",
+  dic: "Carbono Inorgânico Dissolvido",
+  pt: "Fósforo Total",
+  tc: "Carbono Total",
+  materialemsuspensao: "Material em Suspensão",
+  materiaorganica: "Matéria Orgânica",
+  
+  // Elementos químicos (mantidos como estão)
+  f: "Flúor",
+  k: "Potássio",
+  br: "Bromo",
+  ca: "Cálcio",
+  cl: "Cloreto",
+  dc: "Condutividade",
+  li: "Lítio",
+  mg: "Magnésio",
+  n2: "Nitrogênio",
+  na: "Sódio",
+  nt: "Nitrogênio Total",
+  o2: "Oxigênio",
+  _do: "Oxigênio Dissolvido",
+  ch4: "Metano",
+  co2: "Dióxido de Carbono",
+  n2o: "Óxido Nitroso",
+  nh4: "Amônio",
+  no2: "Nitrito",
+  no3: "Nitrato",
+  po4: "Fosfato",
+  poc: "Carbono Orgânico Particulado",
+  so4: "Sulfato",
+  agua: "Água",
+  idtc: "ID Carbono Total",
+  nnh4: "Nitrogênio Amoniacal",
+  nno3: "Nitrogênio Nitrato",
+  ppo43: "Fósforo Fosfato",
+  sso42: "Enxofre Sulfato",
+  
+  // Parâmetros biológicos
+  biomassazoo: "Biomassa Zooplâncton",
+  respiracaofito: "Respiração Fitoplâncton",
+  biomassabacteria: "Biomassa Bacteriana",
+  respiracaobacteriana: "Respiração Bacteriana",
+  producaobacteriana: "Produção Bacteriana",
+  producaofitoplanctonica: "Produção Fitoplanctônica",
+  biomassacarbonototalfito: "Biomassa Carbono Total Fito",
+  carbonoorganicoexcretado: "Carbono Orgânico Excretado",
+  densidadebacteria: "Densidade Bacteriana",
+  densidadetotalzoo: "Densidade Total Zoo",
+  densidadetotalfito: "Densidade Total Fito",
+  taxasedimentacao: "Taxa de Sedimentação",
+  clorofila: "Clorofila",
+  clorofilaa: "Clorofila A",
+  feofitina: "Feofitina",
+  volumecoletado: "Volume Coletado",
+  
+  // Amostras e réplicas
+  ch4_amostras: "Amostras de CH4",
+  co2_amostras: "Amostras de CO2",
+  ch4_desviopadrao: "Desvio Padrão CH4",
+  co2_desviopadrao: "Desvio Padrão CO2",
+  nrodefunis: "Número de Funis",
+  nrocampanha: "Número da Campanha",
+  replica: "Réplica",
+  
+  // Isotópicos
+  delta13c: "Delta 13C",
+  delta15n: "Delta 15N",
+  
+  // Outros
+  profundidadedosedimento: "Profundidade do Sedimento"
+};
+
+// Ordem prioritária para as colunas (datas primeiro)
+const COLUMN_PRIORITY = [
+  'datamedida', 'datainicio', 'datafim', 'horamedida', 'intervalo',
+  'lat', 'lng', 'altitude'
+];
+
 const calcMinWidth = (nCols: number) => Math.max(900, nCols * 140);
 
 const isRecordArray = (v: unknown): v is Record<string, unknown>[] =>
   Array.isArray(v) && (v.length === 0 || typeof v[0] === "object");
 
-/**
- * flattenRecord:
- * - se record.data for um objeto, mescla record.data no topo do objeto
- * - remove a propriedade original `data` para evitar duplicação
- * - mantém todas as outras propriedades (ids, metadados)
- */
 function flattenRecord(r: Record<string, unknown>): Record<string, unknown> {
   if (!r || typeof r !== "object") return r;
   const copy: Record<string, unknown> = { ...r };
   const maybeData = copy.data;
   if (maybeData && typeof maybeData === "object" && !Array.isArray(maybeData)) {
-    // mescla as chaves de data no topo (sobrescreve se houver conflito)
     const nested = maybeData as Record<string, unknown>;
     delete copy.data;
     return { ...copy, ...nested };
@@ -63,7 +196,6 @@ function normalizePayload(payload: unknown): { online: Record<string, unknown>[]
   const offline: Record<string, unknown>[] = [];
 
   if (isRecordArray(payload)) {
-    // achatar cada registro quando necessário
     online.push(...(payload as Record<string, unknown>[]).map(flattenRecord));
     return { online, offline };
   }
@@ -71,7 +203,6 @@ function normalizePayload(payload: unknown): { online: Record<string, unknown>[]
   if (payload && typeof payload === "object") {
     const obj = payload as Record<string, unknown>;
 
-    // caso: { data: { registers: [...] } }
     if (obj.data && typeof obj.data === "object") {
       const dataObj = obj.data as Record<string, unknown>;
       if (isRecordArray(dataObj.registers)) {
@@ -80,27 +211,23 @@ function normalizePayload(payload: unknown): { online: Record<string, unknown>[]
       }
     }
 
-    // caso: online/offline arrays explícitos
     if (isRecordArray(obj.online) || isRecordArray(obj.offline)) {
       online.push(...(((obj.online as Record<string, unknown>[]) ?? []).map(flattenRecord)));
       offline.push(...(((obj.offline as Record<string, unknown>[]) ?? []).map(flattenRecord)));
       return { online, offline };
     }
 
-    // caso: dados no próprio data (array)
     if (isRecordArray(obj.data)) {
       online.push(...((obj.data as Record<string, unknown>[]).map(flattenRecord)));
       return { online, offline };
     }
 
-    // caso: campos com nomes antigos (sima, sima_offline)
     if (isRecordArray(obj.sima) || isRecordArray(obj.sima_offline)) {
       online.push(...(((obj.sima as Record<string, unknown>[]) ?? []).map(flattenRecord)));
       offline.push(...(((obj.sima_offline as Record<string, unknown>[]) ?? []).map(flattenRecord)));
       return { online, offline };
     }
 
-    // procura por arrays em campos arbitrários (fallback)
     for (const k of Object.keys(obj)) {
       const v = obj[k];
       if (isRecordArray(v)) {
@@ -210,6 +337,18 @@ export default function FurnasTable({
   const [tempSelectedColumns, setTempSelectedColumns] = useState<Record<string, boolean>>({});
   const [columnsOpen, setColumnsOpen] = useState(false);
 
+  // Função para obter o nome amigável da coluna
+  const getColumnLabel = (columnKey: string): string => {
+    return COLUMN_MAPPING[columnKey] || columnKey;
+  };
+
+  // Função para ordenar colunas com prioridade
+  const sortColumnsWithPriority = (columns: string[]): string[] => {
+    const priorityColumns = COLUMN_PRIORITY.filter(col => columns.includes(col));
+    const otherColumns = columns.filter(col => !COLUMN_PRIORITY.includes(col)).sort();
+    return [...priorityColumns, ...otherColumns];
+  };
+
   useEffect(() => {
     setPage(1);
     useClientPaginationRef.current = false;
@@ -224,11 +363,12 @@ export default function FurnasTable({
     if (displayOnline && displayOnline.length > 0) Object.keys(displayOnline[0]).forEach((k) => union.add(k));
     if (displayOffline && displayOffline.length > 0) Object.keys(displayOffline[0]).forEach((k) => union.add(k));
     const cols = Array.from(union);
-    // ordenar: campos comuns primeiro (opcional), por enquanto mantém ordem natural
-    setAvailableColumns(cols);
+    // Ordenar colunas com prioridade
+    const sortedCols = sortColumnsWithPriority(cols);
+    setAvailableColumns(sortedCols);
 
-    if (Object.keys(selectedColumns).length === 0 && cols.length > 0) {
-      const all = Object.fromEntries(cols.map((c) => [c, true]));
+    if (Object.keys(selectedColumns).length === 0 && sortedCols.length > 0) {
+      const all = Object.fromEntries(sortedCols.map((c) => [c, true]));
       setSelectedColumns(all);
     }
     if (Object.keys(tempSelectedColumns).length === 0 && Object.keys(selectedColumns).length > 0) {
@@ -466,7 +606,8 @@ export default function FurnasTable({
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
-    const rows: string[][] = [keys];
+    const headers = keys.map(k => getColumnLabel(k));
+    const rows: string[][] = [headers];
     data.forEach((row) =>
       rows.push(
         keys.map((k) => {
@@ -490,9 +631,10 @@ export default function FurnasTable({
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
+    const headers = keys.map(k => getColumnLabel(k));
     let html = `<html><head><meta charset="utf-8"><title>FURNAS ${which}</title>
       <style>body{font-family:system-ui;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:6px 8px;white-space:nowrap}th{background:#f3f4f6}</style></head><body>`;
-    html += `<h3>FURNAS ${which}</h3><table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
+    html += `<h3>FURNAS ${which}</h3><table><thead><tr>${headers.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
     data.forEach((row) => {
       html += "<tr>" + keys.map((k) => `<td>${renderValue((row as Record<string, unknown>)[k])}</td>`).join("") + "</tr>";
     });
@@ -518,7 +660,7 @@ export default function FurnasTable({
           padding: "8px 10px",
         }}
       >
-        {key}
+        {getColumnLabel(key)}
       </TableHead>
     ));
 
@@ -561,13 +703,13 @@ export default function FurnasTable({
           <div className="inline-flex gap-2 flex-wrap items-center">
             {(view === "offline" || view === "ambos") && (
               <>
-                <button onClick={() => exportCSV("offline")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar Offline CSV</button>
-                <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir Offline</button>
+                <button onClick={() => exportCSV("offline")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Exportar Offline CSV</button>
+                <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Abrir Offline</button>
               </>
             )}
 
             <div className="relative">
-              <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded">
+              <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">
                 Filtros
               </button>
 
@@ -576,8 +718,8 @@ export default function FurnasTable({
                   <div className="p-3 border-b flex justify-between items-center">
                     <strong>Colunas</strong>
                     <div className="flex gap-1">
-                      <button onClick={selectAllTemp} className="px-2 py-1 text-xs border rounded">Tudo</button>
-                      <button onClick={clearAllTemp} className="px-2 py-1 text-xs border rounded">Limpar</button>
+                      <button onClick={selectAllTemp} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Tudo</button>
+                      <button onClick={clearAllTemp} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Limpar</button>
                     </div>
                   </div>
 
@@ -591,7 +733,7 @@ export default function FurnasTable({
                             checked={!!tempSelectedColumns[col]}
                             onChange={() => toggleTempColumn(col)}
                           />
-                          <span className="truncate">{col}</span>
+                          <span className="truncate" title={getColumnLabel(col)}>{getColumnLabel(col)}</span>
                         </label>
                       ))}
                     </div>
@@ -603,7 +745,7 @@ export default function FurnasTable({
                         setTempSelectedColumns({ ...selectedColumns });
                         setColumnsOpen(false);
                       }}
-                      className="px-3 py-1 border rounded"
+                      className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -612,7 +754,7 @@ export default function FurnasTable({
                         setSelectedColumns({ ...tempSelectedColumns });
                         setColumnsOpen(false);
                       }}
-                      className="px-3 py-1 bg-blue-600 text-white rounded"
+                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-transform duration-200 hover:scale-105 cursor-pointer"
                     >
                       Aplicar
                     </button>
@@ -623,8 +765,8 @@ export default function FurnasTable({
 
             {(view === "online" || view === "ambos") && (
               <>
-                <button onClick={() => exportCSV("online")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar Online CSV</button>
-                <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir Online</button>
+                <button onClick={() => exportCSV("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Exportar CSV</button>
+                <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Abrir Online</button>
               </>
             )}
           </div>
@@ -655,26 +797,6 @@ export default function FurnasTable({
           </div>
         )}
 
-        {(view === "offline" || view === "ambos") && displayOffline.length > 0 && visibleColumns.length > 0 && (
-          <div style={{ minWidth: calcMinWidth(visibleColumns.length), marginTop: 20 }}>
-            <Table>
-              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>Offline</TableCaption>
-              <TableHeader>
-                <TableRow>{renderHeaderCells(visibleColumns)}</TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayOffline.map((row, rIdx) => (
-                  <TableRow key={String((row as any).idsimaoffline ?? rIdx)} className={rowClass(rIdx)}>
-                    {visibleColumns.map((col, idx) => (
-                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>{renderValue((row as Record<string, unknown>)[col])}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-
         {((view === "online" && displayOnline.length > 0) || (view === "offline" && displayOffline.length > 0) || (view === "ambos" && (displayOnline.length > 0 || displayOffline.length > 0))) && visibleColumns.length === 0 && (
           <div className="p-4 text-sm text-gray-600">Nenhuma coluna selecionada — selecione colunas em <strong>Coluna</strong>.</div>
         )}
@@ -686,9 +808,9 @@ export default function FurnasTable({
         </div>
 
         <div className="space-x-2 flex items-center">
-          <button disabled={page <= 1} onClick={handlePrev} className="px-3 py-1 border rounded">Anterior</button>
+          <button disabled={page <= 1} onClick={handlePrev} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Anterior</button>
 
-          <button disabled={!hasNext} onClick={handleNext} className="px-3 py-1 border rounded">Próxima</button>
+          <button disabled={!hasNext} onClick={handleNext} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Próxima</button>
 
           <div className="inline-flex items-center gap-2">
             <label className="text-sm">Ir p/ página:</label>

@@ -10,7 +10,7 @@ export default function BalcarPage() {
     <div className="flex gap-4">
      
  
-      <main className="flex-1 p-6 relative">
+      <main className="flex-1 relative">
         <h1 className="text-2xl font-bold mb-4">Balcar</h1>
  
         <Map

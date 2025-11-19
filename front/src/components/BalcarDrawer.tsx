@@ -8,7 +8,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
  
 type PontoColeta = {
   idreservatorio?: number | string;
@@ -30,7 +29,6 @@ const BalcarDrawer: React.FC<Props> = ({
   open,
   onOpenChange,
   selectedPonto,
-  setSelectedPonto,
   apiBase = "http://localhost:3001/balcar",
 }) => {
   const [key, setKey] = React.useState(0);
@@ -52,15 +50,6 @@ const BalcarDrawer: React.FC<Props> = ({
     );
   }, [selectedPonto]);
  
-  const handleClose = () => {
-    onOpenChange(false);
-    // Resetar a seleção após um delay para evitar flickering
-    setTimeout(() => {
-      if (setSelectedPonto) {
-        setSelectedPonto(null);
-      }
-    }, 300);
-  };
  
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -88,23 +77,6 @@ const BalcarDrawer: React.FC<Props> = ({
         </DrawerHeader>
  
         <DrawerFooter>
-          <div className="flex gap-2 justify-between items-center">
-            <div className="flex gap-2">
-              <Button onClick={handleClose}>Fechar</Button>
- 
-              {setSelectedPonto && (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setSelectedPonto(null);
-                    onOpenChange(false);
-                  }}
-                >
-                  Limpar seleção
-                </Button>
-              )}
-            </div>
-          </div>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

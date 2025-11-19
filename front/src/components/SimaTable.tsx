@@ -12,8 +12,6 @@ import type { Props, SimaRecord } from "../lib/types";
 import { normalizePayload, extractTotals, calcMinWidth } from "../lib/utils";
 import { translateFieldName } from "../lib/fieldMappings";
 
-// Safety: only allow client-side full fetch up to this many records
-
 // Função para formatar data e hora
 function formatDateTime(value: unknown): { data: string; hora: string } {
   if (value === null || value === undefined) {
@@ -67,70 +65,66 @@ export default function SimaTable({
   initialLimit = 100,
   apiBase = "http://localhost:3001/sima",
 }: Props) {
-  // display arrays (what is shown on screen)
+  // Estados principais
   const [displayOnline, setDisplayOnline] = useState<SimaRecord[]>([]);
   const [displayOffline, setDisplayOffline] = useState<SimaRecord[]>([]);
-
-  // raw arrays kept only for safe client-side slicing when allowed
   const [, setRawOnline] = useState<SimaRecord[] | null>(null);
   const [, setRawOffline] = useState<SimaRecord[] | null>(null);
-
   const [loading, setLoading] = useState<boolean>(false);
   const [view] = useState<"online" | "offline" | "ambos">("online");
   const [error, setError] = useState<string | null>(null);
-
   const [page, setPage] = useState<number>(initialPage ?? 1);
   const [pageInput, setPageInput] = useState<string>(String(page));
-
-  useEffect(() => {
-    setPageInput(String(page));
-  }, [page]);
-
   const [limit] = useState<number>(initialLimit ?? 100);
-
   const [, setTotalOnline] = useState<number | undefined>(undefined);
   const [, setTotalOffline] = useState<number | undefined>(undefined);
   const [, setTotalCombined] = useState<number | undefined>(undefined);
 
-  // used to detect whether server ignored page param (compara assinatura das primeiras linhas)
-  const prevSignatureRef = useRef<string | null>(null);
-  // flag indicando que estamos em paginação client-side (após fetch completo seguro)
-  const useClientPaginationRef = useRef<boolean>(false);
-
-  // --- column visibility UI ---
+  // Filtros
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<Record<string, boolean>>({});
   const [tempSelectedColumns, setTempSelectedColumns] = useState<Record<string, boolean>>({});
   const [columnsOpen, setColumnsOpen] = useState(false);
 
-  // --- year filter UI ---
+  // Filtro de data (anos e meses)
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [selectedYears, setSelectedYears] = useState<number[]>([]);
+  const [tempSelectedYears, setTempSelectedYears] = useState<number[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<number[]>([]);
+  const [selectedMonths, setSelectedMonths] = useState<number[]>([]);
+  const [tempSelectedMonths, setTempSelectedMonths] = useState<number[]>([]);
   const [yearsOpen, setYearsOpen] = useState(false);
   const [allData, setAllData] = useState<SimaRecord[]>([]);
 
-  // reset page and client-pagination when changing point or range
+  const useClientPaginationRef = useRef<boolean>(false);
+
+  // Reset quando muda o ponto selecionado
   useEffect(() => {
     setPage(1);
-    useClientPaginationRef.current = false;
-    setRawOnline(null);
-    setRawOffline(null);
-    prevSignatureRef.current = null;
     setAvailableYears([]);
     setSelectedYears([]);
+    setTempSelectedYears([]);
+    setAvailableMonths([]);
+    setSelectedMonths([]);
+    setTempSelectedMonths([]);
     setAllData([]);
+    setDisplayOnline([]);
+    setDisplayOffline([]);
   }, [selectedPoint, selectedPointId, selectedPointName]);
 
-  // Extract available years from all data
+  // Extrai anos e meses disponíveis dos dados
   useEffect(() => {
     if (allData.length > 0) {
       const yearsSet = new Set<number>();
+      const monthsSet = new Set<number>();
+      
       allData.forEach(record => {
         if (record.datahora) {
           try {
             const date = new Date(String(record.datahora));
             if (!isNaN(date.getTime())) {
               yearsSet.add(date.getFullYear());
+              monthsSet.add(date.getMonth() + 1); // Janeiro = 1, Dezembro = 12
             }
           } catch (error) {
             console.warn('Invalid date format:', record.datahora);
@@ -138,36 +132,48 @@ export default function SimaTable({
         }
       });
       
-      const years = Array.from(yearsSet).sort((a, b) => b - a); // Most recent years first
+      const years = Array.from(yearsSet).sort((a, b) => b - a);
+      const months = Array.from(monthsSet).sort((a, b) => a - b);
+      
       setAvailableYears(years);
-      setSelectedYears(years); // Select all years by default
+      setAvailableMonths(months);
+      setSelectedYears(years);
+      setSelectedMonths(months);
+      setTempSelectedYears(years);
+      setTempSelectedMonths(months);
     }
   }, [allData]);
 
-  // Filter data based on selected years
+  // Filtra dados baseado nos anos e meses selecionados
   const filteredData = useMemo(() => {
-    if (selectedYears.length === 0) return allData;
+    if (selectedYears.length === 0 && selectedMonths.length === 0) return allData;
     
     return allData.filter(record => {
       if (!record.datahora) return false;
       
       try {
-        const recordYear = new Date(String(record.datahora)).getFullYear();
-        return selectedYears.includes(recordYear);
+        const date = new Date(String(record.datahora));
+        const recordYear = date.getFullYear();
+        const recordMonth = date.getMonth() + 1;
+        
+        const yearMatch = selectedYears.length === 0 || selectedYears.includes(recordYear);
+        const monthMatch = selectedMonths.length === 0 || selectedMonths.includes(recordMonth);
+        
+        return yearMatch && monthMatch;
       } catch {
         return false;
       }
     });
-  }, [allData, selectedYears]);
+  }, [allData, selectedYears, selectedMonths]);
 
-  // Apply pagination to filtered data
+  // Aplica paginação aos dados filtrados
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, page, limit]);
 
-  // Update display data when paginated data changes
+  // Atualiza dados de exibição quando muda a paginação
   useEffect(() => {
     if (view === "online" || view === "ambos") {
       setDisplayOnline(paginatedData);
@@ -177,14 +183,19 @@ export default function SimaTable({
     }
   }, [paginatedData, view]);
 
-  // Update totals when filtered data changes
+  // Atualiza totais quando dados filtrados mudam
   useEffect(() => {
     setTotalOnline(filteredData.length);
     setTotalOffline(0);
     setTotalCombined(filteredData.length);
   }, [filteredData]);
 
-  // quando os dados chegam, monta a lista de colunas disponíveis (união online+offline)
+  // Atualiza página quando muda o input
+  useEffect(() => {
+    setPageInput(String(page));
+  }, [page]);
+
+  // Configura colunas disponíveis
   useEffect(() => {
     const union = new Set<string>();
     if (displayOnline && displayOnline.length > 0) {
@@ -196,22 +207,18 @@ export default function SimaTable({
     const cols = Array.from(union);
     setAvailableColumns(cols);
 
-    // se o usuário ainda não escolheu colunas explicitamente, selecionar todas por padrão
     if (Object.keys(selectedColumns).length === 0 && cols.length > 0) {
       const all = Object.fromEntries(cols.map((c) => [c, true]));
       setSelectedColumns(all);
     }
-    // também atualiza tempSelectedColumns quando não houver seleção temporária
     if (Object.keys(tempSelectedColumns).length === 0 && Object.keys(selectedColumns).length > 0) {
       setTempSelectedColumns({ ...selectedColumns });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayOnline, displayOffline]);
+  }, [displayOnline, displayOffline, selectedColumns, tempSelectedColumns]);
 
-  // quando o dropdown abre, inicializa a cópia temporária com a seleção atual
+  // Inicializa seleção temporária de colunas
   useEffect(() => {
     if (columnsOpen) {
-      // se ainda não há selectedColumns (primeira carga), cria padrão
       if (Object.keys(selectedColumns).length === 0 && availableColumns.length > 0) {
         const all = Object.fromEntries(availableColumns.map((c) => [c, true]));
         setSelectedColumns(all);
@@ -220,9 +227,17 @@ export default function SimaTable({
         setTempSelectedColumns({ ...selectedColumns });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnsOpen]);
+  }, [columnsOpen, selectedColumns, availableColumns]);
 
+  // Inicializa seleção temporária de anos e meses
+  useEffect(() => {
+    if (yearsOpen) {
+      setTempSelectedYears([...selectedYears]);
+      setTempSelectedMonths([...selectedMonths]);
+    }
+  }, [yearsOpen, selectedYears, selectedMonths]);
+
+  // Funções de filtro de colunas
   function toggleTempColumn(col: string) {
     setTempSelectedColumns((s) => ({ ...s, [col]: !s[col] }));
   }
@@ -235,29 +250,49 @@ export default function SimaTable({
     setTempSelectedColumns(Object.fromEntries(availableColumns.map((c) => [c, false])));
   }
 
-  // Year filter functions
+  // Funções de filtro de anos
   function toggleYear(year: number) {
-    setSelectedYears(prev => 
+    setTempSelectedYears(prev => 
       prev.includes(year) 
         ? prev.filter(y => y !== year)
         : [...prev, year]
     );
-    setPage(1); // Reset to first page when filter changes
   }
 
   function selectAllYears() {
-    setSelectedYears([...availableYears]);
-    setPage(1);
+    setTempSelectedYears([...availableYears]);
   }
 
   function clearAllYears() {
-    setSelectedYears([]);
-    setPage(1);
+    setTempSelectedYears([]);
   }
 
-  // gera uma assinatura curta para detectar se os primeiros registros não mudaram
+  // Funções de filtro de meses
+  function toggleMonth(month: number) {
+    setTempSelectedMonths(prev => 
+      prev.includes(month) 
+        ? prev.filter(m => m !== month)
+        : [...prev, month]
+    );
+  }
 
-  // helper fetch com checagem de response.ok
+  function selectAllMonths() {
+    setTempSelectedMonths([...availableMonths]);
+  }
+
+  function clearAllMonths() {
+    setTempSelectedMonths([]);
+  }
+
+  // Aplicar filtro de data
+  function applyDateFilter() {
+    setSelectedYears([...tempSelectedYears]);
+    setSelectedMonths([...tempSelectedMonths]);
+    setPage(1);
+    setYearsOpen(false);
+  }
+
+  // Helper para fetch
   async function tryFetchJSON(url: string, signal: AbortSignal) {
     const res = await fetch(url, { signal });
     if (!res.ok) {
@@ -267,16 +302,14 @@ export default function SimaTable({
     return await res.json();
   }
 
-  // Fetch all data for the selected point
+  // Busca todos os dados
   useEffect(() => {
     const controller = new AbortController();
     const { signal } = controller;
 
     function derivePathSegment(): { segment?: string; reason?: string } {
       if (selectedPoint) {
-        const rotulo = (selectedPoint["rotulo"] ?? selectedPoint["nome_estacao"] ?? selectedPoint["nome"] ?? selectedPoint["name"]) as
-          | string
-          | undefined;
+        const rotulo = (selectedPoint["rotulo"] ?? selectedPoint["nome_estacao"] ?? selectedPoint["nome"] ?? selectedPoint["name"]) as string | undefined;
         const maybeIdest = selectedPoint["idestacao"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
         const preferIdest = maybeIdest !== undefined && maybeIdest !== null && (typeof maybeIdest === "number" || /^\d+$/.test(String(maybeIdest)));
 
@@ -318,7 +351,6 @@ export default function SimaTable({
       setError(null);
 
       try {
-        // Fetch all data without pagination
         const params = new URLSearchParams();
         const baseClean = apiBase.replace(/\/$/, "");
         const url = `${baseClean}/${encodeURIComponent(segment)}?${params.toString()}`;
@@ -326,7 +358,6 @@ export default function SimaTable({
         const payload = await tryFetchJSON(url, signal);
         const { online: maybeOnline, offline: maybeOffline } = normalizePayload(payload);
 
-        // Combine online and offline data
         const allData = [
           ...(maybeOnline as SimaRecord[]),
           ...(maybeOffline as SimaRecord[])
@@ -334,17 +365,14 @@ export default function SimaTable({
 
         setAllData(allData);
         
-        // Store raw data for client-side pagination
         setRawOnline(maybeOnline as SimaRecord[]);
         setRawOffline(maybeOffline as SimaRecord[]);
         useClientPaginationRef.current = true;
 
-        // Set initial display data
         const initialData = allData.slice(0, limit);
         setDisplayOnline(initialData);
         setDisplayOffline([]);
 
-        // Extract totals
         const totals = extractTotals(payload);
         setTotalOnline(totals.totalOnline ?? allData.length);
         setTotalOffline(totals.totalOffline ?? 0);
@@ -378,16 +406,15 @@ export default function SimaTable({
     }
 
     return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPoint, selectedPointName, selectedPointId, apiBase]);
+  }, [selectedPoint, selectedPointName, selectedPointId, apiBase, limit]);
 
+  // Exportação CSV
   function exportCSV(which: "online" | "offline") {
     const data = which === "online" ? filteredData : [];
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
     
-    // Usar cabeçalhos traduzidos
     const translatedHeaders = keys.map(k => translateFieldName(k));
     const rows: string[][] = [translatedHeaders];
     
@@ -414,13 +441,13 @@ export default function SimaTable({
     URL.revokeObjectURL(url);
   }
 
+  // Abrir em nova aba
   function openTableInNewTab(which: "online" | "offline") {
     const data = which === "online" ? filteredData : [];
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
     
-    // Usar cabeçalhos traduzidos
     const translatedHeaders = keys.map(k => translateFieldName(k));
     
     let html = `<html><head><meta charset="utf-8"><title>SIMA ${which}</title>
@@ -472,10 +499,8 @@ export default function SimaTable({
 
   const rowClass = (idx: number) => `group ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} text-sm`;
 
-  // pagination helpers
-
+  // Helpers de paginação
   const hasNext = page * limit < filteredData.length;
-
   const totalPagesForView = Math.max(1, Math.ceil(filteredData.length / limit));
 
   const handlePrev = () => {
@@ -483,14 +508,10 @@ export default function SimaTable({
   };
 
   const handleNext = () => {
-    if (totalPagesForView !== undefined) {
-      setPage((p) => Math.min(totalPagesForView, p + 1));
-    } else {
-      if (hasNext) setPage((p) => p + 1);
-    }
+    if (hasNext) setPage((p) => p + 1);
   };
 
-  // which columns are visible (keeps availableColumns order)
+  // Colunas visíveis
   const visibleColumns = availableColumns.filter((c) => selectedColumns[c]);
 
   return (
@@ -499,10 +520,8 @@ export default function SimaTable({
         <h2 className="text-lg font-bold m-0">SIMA — Visualização de Dados</h2>
 
         <div className="flex items-center gap-3">
-          <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden"></div>
-
           <div className="inline-flex gap-2 flex-wrap items-center">
-            {/* Filtro de anos */}
+            {/* Filtro de data */}
             <div className="relative">
               <button 
                 onClick={() => setYearsOpen((v) => !v)} 
@@ -510,30 +529,27 @@ export default function SimaTable({
                 disabled={availableYears.length === 0}
               >
                 Filtrar Data
-                {selectedYears.length > 0 && selectedYears.length !== availableYears.length && (
-                  <span className="ml-2 bg-white text-purple-600 rounded-full px-2 py-1 text-xs">
-                    {selectedYears.length}
-                  </span>
-                )}
               </button>
 
               {yearsOpen && availableYears.length > 0 && (
-                <div className="absolute right-0 mt-2 w-64 max-h-124 bg-white border rounded shadow-lg z-50 flex flex-col">
-                  <div className="p-1 border-b flex justify-between items-center">
-                    <strong>Filtrar por Ano</strong>
+                <div className="absolute right-0 mt-2 w-80 max-h-124 bg-white border rounded shadow-lg z-50 flex flex-col">
+                  <div className="p-3 border-b flex justify-between items-center">
+                    <strong>Filtrar por Data</strong>
                     <div className="flex gap-1">
-                      <button onClick={selectAllYears} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Todos</button>
-                      <button onClick={clearAllYears} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Limpar</button>
+                      <button onClick={selectAllYears} className="px-2 py-1 text-xs border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Todos Anos</button>
+                      <button onClick={clearAllYears} className="px-2 py-1 text-xs border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Limpar Anos</button>
                     </div>
                   </div>
 
-                  <div className="p-3 overflow-auto flex-1">
-                    <div className="grid gap-2">
+                  {/* Seção de Anos */}
+                  <div className="p-3 border-b">
+                    <div className="mb-2 font-medium text-sm">Anos</div>
+                    <div className="grid grid-cols-3 gap-2 max-h-32 overflow-auto">
                       {availableYears.map((year) => (
                         <label key={year} className="inline-flex items-center gap-2 text-sm">
                           <input
                             type="checkbox"
-                            checked={selectedYears.includes(year)}
+                            checked={tempSelectedYears.includes(year)}
                             onChange={() => toggleYear(year)}
                           />
                           <span className="truncate">{year}</span>
@@ -542,11 +558,44 @@ export default function SimaTable({
                     </div>
                   </div>
 
+                  {/* Seção de Meses */}
+                  <div className="p-3 border-b">
+                    <div className="mb-2 font-medium text-sm">Meses</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { num: 1, name: 'Jan' }, { num: 2, name: 'Fev' }, { num: 3, name: 'Mar' },
+                        { num: 4, name: 'Abr' }, { num: 5, name: 'Mai' }, { num: 6, name: 'Jun' },
+                        { num: 7, name: 'Jul' }, { num: 8, name: 'Ago' }, { num: 9, name: 'Set' },
+                        { num: 10, name: 'Out' }, { num: 11, name: 'Nov' }, { num: 12, name: 'Dez' }
+                      ].map((month) => (
+                        <label key={month.num} className="inline-flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={tempSelectedMonths.includes(month.num)}
+                            onChange={() => toggleMonth(month.num)}
+                            disabled={!availableMonths.includes(month.num)}
+                          />
+                          <span className={`truncate ${!availableMonths.includes(month.num) ? 'text-gray-400' : ''}`}>
+                            {month.name}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="flex gap-1 mt-2">
+                      <button onClick={selectAllMonths} className="px-2 py-1 text-xs border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Todos Meses</button>
+                      <button onClick={clearAllMonths} className="px-2 py-1 text-xs border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Limpar Meses</button>
+                    </div>
+                  </div>
+
                   <div className="p-3 border-t flex justify-end gap-2 bg-white">
                     <button
-                      onClick={() => {
-                        setYearsOpen(false);
-                      }}
+                      onClick={() => setYearsOpen(false)}
+                      className="px-3 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={applyDateFilter}
                       className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-transform duration-200 hover:scale-105 cursor-pointer"
                     >
                       Aplicar
@@ -556,7 +605,7 @@ export default function SimaTable({
               )}
             </div>
 
-            {/* botão colunas */}
+            {/* Filtro de colunas */}
             <div className="relative">
               <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">
                 Filtros
@@ -572,7 +621,6 @@ export default function SimaTable({
                     </div>
                   </div>
 
-                  {/* area rolável com checkboxes (usa tempSelectedColumns enquanto aberto) */}
                   <div className="p-3 overflow-auto flex-1">
                     <div className="grid gap-2">
                       {availableColumns.length === 0 && <div className="text-xs text-gray-500">Sem colunas disponíveis</div>}
@@ -589,11 +637,9 @@ export default function SimaTable({
                     </div>
                   </div>
 
-                  {/* rodapé fixo: Cancelar descarta temp, Aplicar grava temp em selected */}
                   <div className="p-3 border-t flex justify-end gap-2 bg-white">
                     <button
                       onClick={() => {
-                        // descarta temporário e fecha
                         setTempSelectedColumns({ ...selectedColumns });
                         setColumnsOpen(false);
                       }}
@@ -603,7 +649,6 @@ export default function SimaTable({
                     </button>
                     <button
                       onClick={() => {
-                        // aplica: grava temp em selectedColumns e fecha
                         setSelectedColumns({ ...tempSelectedColumns });
                         setColumnsOpen(false);
                       }}
@@ -616,6 +661,7 @@ export default function SimaTable({
               )}
             </div>
 
+            {/* Botões de exportação */}
             {(view === "online" || view === "ambos") && (
               <>
                 <button onClick={() => exportCSV("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Exportar CSV</button>
@@ -625,6 +671,7 @@ export default function SimaTable({
           </div>
         </div>
       </div>
+
 
       {loading && <p>Carregando...</p>}
       {error && <p className="text-red-600">{error}</p>}
@@ -652,9 +699,8 @@ export default function SimaTable({
           </div>
         )}
 
-        {/* se não houver colunas visíveis ou dados */}
-        {((view === "online" && displayOnline.length > 0) || (view === "offline" && displayOffline.length > 0) || (view === "ambos" && (displayOnline.length > 0 || displayOffline.length > 0))) && visibleColumns.length === 0 && (
-          <div className="p-4 text-sm text-gray-600">Nenhuma coluna selecionada — selecione colunas em <strong>Coluna</strong>.</div>
+        {displayOnline.length > 0 && visibleColumns.length === 0 && (
+          <div className="p-4 text-sm text-gray-600">Nenhuma coluna selecionada — selecione colunas em <strong>Colunas</strong>.</div>
         )}
 
         {filteredData.length === 0 && !loading && (
@@ -666,13 +712,12 @@ export default function SimaTable({
 
       <div className="mt-2 flex items-center justify-between">
         <div>
-          Página {page} de {totalPagesForView}
+          Página {page}
         </div>
 
         <div className="space-x-2 flex items-center">
-          <button disabled={page <= 1} onClick={handlePrev} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Anterior</button>
-
-          <button disabled={!hasNext} onClick={handleNext} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Próxima</button>
+          <button disabled={page <= 1} onClick={handlePrev} className="px-3 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Anterior</button>
+          <button disabled={!hasNext} onClick={handleNext} className="px-3 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Próxima</button>
 
           <div className="inline-flex items-center gap-2">
             <label className="text-sm">Ir p/ página:</label>
@@ -682,9 +727,7 @@ export default function SimaTable({
               pattern="[0-9]*"
               value={pageInput}
               onChange={(e) => {
-                // permite edição livre (incluindo string vazia)
                 const v = e.target.value;
-                // remover espaços e permitir apenas dígitos
                 const cleaned = v.replace(/[^\d]/g, "");
                 setPageInput(cleaned);
               }}
@@ -692,23 +735,19 @@ export default function SimaTable({
                 if (e.key === "Enter") {
                   const v = Number(pageInput || "0");
                   if (!Number.isFinite(v) || v < 1) {
-                    // se inválido, retorna ao page atual
                     setPageInput(String(page));
                     return;
                   }
-                  const maxP = totalPagesForView ?? v;
-                  setPage(Math.min(v, maxP));
+                  setPage(Math.min(v, totalPagesForView));
                 }
               }}
               onBlur={() => {
-                // ao sair do campo, aplica a página (mesma validação)
                 const v = Number(pageInput || "0");
                 if (!Number.isFinite(v) || v < 1) {
                   setPageInput(String(page));
                   return;
                 }
-                const maxP = totalPagesForView ?? v;
-                setPage(Math.min(v, maxP));
+                setPage(Math.min(v, totalPagesForView));
               }}
               className="w-20 px-2 py-1 border rounded"
               aria-label="Ir para página"
