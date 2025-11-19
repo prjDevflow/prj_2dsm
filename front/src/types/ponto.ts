@@ -1,9 +1,10 @@
-// Shared type for points used across components
+// src/types/ponto.ts
 export type PontoColeta = {
-  id: string | number;
+  id: number | string;
   name?: string;
-  latitude: number;
-  longitude: number;
-  type?: string;
   rotulo?: string;
+  latitude?: number;
+  longitude?: number;
+  type?: string;
+  // adicione outras propriedades que podem ser usadas
 };

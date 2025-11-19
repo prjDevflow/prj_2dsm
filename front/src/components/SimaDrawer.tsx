@@ -1,5 +1,4 @@
 import React from "react";
-import CalendarPicker from "@/components/CalendarPicker";
 import SimaTable from "@/components/SimaTable";
  
 import {
@@ -9,7 +8,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
  
 type PontoColeta = {
   id: number | string;
@@ -36,7 +34,6 @@ const SimaDrawer: React.FC<Props> = ({
   onOpenChange,
   selectedPonto,
   range,
-  setRange,
 }) => {
   // debug rápido: mostra quando o drawer abre e o ponto atual
   React.useEffect(() => {
@@ -55,15 +52,7 @@ const SimaDrawer: React.FC<Props> = ({
             </span>
  
             <div className="mt-4 p-2 border rounded-md bg-white">
-              {/* CalendarPicker sem seletor de estação */}
-              <CalendarPicker
-                value={range}
-                onChange={(r) => setRange(r)}
-                showApply={true}
-                onApply={(r) => {
-                  setRange(r);
-                }}
-              />
+
  
               {/* SimaTable: envio tanto do id quanto do objeto completo para mais robustez */}
               <div className="mt-4">
@@ -80,14 +69,6 @@ const SimaDrawer: React.FC<Props> = ({
         </DrawerHeader>
  
         <DrawerFooter>
-          <Button
-            onClick={() => {
-              console.log("Fechar Drawer", { range, selectedPonto });
-              onOpenChange(false);
-            }}
-          >
-            Ok
-          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

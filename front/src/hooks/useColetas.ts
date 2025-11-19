@@ -7,13 +7,30 @@ const fetchColetas = async (type: "sima" | "balcar" | "furnas", instituicao?: st
     params: { type, instituicao },
   });
  
-  console.log(response)
+  console.log("RAW RESPONSE:", response.data);
  
-  // Normaliza os dados, garantindo que todos tenham key única
-  const normalizedData = response.data.markers.map((ponto: any, i: number) => ({
-    ...ponto,
-    id: ponto.id ?? `${ponto.instituicao}-${ponto.reservatorio}-${i}`,
-  }));
+  const normalizedData = response.data.markers.map((ponto: any, index: number) => {
+    const latitude = ponto.latitude ?? ponto.lat;
+    const longitude = ponto.longitude ?? ponto.lng;
+ 
+    return {
+      ...ponto,
+ 
+      // Normalização das coordenadas
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+ 
+      // Normalização de nomes
+      reservatorio: ponto.reservatorio ?? ponto.nome_reservatorio,
+      instituicao: ponto.instituicao ?? ponto.nome_instituicao,
+ 
+      // ID sempre único e consistente
+      id:
+        ponto.id ??
+        ponto.idreservatorio ??
+        `${ponto.nome_instituicao ?? "inst"}-${ponto.nome_reservatorio ?? "res"}-${index}`,
+    };
+  });
  
   return normalizedData as PontoColeta[];
 };
@@ -23,3 +40,4 @@ export const useColetas = (type: "sima" | "balcar" | "furnas", instituicao?: str
     fetchColetas(type, instituicao)
   );
 };
+ 
