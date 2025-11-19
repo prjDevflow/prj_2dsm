@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Calendar from "./ui/calendar";
+import {Calendar} from "./ui/calendar";
 
 type Range = { start?: Date | null; end?: Date | null };
 

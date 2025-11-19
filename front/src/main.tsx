@@ -10,7 +10,7 @@ import SimaPage from "./pages/SimaPage";
 import BalcarPage from "./pages/BalcarPage";
 import InstituicaoPage from "./pages/Furnas/FurnasInstituicao.page";
 import { FurnasMapPage } from "@/pages/Furnas/furnasMap.page";
-import AboutPage from "./pages/AboutPage";
+// import AboutPage from "./pages/AboutPage";
  
 import theme from "./styles/theme";
 import GlobalStyle from "./styles/GlobalStyle";

@@ -28,6 +28,7 @@ const AppLayout = () => {
             paddingBottom: "72px",
             flex: 1,
           }}
+          className="max-h-full"
         >
           {/* Aqui as páginas renderizam via Outlet */}
           <Outlet />
