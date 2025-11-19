@@ -3,8 +3,6 @@ import { Sima } from "../../entities/sima/Sima";
 import { simaPool } from "../../configs/db";
 import { connectRedis, redisClient } from "../../providers/RedisConfig";
 
-
-
 export class PostgresSimaRepository implements ISimaRepository {
   async getCoordinates(): Promise<
     { id: string; rotulo: string; latitude: number; longitude: number }[]
@@ -41,40 +39,81 @@ export class PostgresSimaRepository implements ISimaRepository {
     limit?: number;
     dateInit?: Date;
     dateEnd?: Date;
-
   }): Promise<{ registers: any[]; total: number }> {
-    // Mapeamento dos tipos de dado para procedures
     const procedureMap: Record<string, string> = {
       carbono: "buscar_co2",
-      temperatura: "buscar_temperaturas",
-      oxigenioDissolvido: "buscar_do",
+      temperatura_2m: "buscar_tempag1",
+      temperatura_5m: "buscar_tempag2",
+      temperatura_20m: "buscar_tempag3",
+      temperatura_40m: "buscar_tempag4",
+      temperatura_ar: "buscar_tempar",
+      temperatura_sonda: "buscar_tempar_r",
+      oxigenio_dissolvido: "buscar_sonda_do",
       ph: "buscar_ph",
       clorofila: "buscar_clorofila",
-      nutrientes: "buscar_nutrientes",
+      nutrientes_amonia: "buscar_sonda_nh4",
+      nutrientes_do2: "buscar_sonda_no3",
       condutividade: "buscar_condutividade",
       turbidez: "buscar_turbidez",
-      radiacao: "buscar_radiacao",
-      vento: "buscar_vento_vetor",
-      correntes: "buscar_correntes",
+      radiacao_incidencia: "buscar_radincid",
+      radiacao_reflexao: "buscar_radrefl",
+      vento: "buscar_dirvt",
+      correntes_norte: "buscar_corr_norte",
+      correntes_leste: "buscar_corr_leste",
       precipitacao: "buscar_precipitacao",
-      qualidadeAgua: "buscar_qualidade_agua",
     };
+
     const procedure = procedureMap[params.tipoDado];
     if (!procedure) throw new Error("Tipo de dado não suportado");
+
     const query = `SELECT * FROM ${procedure}($1, $2, $3, $4, $5)`;
     const values = [
-
       params.rotulo ?? null,
       params.dateInit ?? null,
       params.dateEnd ?? null,
       params.offset ?? 0,
-      params.limit ?? 20,
-      // Adapte conforme assinatura da procedure
+      params.limit ?? 100,
     ];
+
     const { rows } = await simaPool.query(query, values);
+
+    // Mapeamento dos nomes originais → nomes padronizados
+    const fieldMap: Record<string, { value1: string; value2?: string }> = {
+      temperatura_2m: { value1: "tempag1" },
+      temperatura_5m: { value1: "tempag2" },
+      temperatura_20m: { value1: "tempag3" },
+      temperatura_40m: { value1: "tempag4" },
+      temperatura_ar: { value1: "tempar" },
+      temperatura_sonda: { value1: "tempar_r" },
+      carbono: { value1: "co2_low", value2: "co2_high" },
+      ph: { value1: "sonda_ph" },
+      oxigenio_dissolvido: { value1: "sonda_do" },
+      vento: { value1: "dirvt" },
+      clorofila: { value1: "sonda_chl" },
+      nutrientes_amonia: { value1: "sonda_nh4" },
+      nutrientes_do2: { value1: "sonda_no3" },
+      condutividade: { value1: "sonda_cond" },
+      turbidez: { value1: "sonda_turb" },
+      radiacao_incidencia: { value1: "radincid" },
+      radiacao_reflexao: { value1: "radrefl" },
+      correntes_norte: { value1: "cor_norte" },
+      correntes_leste: { value1: "cor_leste" },
+      precipitacao: { value1: "precipitacao" },
+    };
+
+    const map = fieldMap[params.tipoDado];
+    if (!map) throw new Error("Mapeamento não encontrado para tipoDado");
+
+    const formatted = rows.map((row) => ({
+      timestamp: row.datahora ?? null,
+      value1: row[map.value1] || 0,
+      value2: map.value2 ? row[map.value2] : undefined,
+      rotulo: row.rotulo,
+    }));
+
     return {
-      registers: rows,
-      total: rows.length,
+      registers: formatted,
+      total: formatted.length,
     };
   }
 
@@ -161,7 +200,6 @@ export class PostgresSimaRepository implements ISimaRepository {
     dateEnd?: Date;
     type: "sima";
   }): Promise<{ registers: Sima[]; total: number }> {
-
     const { rows } = await simaPool.query(
       `SELECT * FROM buscar_todas_informacoes($1, $2, $3, $4, $5)`,
       [params.id, params.dateInit, params.dateEnd, params.limit, params.offset],
@@ -211,25 +249,21 @@ export class PostgresSimaRepository implements ISimaRepository {
     offSet?: number;
     limit?: number;
   }): Promise<{ date: Date; carbonoLow: number; carbonoHigh: number; estacao: string }[]> {
-
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
-    const { rows } = await simaPool.query(
-      `SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`,
-      values
-    );
+    const { rows } = await simaPool.query(`SELECT * FROM buscar_co2($1, $2, $3, $4, $5)`, values);
 
     const data = rows.map((row: any) => ({
-      date: row.datahora,             // veio do DB como datahora.
-      carbonoLow: row.co2_low,        // veio como co2_low
-      carbonoHigh: row.co2_high,      // veio como co2_high
-      estacao: row.nome_estacao        // veio como nome_estacao
+      date: row.datahora, // veio do DB como datahora.
+      carbonoLow: row.co2_low, // veio como co2_low
+      carbonoHigh: row.co2_high, // veio como co2_high
+      estacao: row.nome_estacao, // veio como nome_estacao
     }));
 
     return data;
@@ -293,16 +327,20 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; sonda_do: number; sonda_dosat: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      sonda_do: number;
+      sonda_dosat: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -313,15 +351,14 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_do($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
-      date: row.datahora,           // Data da medição
-      sonda_do: row.sonda_do,         // Temperatura do sensor 1
-      sonda_dosat: row.sonda_dosat,         // Temperatura do sensor 2
-      nome_estacao: row.nome_estacao,         // Temperatura do sensor 3
-
+      date: row.datahora, // Data da medição
+      sonda_do: row.sonda_do, // Temperatura do sensor 1
+      sonda_dosat: row.sonda_dosat, // Temperatura do sensor 2
+      nome_estacao: row.nome_estacao, // Temperatura do sensor 3
     }));
 
     return data;
@@ -332,16 +369,19 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; sonda_ph: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      sonda_ph: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -351,7 +391,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_ph($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
@@ -369,16 +409,19 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; sonda_chl: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      sonda_chl: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -388,7 +431,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_clorofila($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
@@ -406,16 +449,20 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; sonda_nh4: number; sonda_no3: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      sonda_nh4: number;
+      sonda_no3: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -426,7 +473,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_nutrientes($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
@@ -444,16 +491,19 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; sonda_cond: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      sonda_cond: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -463,7 +513,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_condutividade($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
@@ -480,16 +530,19 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; sonda_turb: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      sonda_turb: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -499,7 +552,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_turbidez($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
@@ -516,16 +569,20 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; radincid: number; radrefl: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      radincid: number;
+      radrefl: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -536,14 +593,14 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_radiacao($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
       date: row.datahora,
       radincid: row.radincid,
       radrefl: row.radrefl,
-      nome_estacao: row.nome_estacao
+      nome_estacao: row.nome_estacao,
     }));
 
     return data;
@@ -554,21 +611,22 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date;
-    dirvt: number;
-    intensvt: number;
-    u_vel: number;
-    v_vel: number;
-    nome_estacao: string;
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      dirvt: number;
+      intensvt: number;
+      u_vel: number;
+      v_vel: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -581,7 +639,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_vento_vetor($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
@@ -590,7 +648,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       intensvt: row.intensvt,
       u_vel: row.u_vel,
       v_vel: row.v_vel,
-      nome_estacao: row.nome_estacao
+      nome_estacao: row.nome_estacao,
     }));
 
     return data;
@@ -602,16 +660,20 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; corr_norte: number; corr_leste: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      corr_norte: number;
+      corr_leste: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -622,14 +684,14 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_correntes($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
       date: row.datahora,
       corr_norte: row.corr_norte,
       corr_leste: row.corr_leste,
-      nome_estacao: row.nome_estacao
+      nome_estacao: row.nome_estacao,
     }));
 
     return data;
@@ -640,16 +702,19 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date; precipitacao: number; nome_estacao: string
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      precipitacao: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -659,13 +724,13 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_precipitacao($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
       date: row.datahora,
       precipitacao: row.precipitacao,
-      nome_estacao: row.nome_estacao
+      nome_estacao: row.nome_estacao,
     }));
 
     return data;
@@ -676,28 +741,29 @@ export class PostgresSimaRepository implements ISimaRepository {
     dataFim?: Date;
     offSet?: number;
     limit?: number;
-  }): Promise<{
-    date: Date;
-    tempag1: number;
-    tempag2: number;
-    tempag3: number;
-    tempag4: number;
-    sonda_temp: number;
-    sonda_cond: number;
-    sonda_do: Number;
-    sonda_dosat: number;
-    sonda_ph: Number;
-    sonda_chl: Number;
-    sonda_turb: number;
-    nome_estacao: string;
-  }[]> {
-
+  }): Promise<
+    {
+      date: Date;
+      tempag1: number;
+      tempag2: number;
+      tempag3: number;
+      tempag4: number;
+      sonda_temp: number;
+      sonda_cond: number;
+      sonda_do: Number;
+      sonda_dosat: number;
+      sonda_ph: Number;
+      sonda_chl: Number;
+      sonda_turb: number;
+      nome_estacao: string;
+    }[]
+  > {
     const values = [
       params.rotulo ?? null,
       params.dataInicio ?? null,
       params.dataFim ?? null,
       params.offSet ?? 0,
-      params.limit ?? 20
+      params.limit ?? 20,
     ];
 
     const { rows } = await simaPool.query(
@@ -717,7 +783,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       nome_estacao
     
     FROM buscar_qualidade_agua($1, $2, $3, $4, $5)`,
-      values
+      values,
     );
 
     const data = rows.map((row: any) => ({
@@ -734,7 +800,7 @@ export class PostgresSimaRepository implements ISimaRepository {
       sonda_chl: row.sonda_chl,
       sonda_turb: row.sonda_turb,
       precipitacao: row.precipitacao,
-      nome_estacao: row.nome_estacao
+      nome_estacao: row.nome_estacao,
     }));
 
     return data;

@@ -17,7 +17,7 @@ export class PostgresBalcarRepository implements IBalcarRepository {
 
   async getDataById(params: {
     idreservatorio: number | undefined;
-    limit: number;
+    limit?: number;
     offset: number;
   }): Promise<{ registers: any[]; total: number }> {
    

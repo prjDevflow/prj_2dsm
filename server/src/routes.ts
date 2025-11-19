@@ -5,7 +5,7 @@ import { exportCsvController } from "./useCases/exportCsv";
 import { getDataByIdSimaController } from "./useCases/getDataByIdSima";
 import { getDataByIdFurnasController } from "./useCases/getDataByIdFurnas";
 import { getDataByIdBalcarController } from "./useCases/getDataByIdBalcar";
-import { getDataForGraphicsController } from "./useCases/getDataForGraphics";
+// import { getDataForGraphicsController } from "./useCases/getDataForGraphics";
 import { getFurnasDataController } from "./useCases/getFurnasData";
 import { getDataForSimaGraphicsController } from "./useCases/getDataForSimaGraphics";
 
