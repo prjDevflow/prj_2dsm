@@ -256,7 +256,7 @@ A plataforma integra dados de duas fontes principais:
 </details>
 
 <details>
-<summary><b>RF12 — Triggers</b></summary>
+<summary><b>RF13 — Triggers</b></summary>
 
 **Como** administrador de banco de dados do INPE  
 **Quero** desenvolver triggers no PostgreSQL para automatizar ações no banco limnologia_db  
@@ -306,6 +306,23 @@ A plataforma integra dados de duas fontes principais:
 
 ### Burndown Chart
 <img width="487" height="299" alt="Burndown Chart Sprint 1" src= "https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/burndown_sprint2.png" />
+
+## Sprint 3 — Planejamento (Poker Planning)
+
+### Estimativa de Tarefas e Story Points
+
+| Código | Tarefa | Story Points |
+|--------|--------|--------------|
+| **RF-05** | Séries temporais (gráficos) | **13** |
+| **RF-08** | Diagrama de sequência | **13** |
+| **RF-09** | Testes unitários | **8** |
+| **RF-12** | Stored Procedure | **5** |
+| **RF-13** | Triggers | **5** |
+
+🔹 **Total de Story Points (Sprint 1): 42**
+
+### Burndown Chart
+<img width="487" height="299" alt="Burndown Chart Sprint 1" src= "https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/burndown_sprint3.png" />
 ---
 
 # 📝 UML
