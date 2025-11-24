@@ -169,11 +169,11 @@ export default function SimaTable({
  
   const [page, setPage] = useState<number>(initialPage ?? 1);
   const [pageInput, setPageInput] = useState<string>(String(page));
- 
+
   useEffect(() => {
   setPageInput(String(page));
 }, [page]);
- 
+
   const [limit] = useState<number>(initialLimit ?? 100);
  
   const [totalOnline, setTotalOnline] = useState<number | undefined>(undefined);
@@ -187,13 +187,11 @@ export default function SimaTable({
   const prevSignatureRef = useRef<string | null>(null);
   // flag indicando que estamos em paginação client-side (após fetch completo seguro)
   const useClientPaginationRef = useRef<boolean>(false);
- 
   // --- column visibility UI ---
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<Record<string, boolean>>({});
   const [tempSelectedColumns, setTempSelectedColumns] = useState<Record<string, boolean>>({});
   const [columnsOpen, setColumnsOpen] = useState(false);
- 
   // reset page and client-pagination when changing point or range
   useEffect(() => {
     setPage(1);
@@ -202,7 +200,6 @@ export default function SimaTable({
     setRawOffline(null);
     prevSignatureRef.current = null;
   }, [selectedPoint, selectedPointId, selectedPointName, range?.start, range?.end]);
- 
   // quando os dados chegam, monta a lista de colunas disponíveis (união online+offline)
   useEffect(() => {
     const union = new Set<string>();
@@ -214,7 +211,6 @@ export default function SimaTable({
     }
     const cols = Array.from(union);
     setAvailableColumns(cols);
- 
     // se o usuário ainda não escolheu colunas explicitamente, selecionar todas por padrão
     if (Object.keys(selectedColumns).length === 0 && cols.length > 0) {
       const all = Object.fromEntries(cols.map((c) => [c, true]));
@@ -226,7 +222,6 @@ export default function SimaTable({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayOnline, displayOffline]);
- 
   // quando o dropdown abre, inicializa a cópia temporária com a seleção atual
   useEffect(() => {
     if (columnsOpen) {
@@ -241,20 +236,20 @@ export default function SimaTable({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnsOpen]);
- 
+
   function toggleTempColumn(col: string) {
     setTempSelectedColumns((s) => ({ ...s, [col]: !s[col] }));
   }
- 
+
   function selectAllTemp() {
     setTempSelectedColumns(Object.fromEntries(availableColumns.map((c) => [c, true])));
   }
- 
+
   function clearAllTemp() {
     setTempSelectedColumns(Object.fromEntries(availableColumns.map((c) => [c, false])));
   }
- 
- 
+
+
   // gera uma assinatura curta para detectar se os primeiros registros não mudaram
   function signatureOf(arr: SimaRecord[] | undefined | null) {
     if (!arr || arr.length === 0) return "";
@@ -510,7 +505,6 @@ export default function SimaTable({
     w.document.write(html);
     w.document.close();
   }
- 
   const renderHeaderCells = (cols: string[]) =>
     cols.map((key) => (
       <TableHead
@@ -533,22 +527,22 @@ export default function SimaTable({
   const rowClass = (idx: number) => `group ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} text-sm`;
  
   // pagination helpers
- 
+
   const knownTotalForView = view === "online" ? totalOnline : view === "offline" ? totalOffline : totalCombined;
- 
+
   const pageItemCount =
     view === "online"
       ? displayOnline.length
       : view === "offline"
         ? displayOffline.length
         : displayOnline.length + displayOffline.length;
- 
+
   const hasNext =
     knownTotalForView !== undefined ? page * limit < knownTotalForView : pageItemCount === limit;
- 
+
   const totalPagesForView =
     knownTotalForView !== undefined ? Math.max(1, Math.ceil(knownTotalForView / limit)) : undefined;
- 
+
   const handlePrev = () => {
     setPage((p) => Math.max(1, p - 1));
   };
@@ -560,10 +554,10 @@ export default function SimaTable({
       if (hasNext) setPage((p) => p + 1);
     }
   };
- 
+
   // which columns are visible (keeps availableColumns order)
   const visibleColumns = availableColumns.filter((c) => selectedColumns[c]);
- 
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3">
@@ -571,7 +565,6 @@ export default function SimaTable({
  
         <div className="flex items-center gap-3">
           <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden"></div>
- 
           <div className="inline-flex gap-2 flex-wrap items-center">
             {(view === "offline" || view === "ambos") && (
               <>
@@ -579,13 +572,11 @@ export default function SimaTable({
                 <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">Abrir Offline</button>
               </>
             )}
- 
             {/* botão colunas */}
             <div className="relative">
               <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded">
                 Filtros
               </button>
- 
               {columnsOpen && (
                 <div className="absolute right-0 mt-2 w-64 max-h-124 bg-white border rounded shadow-lg z-50 flex flex-col">
                   <div className="p-3 border-b flex justify-between items-center">
@@ -595,7 +586,6 @@ export default function SimaTable({
                       <button onClick={clearAllTemp} className="px-2 py-1 text-xs border rounded">Limpar</button>
                     </div>
                   </div>
- 
                   {/* area rolável com checkboxes (usa tempSelectedColumns enquanto aberto) */}
                   <div className="p-3 overflow-auto flex-1">
                     <div className="grid gap-2">
@@ -612,7 +602,6 @@ export default function SimaTable({
                       ))}
                     </div>
                   </div>
- 
                   {/* rodapé fixo: Cancelar descarta temp, Aplicar grava temp em selected */}
                   <div className="p-3 border-t flex justify-end gap-2 bg-white">
                     <button
@@ -639,7 +628,6 @@ export default function SimaTable({
                 </div>
               )}
             </div>
- 
             {(view === "online" || view === "ambos") && (
               <>
                 <button onClick={() => exportCSV("online")} className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Exportar Online CSV</button>
@@ -652,7 +640,6 @@ export default function SimaTable({
  
       {loading && <p>Carregando...</p>}
       {error && <p className="text-red-600">{error}</p>}
- 
       <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "calc(100vh - 200px)", border: "1px solid #ddd", borderRadius: 6, paddingBottom: 16 }}>
         {(view === "online" || view === "ambos") && displayOnline.length > 0 && visibleColumns.length > 0 && (
           <div style={{ minWidth: calcMinWidth(visibleColumns.length) }}>
@@ -673,7 +660,6 @@ export default function SimaTable({
             </Table>
           </div>
         )}
- 
         {(view === "offline" || view === "ambos") && displayOffline.length > 0 && visibleColumns.length > 0 && (
           <div style={{ minWidth: calcMinWidth(visibleColumns.length), marginTop: 20 }}>
             <Table>
@@ -693,7 +679,6 @@ export default function SimaTable({
             </Table>
           </div>
         )}
- 
         {/* se não houver colunas visíveis ou dados */}
         {((view === "online" && displayOnline.length > 0) || (view === "offline" && displayOffline.length > 0) || (view === "ambos" && (displayOnline.length > 0 || displayOffline.length > 0))) && visibleColumns.length === 0 && (
           <div className="p-4 text-sm text-gray-600">Nenhuma coluna selecionada — selecione colunas em <strong>Coluna</strong>.</div>

@@ -11,10 +11,10 @@ import theme from "./styles/theme";
  
 const AppLayout = () => {
   const location = useLocation();
- 
+
   // Ajuste aqui a rota da landing, se for diferente de "/"
   const isLanding = matchPath({ path: "/", end: true }, location.pathname) !== null;
- 
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -32,7 +32,6 @@ const AppLayout = () => {
           {/* Aqui as páginas renderizam via Outlet */}
           <Outlet />
         </main>
- 
         {/* Footer aparece somente na landing page */}
         {isLanding && <Footer />}
       </div>
@@ -40,4 +39,5 @@ const AppLayout = () => {
   );
 };
  
+
 export default AppLayout;
