@@ -6,7 +6,8 @@ export class GetDataByIdBalcarUseCase {
   async execute(params: IGetDataByIdBalcar) {
     const result = await this.balcarRepository.getDataById({
       idreservatorio: params.id,
-      
+      limit: params.limit,
+      offset: params.offset      
     });
 
     const nextOffset = params.limit !== undefined ? params.offset + params.limit : undefined;

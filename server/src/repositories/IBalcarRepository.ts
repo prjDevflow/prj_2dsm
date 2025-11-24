@@ -7,5 +7,6 @@ export interface IBalcarRepository {
 
   getDataById(params: {
     idreservatorio: number | undefined;
-    
+    limit?: number;
+    offset?: number;
   }): Promise<{ registers: any[]; total: number }>}
