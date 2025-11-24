@@ -1,5 +1,5 @@
 import * as z from "zod";
-
+ 
 export const getDataByIdBalcarSchema = z.object({
   id: z.string().transform((val) => parseInt(val, 10)),
   offset: z
@@ -21,9 +21,9 @@ export const getDataByIdBalcarSchema = z.object({
     .transform((val) => (val ? new Date(val) : undefined)),
   rotulo: z.string().optional(),
 });
-
+ 
 export type IGetDataByIdBalcar = z.infer<typeof getDataByIdBalcarSchema>;
-
+ 
 export interface IGetDataByIdBalcarResponse {
   registers: any[]; // Alterar classe para Balcar
   total: number;

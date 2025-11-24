@@ -1,4 +1,3 @@
-// src/components/FurnasTable.tsx
 import { useEffect, useRef, useState } from "react";
 import {
   Table,
@@ -9,21 +8,75 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+ 
 type Range = { start?: Date | null; end?: Date | null };
-
-export interface SimaRecord extends Record<string, unknown> {
-  idsima?: number;
-  idsimaoffline?: number;
-  idestacao?: string | number;
-  nome_estacao?: string;
-  rotulo?: string;
-  nome?: string;
-  name?: string;
+ 
+export interface BalcarRecord extends Record<string, unknown> {
   datahora?: string;
+  ch4?: number;
+  batimetria?: number;
+  tempar?: number;
+  tempaguasubsuperficie?: number;
+  phsubsuperficie?: number;
+  orpsubsuperficie?: number;
+  condutividadesubsuperficie?: number;
+  odsubsuperficie?: number;
+  tsdsubsuperficie?: number;
+  sitio_nome?: string;
+  instituicao_nome?: string;
+  reservatorio_nome?: string;
+  total_count?: string | number;
   [k: string]: unknown;
 }
 
+// Mapeamento dos nomes das colunas para Balcar
+const COLUMN_MAPPING: Record<string, string> = {
+  // Datas (primeiros itens como solicitado)
+  datahora: "Data e Hora",
+  
+  // Localização e identificação
+  sitio_nome: "Nome do Sítio",
+  instituicao_nome: "Nome da Instituição",
+  reservatorio_nome: "Nome do Reservatório",
+  
+  // Parâmetros físicos
+  batimetria: "Batimetria",
+  tempar: "Temperatura do Ar",
+  tempcupula: "Temperatura da Cúpula",
+  tempaguasubsuperficie: "Temperatura da Água Subsuperfície",
+  tempaguameio: "Temperatura da Água Meio",
+  tempaguafundo: "Temperatura da Água Fundo",
+  
+  // Parâmetros químicos
+  phsubsuperficie: "pH Subsuperfície",
+  phmeio: "pH Meio",
+  phfundo: "pH Fundo",
+  orpsubsuperficie: "ORP Subsuperfície",
+  orpmeio: "ORP Meio",
+  orpfundo: "ORP Fundo",
+  condutividadesubsuperficie: "Condutividade Subsuperfície",
+  condutividademeio: "Condutividade Meio",
+  condutividadefundo: "Condutividade Fundo",
+  odsubsuperficie: "Oxigênio Dissolvido Subsuperfície",
+  odmeio: "Oxigênio Dissolvido Meio",
+  odfundo: "Oxigênio Dissolvido Fundo",
+  tsdsubsuperficie: "TSD Subsuperfície",
+  tsdmeio: "TSD Meio",
+  tsdfundo: "TSD Fundo",
+  
+  // Gases (elementos químicos mantidos como estão)
+  ch4: "CH4",
+};
+
+// Ordem prioritária para as colunas (datas primeiro)
+const COLUMN_PRIORITY = [
+  'datahora',
+  'sitio_nome',
+  'instituicao_nome', 
+  'reservatorio_nome',
+  'batimetria'
+];
+ 
 interface Props {
   selectedPointId?: number | string | null;
   selectedPointName?: string | null;
@@ -31,154 +84,14 @@ interface Props {
   range?: Range;
   initialPage?: number;
   initialLimit?: number;
-  apiBase?: string; // default para furnas
+  apiBase?: string;
 }
-
-// Mapeamento dos nomes das colunas
-const COLUMN_MAPPING: Record<string, string> = {
-  // Datas (primeiros itens como solicitado)
-  datamedida: "Data da Medida",
-  datainicio: "Data Início",
-  datafim: "Data Fim",
-  horamedida: "Hora da Medida",
-  intervalo: "Intervalo",
-  
-  // Localização
-  lat: "Latitude",
-  lng: "Longitude",
-  altitude: "Altitude",
-  
-  // Identificadores
-  idsitio: "ID Sítio",
-  idcampanha: "ID Campanha",
-  idbolhas: "ID Bolhas",
-  idhoriba: "ID Horiba",
-  idcarbono: "ID Carbono",
-  iddifusao: "ID Difusão",
-  idinstituicao: "ID Instituição",
-  idreservatorio: "ID Reservatório",
-  idfluxocarbono: "ID Fluxo Carbono",
-  idfluxodifusivo: "ID Fluxo Difusivo",
-  idgasesembolhas: "ID Gases em Bolhas",
-  idbioticocoluna: "ID Biótico Coluna",
-  idabioticocoluna: "ID Abiótico Coluna",
-  idfluxobolhasinpe: "ID Fluxo Bolhas INPE",
-  idbioticosuperficie: "ID Biótico Superfície",
-  idfluxodifusivoinpe: "ID Fluxo Difusivo INPE",
-  idmedidacampocoluna: "ID Medida Campo Coluna",
-  idabioticosuperficie: "ID Abiótico Superfície",
-  iddupladessorcaoagua: "ID Dupla Dessorção Água",
-  idconcentracaogasagua: "ID Concentração Gás Água",
-  idnutrientessedimento: "ID Nutrientes Sedimento",
-  idmedidacamposuperficie: "ID Medida Campo Superfície",
-  idconcentracaogassedimento: "ID Concentração Gás Sedimento",
-  idaguamateriaorganicasedimento: "ID Água Matéria Orgânica Sedimento",
-  idvariaveisfisicasquimicasdaagua: "ID Variáveis Físico-Químicas da Água",
-  idparametrosbiologicosfisicosagua: "ID Parâmetros Biológicos Físicos Água",
-  idionsnaaguaintersticialdosedimento: "ID Íons na Água Intersticial do Sedimento",
-  
-  // Parâmetros físicos
-  tempagua: "Temperatura da Água",
-  tempsolo: "Temperatura do Solo",
-  tempar: "Temperatura do Ar",
-  turbidez: "Turbidez",
-  secchi: "Disco de Secchi",
-  vento: "Velocidade do Vento",
-  altura: "Altura",
-  profundidade: "Profundidade",
-  batimetria: "Batimetria",
-  condutividade: "Condutividade",
-  redox: "Potencial Redox",
-  intensidadeluminosa: "Intensidade Luminosa",
-  
-  // Parâmetros químicos gerais
-  ph: "pH",
-  tds: "Sólidos Totais Dissolvidos (TDS)",
-  tdc: "Carbono Total Dissolvido",
-  toc: "Carbono Orgânico Total",
-  doc: "Carbono Orgânico Dissolvido",
-  dic: "Carbono Inorgânico Dissolvido",
-  pt: "Fósforo Total",
-  tc: "Carbono Total",
-  materialemsuspensao: "Material em Suspensão",
-  materiaorganica: "Matéria Orgânica",
-  
-  // Elementos químicos (mantidos como estão)
-  f: "Flúor",
-  k: "Potássio",
-  br: "Bromo",
-  ca: "Cálcio",
-  cl: "Cloreto",
-  dc: "Condutividade",
-  li: "Lítio",
-  mg: "Magnésio",
-  n2: "Nitrogênio",
-  na: "Sódio",
-  nt: "Nitrogênio Total",
-  o2: "Oxigênio",
-  _do: "Oxigênio Dissolvido",
-  ch4: "Metano",
-  co2: "Dióxido de Carbono",
-  n2o: "Óxido Nitroso",
-  nh4: "Amônio",
-  no2: "Nitrito",
-  no3: "Nitrato",
-  po4: "Fosfato",
-  poc: "Carbono Orgânico Particulado",
-  so4: "Sulfato",
-  agua: "Água",
-  idtc: "ID Carbono Total",
-  nnh4: "Nitrogênio Amoniacal",
-  nno3: "Nitrogênio Nitrato",
-  ppo43: "Fósforo Fosfato",
-  sso42: "Enxofre Sulfato",
-  
-  // Parâmetros biológicos
-  biomassazoo: "Biomassa Zooplâncton",
-  respiracaofito: "Respiração Fitoplâncton",
-  biomassabacteria: "Biomassa Bacteriana",
-  respiracaobacteriana: "Respiração Bacteriana",
-  producaobacteriana: "Produção Bacteriana",
-  producaofitoplanctonica: "Produção Fitoplanctônica",
-  biomassacarbonototalfito: "Biomassa Carbono Total Fito",
-  carbonoorganicoexcretado: "Carbono Orgânico Excretado",
-  densidadebacteria: "Densidade Bacteriana",
-  densidadetotalzoo: "Densidade Total Zoo",
-  densidadetotalfito: "Densidade Total Fito",
-  taxasedimentacao: "Taxa de Sedimentação",
-  clorofila: "Clorofila",
-  clorofilaa: "Clorofila A",
-  feofitina: "Feofitina",
-  volumecoletado: "Volume Coletado",
-  
-  // Amostras e réplicas
-  ch4_amostras: "Amostras de CH4",
-  co2_amostras: "Amostras de CO2",
-  ch4_desviopadrao: "Desvio Padrão CH4",
-  co2_desviopadrao: "Desvio Padrão CO2",
-  nrodefunis: "Número de Funis",
-  nrocampanha: "Número da Campanha",
-  replica: "Réplica",
-  
-  // Isotópicos
-  delta13c: "Delta 13C",
-  delta15n: "Delta 15N",
-  
-  // Outros
-  profundidadedosedimento: "Profundidade do Sedimento"
-};
-
-// Ordem prioritária para as colunas (datas primeiro)
-const COLUMN_PRIORITY = [
-  'datamedida', 'datainicio', 'datafim', 'horamedida', 'intervalo',
-  'lat', 'lng', 'altitude'
-];
-
+ 
 const calcMinWidth = (nCols: number) => Math.max(900, nCols * 140);
-
+ 
 const isRecordArray = (v: unknown): v is Record<string, unknown>[] =>
   Array.isArray(v) && (v.length === 0 || typeof v[0] === "object");
-
+ 
 function flattenRecord(r: Record<string, unknown>): Record<string, unknown> {
   if (!r || typeof r !== "object") return r;
   const copy: Record<string, unknown> = { ...r };
@@ -190,44 +103,42 @@ function flattenRecord(r: Record<string, unknown>): Record<string, unknown> {
   }
   return copy;
 }
-
+ 
 function normalizePayload(payload: unknown): { online: Record<string, unknown>[]; offline: Record<string, unknown>[] } {
   const online: Record<string, unknown>[] = [];
   const offline: Record<string, unknown>[] = [];
-
+ 
   if (isRecordArray(payload)) {
     online.push(...(payload as Record<string, unknown>[]).map(flattenRecord));
     return { online, offline };
   }
-
+ 
   if (payload && typeof payload === "object") {
     const obj = payload as Record<string, unknown>;
-
+ 
     if (obj.data && typeof obj.data === "object") {
       const dataObj = obj.data as Record<string, unknown>;
       if (isRecordArray(dataObj.registers)) {
         online.push(...(dataObj.registers as Record<string, unknown>[]).map(flattenRecord));
         return { online, offline };
       }
+      if (isRecordArray(dataObj)) {
+        online.push(...(dataObj as Record<string, unknown>[]).map(flattenRecord));
+        return { online, offline };
+      }
     }
-
+ 
     if (isRecordArray(obj.online) || isRecordArray(obj.offline)) {
       online.push(...(((obj.online as Record<string, unknown>[]) ?? []).map(flattenRecord)));
       offline.push(...(((obj.offline as Record<string, unknown>[]) ?? []).map(flattenRecord)));
       return { online, offline };
     }
-
+ 
     if (isRecordArray(obj.data)) {
       online.push(...((obj.data as Record<string, unknown>[]).map(flattenRecord)));
       return { online, offline };
     }
-
-    if (isRecordArray(obj.sima) || isRecordArray(obj.sima_offline)) {
-      online.push(...(((obj.sima as Record<string, unknown>[]) ?? []).map(flattenRecord)));
-      offline.push(...(((obj.sima_offline as Record<string, unknown>[]) ?? []).map(flattenRecord)));
-      return { online, offline };
-    }
-
+ 
     for (const k of Object.keys(obj)) {
       const v = obj[k];
       if (isRecordArray(v)) {
@@ -239,12 +150,13 @@ function normalizePayload(payload: unknown): { online: Record<string, unknown>[]
         }
       }
     }
+ 
     return { online, offline };
   }
-
+ 
   return { online, offline };
 }
-
+ 
 function renderValue(v: unknown): string {
   if (v === null || v === undefined) return "-";
   if (typeof v === "object") {
@@ -256,7 +168,7 @@ function renderValue(v: unknown): string {
   }
   return String(v);
 }
-
+ 
 function extractTotals(payload: unknown): {
   total?: number;
   totalOnline?: number;
@@ -264,13 +176,13 @@ function extractTotals(payload: unknown): {
 } {
   if (!payload || typeof payload !== "object") return {};
   const obj: any = payload;
-
+ 
   const pickNumber = (v: unknown) => {
     if (v === undefined || v === null) return undefined;
     const n = Number(v);
     return Number.isFinite(n) ? n : undefined;
   };
-
+ 
   const candidates = [
     obj.total,
     obj.count,
@@ -283,137 +195,158 @@ function extractTotals(payload: unknown): {
     obj.data?.pagination?.total,
     obj.data?.meta?.total,
   ];
-
+ 
   const total = candidates.map(pickNumber).find((v) => v !== undefined);
-
+ 
   const totalOnline = pickNumber(obj.online_total ?? obj.total_online ?? obj.onlineTotal ?? obj.meta?.online_total ?? obj.data?.online_total);
   const totalOffline = pickNumber(obj.offline_total ?? obj.total_offline ?? obj.offlineTotal ?? obj.meta?.offline_total ?? obj.data?.offline_total);
-
+ 
   const fallbackOnline = pickNumber(obj.data?.counts?.online ?? obj.data?.counts?.sima ?? obj.data?.counts?.total_online);
   const fallbackOffline = pickNumber(obj.data?.counts?.offline ?? obj.data?.counts?.sima_offline ?? obj.data?.counts?.total_offline);
-
+ 
   return {
     total: total ?? pickNumber(obj.data?.registers_total) ?? undefined,
     totalOnline: totalOnline ?? fallbackOnline ?? undefined,
     totalOffline: totalOffline ?? fallbackOffline ?? undefined,
   };
 }
+ 
+function extractColumnsFromData(records: BalcarRecord[]): string[] {
+  if (!records || records.length === 0) return [];
+ 
+  const columns = new Set<string>();
+  records.forEach(record => {
+    Object.keys(record).forEach(key => {
+      columns.add(key);
+    });
+  });
+ 
+  return Array.from(columns);
+}
 
-export default function FurnasTable({
+// Função para obter o nome amigável da coluna
+const getColumnLabel = (columnKey: string): string => {
+  return COLUMN_MAPPING[columnKey] || columnKey;
+};
+
+// Função para ordenar colunas com prioridade
+const sortColumnsWithPriority = (columns: string[]): string[] => {
+  const priorityColumns = COLUMN_PRIORITY.filter(col => columns.includes(col));
+  const otherColumns = columns.filter(col => !COLUMN_PRIORITY.includes(col)).sort();
+  return [...priorityColumns, ...otherColumns];
+};
+ 
+export default function BalcarTable({
   selectedPointId = null,
   selectedPointName = null,
   selectedPoint = null,
   range,
   initialPage = 1,
   initialLimit = 100,
-  apiBase = "http://localhost:3001/furnas",
+  apiBase = "http://localhost:3001/balcar",
 }: Props) {
-  const [displayOnline, setDisplayOnline] = useState<SimaRecord[]>([]);
-  const [displayOffline, setDisplayOffline] = useState<SimaRecord[]>([]);
-
-  const [rawOnline, setRawOnline] = useState<SimaRecord[] | null>(null);
-  const [rawOffline, setRawOffline] = useState<SimaRecord[] | null>(null);
-
+  const [displayOnline, setDisplayOnline] = useState<BalcarRecord[]>([]);
+  const [displayOffline, setDisplayOffline] = useState<BalcarRecord[]>([]);
+ 
+  const [rawOnline, setRawOnline] = useState<BalcarRecord[] | null>(null);
+  const [rawOffline, setRawOffline] = useState<BalcarRecord[] | null>(null);
+ 
   const [loading, setLoading] = useState<boolean>(false);
   const [view] = useState<"online" | "offline" | "ambos">("online");
   const [error, setError] = useState<string | null>(null);
-
+ 
   const [page, setPage] = useState<number>(initialPage ?? 1);
   const [pageInput, setPageInput] = useState<string>(String(page));
   useEffect(() => setPageInput(String(page)), [page]);
-
+ 
   const [limit] = useState<number>(initialLimit ?? 100);
-
+ 
   const [totalOnline, setTotalOnline] = useState<number | undefined>(undefined);
   const [totalOffline, setTotalOffline] = useState<number | undefined>(undefined);
   const [totalCombined, setTotalCombined] = useState<number | undefined>(undefined);
-
+ 
   const MAX_CLIENT_FETCH = 2000;
   const prevSignatureRef = useRef<string | null>(null);
   const useClientPaginationRef = useRef<boolean>(false);
-
+ 
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<Record<string, boolean>>({});
   const [tempSelectedColumns, setTempSelectedColumns] = useState<Record<string, boolean>>({});
   const [columnsOpen, setColumnsOpen] = useState(false);
-
-  // Função para obter o nome amigável da coluna
-  const getColumnLabel = (columnKey: string): string => {
-    return COLUMN_MAPPING[columnKey] || columnKey;
-  };
-
-  // Função para ordenar colunas com prioridade
-  const sortColumnsWithPriority = (columns: string[]): string[] => {
-    const priorityColumns = COLUMN_PRIORITY.filter(col => columns.includes(col));
-    const otherColumns = columns.filter(col => !COLUMN_PRIORITY.includes(col)).sort();
-    return [...priorityColumns, ...otherColumns];
-  };
-
+ 
   useEffect(() => {
+    const allRecords = [...displayOnline, ...displayOffline];
+    if (allRecords.length > 0) {
+      const columns = extractColumnsFromData(allRecords);
+      // Ordenar colunas com prioridade
+      const sortedColumns = sortColumnsWithPriority(columns);
+      setAvailableColumns(sortedColumns);
+     
+      const defaultSelected: Record<string, boolean> = {};
+      sortedColumns.forEach(col => {
+        defaultSelected[col] = true;
+      });
+      setSelectedColumns(defaultSelected);
+      setTempSelectedColumns(defaultSelected);
+    }
+  }, [displayOnline, displayOffline]);
+ 
+  // CORREÇÃO: Resetar completamente quando os parâmetros mudarem
+  useEffect(() => {
+    console.log(`[BalcarTable] Resetando paginação devido a mudanças nos parâmetros`);
     setPage(1);
     useClientPaginationRef.current = false;
     setRawOnline(null);
     setRawOffline(null);
     prevSignatureRef.current = null;
+    setDisplayOnline([]);
+    setDisplayOffline([]);
+    setTotalOnline(undefined);
+    setTotalOffline(undefined);
+    setTotalCombined(undefined);
   }, [selectedPoint, selectedPointId, selectedPointName, range?.start, range?.end]);
-
-  useEffect(() => {
-    // monta união de colunas a partir do primeiro registro visível
-    const union = new Set<string>();
-    if (displayOnline && displayOnline.length > 0) Object.keys(displayOnline[0]).forEach((k) => union.add(k));
-    if (displayOffline && displayOffline.length > 0) Object.keys(displayOffline[0]).forEach((k) => union.add(k));
-    const cols = Array.from(union);
-    // Ordenar colunas com prioridade
-    const sortedCols = sortColumnsWithPriority(cols);
-    setAvailableColumns(sortedCols);
-
-    if (Object.keys(selectedColumns).length === 0 && sortedCols.length > 0) {
-      const all = Object.fromEntries(sortedCols.map((c) => [c, true]));
-      setSelectedColumns(all);
-    }
-    if (Object.keys(tempSelectedColumns).length === 0 && Object.keys(selectedColumns).length > 0) {
-      setTempSelectedColumns({ ...selectedColumns });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayOnline, displayOffline]);
-
-  useEffect(() => {
-    if (columnsOpen) {
-      if (Object.keys(selectedColumns).length === 0 && availableColumns.length > 0) {
-        const all = Object.fromEntries(availableColumns.map((c) => [c, true]));
-        setSelectedColumns(all);
-        setTempSelectedColumns(all);
-      } else {
-        setTempSelectedColumns({ ...selectedColumns });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnsOpen]);
-
-  function toggleTempColumn(col: string) {
-    setTempSelectedColumns((s) => ({ ...s, [col]: !s[col] }));
-  }
-
-  function selectAllTemp() {
-    setTempSelectedColumns(Object.fromEntries(availableColumns.map((c) => [c, true])));
-  }
-
-  function clearAllTemp() {
-    setTempSelectedColumns(Object.fromEntries(availableColumns.map((c) => [c, false])));
-  }
-
-  function signatureOf(arr: SimaRecord[] | undefined | null) {
+ 
+  function signatureOf(arr: BalcarRecord[] | undefined | null) {
     if (!arr || arr.length === 0) return "";
     return arr
       .slice(0, 5)
       .map((r) =>
         String(
-          r.idsima ?? r.idsimaoffline ?? r.idestacao ?? r.rotulo ?? (typeof r === "object" ? JSON.stringify(r).slice(0, 60) : String(r))
+          (r.idsima ?? r.idsimaoffline ?? r.idestacao ?? r.rotulo ?? r.datahora ?? JSON.stringify(r).slice(0, 60))
         )
       )
       .join("|");
   }
-
+ 
+  function derivePathSegment(): { segment?: string; reason?: string } {
+    if (selectedPoint) {
+      const idRes = (selectedPoint["idreservatorio"] ?? selectedPoint["id"] ?? selectedPoint["_id"]) as string | number | undefined;
+      if (idRes !== undefined && idRes !== null && String(idRes).trim() !== "") {
+        console.log(`[BalcarTable] Usando idreservatorio: ${idRes}`);
+        return { segment: String(idRes), reason: "idreservatorio_from_object" };
+      }
+ 
+      const nome = (selectedPoint["nome_reservatorio"] ?? selectedPoint["reservatorio_nome"] ?? selectedPoint["nome"] ?? selectedPoint["name"]) as string | undefined;
+      if (nome && String(nome).trim().length > 0) {
+        console.log(`[BalcarTable] Usando nome: ${nome}`);
+        return { segment: String(nome).trim(), reason: "nome_reservatorio_from_object" };
+      }
+    }
+ 
+    if (selectedPointName && String(selectedPointName).trim().length > 0) {
+      console.log(`[BalcarTable] Usando selectedPointName: ${selectedPointName}`);
+      return { segment: String(selectedPointName).trim(), reason: "name_prop" };
+    }
+ 
+    if (selectedPointId !== null && selectedPointId !== undefined && String(selectedPointId).trim() !== "") {
+      console.log(`[BalcarTable] Usando selectedPointId: ${selectedPointId}`);
+      return { segment: String(selectedPointId), reason: "id_prop" };
+    }
+ 
+    console.log(`[BalcarTable] Nenhum identificador encontrado`);
+    return { segment: undefined, reason: "no_identifier" };
+  }
+ 
   async function tryFetchJSON(url: string, signal: AbortSignal) {
     const res = await fetch(url, { signal });
     if (!res.ok) {
@@ -422,88 +355,54 @@ export default function FurnasTable({
     }
     return await res.json();
   }
-
-  
-  // derivePathSegment (prioriza id numérico e extrai dígitos de rotulo)
-  function derivePathSegment(): { segment?: string; reason?: string } {
-    if (selectedPoint) {
-      const maybeIdest = selectedPoint["idestacao"] ?? selectedPoint["id"] ?? selectedPoint["_id"] ?? selectedPoint["idsima"];
-      if (maybeIdest !== undefined && maybeIdest !== null) {
-        if (typeof maybeIdest === "number" || /^\d+$/.test(String(maybeIdest))) {
-          return { segment: String(maybeIdest), reason: "prefer_id_from_object" };
-        }
-      }
-
-      const rotulo = (selectedPoint["rotulo"] ?? selectedPoint["nome_estacao"] ?? selectedPoint["nome"] ?? selectedPoint["name"]) as
-        | string
-        | undefined;
-      if (rotulo && String(rotulo).trim().length > 0) {
-        const s = String(rotulo).trim();
-        if (/^\d+$/.test(s)) return { segment: s, reason: "rotulo_numeric_string" };
-        const m = s.match(/(\d+)\s*$/);
-        if (m) return { segment: m[1], reason: "rotulo_extract_trailing_digits" };
-        return { segment: s, reason: "rotulo_from_object" };
-      }
-
-      const reserva = selectedPoint["reservatorio"] ?? selectedPoint["reservatorio_nome"] ?? selectedPoint["reservatorioName"];
-      const instituicao = selectedPoint["instituicao"] ?? selectedPoint["instituicao_nome"] ?? selectedPoint["instituicaoName"];
-      if (reserva && instituicao) {
-        return { segment: `${instituicao}-${reserva}`, reason: "instituicao_reservatorio_compose" };
-      }
-
-      const fallbackId = selectedPoint["idHexadecimal"] ?? selectedPoint["id"] ?? selectedPoint["_id"];
-      if (fallbackId !== undefined && fallbackId !== null && String(fallbackId).trim() !== "") {
-        return { segment: String(fallbackId), reason: "fallback_id_from_object" };
-      }
-
-      return { segment: undefined, reason: "no_identifier_in_object" };
-    }
-
-    if (selectedPointName && String(selectedPointName).trim().length > 0) {
-      return { segment: String(selectedPointName).trim(), reason: "rotulo_from_name_prop" };
-    }
-
-    if (selectedPointId !== null && selectedPointId !== undefined && String(selectedPointId).trim() !== "") {
-      return { segment: String(selectedPointId), reason: "id_from_id_prop" };
-    }
-
-    return { segment: undefined, reason: "no_identifier" };
-  }
-
+ 
+  // CORREÇÃO PRINCIPAL: Limpar dados antes de cada fetch
   useEffect(() => {
     const controller = new AbortController();
     const { signal } = controller;
-
+ 
     async function fetchPageSegment(segment: string) {
       setLoading(true);
       setError(null);
-
+     
+      // CORREÇÃO: Limpar dados antes de buscar novos
+      setDisplayOnline([]);
+      setDisplayOffline([]);
+ 
       try {
         const paramsPage = new URLSearchParams();
         if (range?.start) paramsPage.append("start", new Date(range.start).toISOString());
         if (range?.end) paramsPage.append("end", new Date(range.end).toISOString());
         paramsPage.append("page", String(page));
         paramsPage.append("limit", String(limit));
-
+ 
         const baseClean = apiBase.replace(/\/$/, "");
         const urlPage = `${baseClean}/${encodeURIComponent(segment)}?${paramsPage.toString()}`;
-
+ 
+        console.log(`[BalcarTable] Fetching: ${urlPage}`);
+        console.log(`[BalcarTable] Page: ${page}, Limit: ${limit}`);
+ 
         const payload = await tryFetchJSON(urlPage, signal);
+       
+        console.log(`[BalcarTable] Payload received:`, payload);
+       
         const { online: maybeOnline, offline: maybeOffline } = normalizePayload(payload);
-
-        const sig = signatureOf(maybeOnline as SimaRecord[]);
+ 
+        console.log(`[BalcarTable] Online records: ${maybeOnline.length}, Offline records: ${maybeOffline.length}`);
+ 
+        const sig = signatureOf(maybeOnline as BalcarRecord[]);
         const prevSig = prevSignatureRef.current;
-
+ 
         const totals = extractTotals(payload);
         setTotalOnline(totals.totalOnline);
         setTotalOffline(totals.totalOffline);
         setTotalCombined(totals.total ?? (totals.totalOnline && totals.totalOffline ? totals.totalOnline + totals.totalOffline : undefined));
-
+ 
         if (page === 1) prevSignatureRef.current = sig;
-
+ 
         if (page > 1 && prevSig && sig === prevSig) {
-          console.warn("[FurnasTable] backend pode estar ignorando page/limit; tentando offset...");
-
+          console.warn("[BalcarTable] backend pode estar ignorando page/limit; tentando offset...");
+ 
           const offset = (page - 1) * limit;
           const paramsOffset = new URLSearchParams();
           if (range?.start) paramsOffset.append("start", new Date(range.start).toISOString());
@@ -511,15 +410,15 @@ export default function FurnasTable({
           paramsOffset.append("offset", String(offset));
           paramsOffset.append("limit", String(limit));
           const urlOffset = `${baseClean}/${encodeURIComponent(segment)}?${paramsOffset.toString()}`;
-
+ 
           try {
             const payloadOffset = await tryFetchJSON(urlOffset, signal);
             const { online: onlineOffset, offline: offlineOffset } = normalizePayload(payloadOffset);
-            const sigOffset = signatureOf(onlineOffset as SimaRecord[]);
-
+            const sigOffset = signatureOf(onlineOffset as BalcarRecord[]);
+ 
             if (sigOffset !== sig) {
-              setDisplayOnline(onlineOffset as SimaRecord[]);
-              setDisplayOffline(offlineOffset as SimaRecord[]);
+              setDisplayOnline(onlineOffset as BalcarRecord[]);
+              setDisplayOffline(offlineOffset as BalcarRecord[]);
               const totalsOffset = extractTotals(payloadOffset);
               setTotalOnline(totalsOffset.totalOnline ?? totals.totalOnline);
               setTotalOffline(totalsOffset.totalOffline ?? totals.totalOffline);
@@ -527,49 +426,49 @@ export default function FurnasTable({
               return;
             }
           } catch (err) {
-            console.debug("[FurnasTable] tentativa com offset falhou:", err);
+            console.debug("[BalcarTable] tentativa com offset falhou:", err);
           }
-
+ 
           const knownTotal = totals.total ?? totals.totalOnline ?? totals.totalOffline;
           if (knownTotal !== undefined && knownTotal <= MAX_CLIENT_FETCH) {
-            console.info(`[FurnasTable] baixando todos os ${knownTotal} registros (<= ${MAX_CLIENT_FETCH}) e aplicando paginação client-side`);
-
+            console.info(`[BalcarTable] baixando todos os ${knownTotal} registros (<= ${MAX_CLIENT_FETCH}) e aplicando paginação client-side`);
+ 
             const paramsFull = new URLSearchParams();
             if (range?.start) paramsFull.append("start", new Date(range.start).toISOString());
             if (range?.end) paramsFull.append("end", new Date(range.end).toISOString());
             const urlFull = `${baseClean}/${encodeURIComponent(segment)}?${paramsFull.toString()}`;
-
+ 
             const payloadFull = await tryFetchJSON(urlFull, signal);
             const { online: fullOnline, offline: fullOffline } = normalizePayload(payloadFull);
-
-            setRawOnline(fullOnline as SimaRecord[]);
-            setRawOffline(fullOffline as SimaRecord[]);
+ 
+            setRawOnline(fullOnline as BalcarRecord[]);
+            setRawOffline(fullOffline as BalcarRecord[]);
             useClientPaginationRef.current = true;
-
+ 
             const off = (page - 1) * limit;
-            setDisplayOnline((fullOnline as SimaRecord[]).slice(off, off + limit));
-            setDisplayOffline((fullOffline as SimaRecord[]).slice(off, off + limit));
+            setDisplayOnline((fullOnline as BalcarRecord[]).slice(off, off + limit));
+            setDisplayOffline((fullOffline as BalcarRecord[]).slice(off, off + limit));
             const totalsFull = extractTotals(payloadFull);
             setTotalOnline(totalsFull.totalOnline ?? totals.totalOnline);
             setTotalOffline(totalsFull.totalOffline ?? totals.totalOffline);
             setTotalCombined(totalsFull.total ?? totals.total ?? undefined);
             return;
           }
-
+ 
           throw new Error(
             "Backend não está paginando corretamente e o total é desconhecido/grande. Ajuste a API para suportar page+limit ou offset+limit, ou retorne o 'total' no payload."
           );
         }
-
-        // caminho normal: servidor retornou a página correta (já flattened)
-        setDisplayOnline(maybeOnline as SimaRecord[]);
-        setDisplayOffline(maybeOffline as SimaRecord[]);
+ 
+        // CORREÇÃO: Garantir que apenas os dados da página atual sejam exibidos
+        setDisplayOnline(maybeOnline as BalcarRecord[]);
+        setDisplayOffline(maybeOffline as BalcarRecord[]);
       } catch (err: unknown) {
         if (typeof err === "object" && err !== null && "name" in err && (err as any).name === "AbortError") {
-          console.debug("[FurnasTable] fetch aborted");
+          console.debug("[BalcarTable] fetch aborted");
         } else {
-          console.error("[FurnasTable] fetch error", err);
-          setError(err instanceof Error ? err.message : "Erro ao buscar dados Furnas");
+          console.error("[BalcarTable] fetch error", err);
+          setError(err instanceof Error ? err.message : "Erro ao buscar dados Balcar");
           setDisplayOnline([]);
           setDisplayOffline([]);
         }
@@ -577,9 +476,12 @@ export default function FurnasTable({
         if (!signal.aborted) setLoading(false);
       }
     }
-
+ 
     if (useClientPaginationRef.current && rawOnline) {
       const off = (page - 1) * limit;
+      // CORREÇÃO: Limpar antes de aplicar a paginação client-side também
+      setDisplayOnline([]);
+      setDisplayOffline([]);
       setDisplayOnline(rawOnline.slice(off, off + limit));
       setDisplayOffline((rawOffline ?? []).slice(off, off + limit));
       setLoading(false);
@@ -596,45 +498,74 @@ export default function FurnasTable({
         fetchPageSegment(segment);
       }
     }
-
+ 
     return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPoint, selectedPointName, selectedPointId, range?.start, range?.end, page, limit, apiBase]);
+ 
+  // CORREÇÃO: Funções de paginação melhoradas
+  const handlePrev = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+ 
+  const handleNext = () => {
+    if (hasNext) {
+      setPage(page + 1);
+    }
+  };
+ 
+  const selectAllTemp = () => {
+    const allSelected: Record<string, boolean> = {};
+    availableColumns.forEach(col => {
+      allSelected[col] = true;
+    });
+    setTempSelectedColumns(allSelected);
+  };
+ 
+  const clearAllTemp = () => {
+    setTempSelectedColumns({});
+  };
+ 
+  const toggleTempColumn = (col: string) => {
+    setTempSelectedColumns(prev => ({
+      ...prev,
+      [col]: !prev[col],
+    }));
+  };
 
-  function exportCSV(which: "online" | "offline") {
+  function exportCSV(which: "online" | "offline" = "online") {
     const data = which === "online" ? displayOnline : displayOffline;
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
     const headers = keys.map(k => getColumnLabel(k));
-    const rows: string[][] = [headers];
+    const rowsOut: string[][] = [headers];
     data.forEach((row) =>
-      rows.push(
-        keys.map((k) => {
-          const v = (row as Record<string, unknown>)[k];
-          return v === undefined || v === null ? "" : String(v);
-        })
-      )
+      rowsOut.push(keys.map((k) => {
+        const v = (row as Record<string, unknown>)[k];
+        return v === undefined || v === null ? "" : String(v);
+      }))
     );
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csv = rowsOut.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `furnas_${which}_${new Date().toISOString()}.csv`;
+    a.download = `balcar_${which}_${new Date().toISOString()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
-
+ 
   function openTableInNewTab(which: "online" | "offline") {
     const data = which === "online" ? displayOnline : displayOffline;
     if (!data || data.length === 0) return;
     const keys = availableColumns.filter((k) => selectedColumns[k]);
     if (keys.length === 0) return;
     const headers = keys.map(k => getColumnLabel(k));
-    let html = `<html><head><meta charset="utf-8"><title>FURNAS ${which}</title>
+    let html = `<html><head><meta charset="utf-8"><title>Balcar ${which}</title>
       <style>body{font-family:system-ui;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:6px 8px;white-space:nowrap}th{background:#f3f4f6}</style></head><body>`;
-    html += `<h3>FURNAS ${which}</h3><table><thead><tr>${headers.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
+    html += `<h3>Balcar ${which}</h3><table><thead><tr>${headers.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
     data.forEach((row) => {
       html += "<tr>" + keys.map((k) => `<td>${renderValue((row as Record<string, unknown>)[k])}</td>`).join("") + "</tr>";
     });
@@ -644,7 +575,7 @@ export default function FurnasTable({
     w.document.write(html);
     w.document.close();
   }
-
+ 
   const renderHeaderCells = (cols: string[]) =>
     cols.map((key) => (
       <TableHead
@@ -663,67 +594,52 @@ export default function FurnasTable({
         {getColumnLabel(key)}
       </TableHead>
     ));
-
+ 
   const rowClass = (idx: number) => `group ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} text-sm`;
-
+ 
   const knownTotalForView = view === "online" ? totalOnline : view === "offline" ? totalOffline : totalCombined;
-
+ 
   const pageItemCount =
     view === "online"
       ? displayOnline.length
       : view === "offline"
         ? displayOffline.length
         : displayOnline.length + displayOffline.length;
-
-  const hasNext =
-    knownTotalForView !== undefined ? page * limit < knownTotalForView : pageItemCount === limit;
-
+ 
+  // CORREÇÃO: Lógica melhorada para verificar se há próxima página
+  const hasNext = useRef(false);
+  hasNext.current = knownTotalForView !== undefined
+    ? page * limit < knownTotalForView
+    : pageItemCount >= limit;
+ 
   const totalPagesForView =
     knownTotalForView !== undefined ? Math.max(1, Math.ceil(knownTotalForView / limit)) : undefined;
-
-  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
-  const handleNext = () => {
-    if (totalPagesForView !== undefined) {
-      setPage((p) => Math.min(totalPagesForView, p + 1));
-    } else {
-      if (hasNext) setPage((p) => p + 1);
-    }
-  };
-
+ 
   const visibleColumns = availableColumns.filter((c) => selectedColumns[c]);
-
+ 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <h2 className="text-lg font-bold m-0">FURNAS — Visualização de Dados</h2>
-
+        <h2 className="text-lg font-bold m-0">BALCAR — Visualização de Dados</h2>
+ 
         <div className="flex items-center gap-3">
-          <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden"></div>
-
           <div className="inline-flex gap-2 flex-wrap items-center">
-            {(view === "offline" || view === "ambos") && (
-              <>
-                <button onClick={() => exportCSV("offline")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Exportar Offline CSV</button>
-                <button onClick={() => openTableInNewTab("offline")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Abrir Offline</button>
-              </>
-            )}
-
             <div className="relative">
               <button onClick={() => setColumnsOpen((v) => !v)} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">
                 Filtros
               </button>
-
+ 
               {columnsOpen && (
-                <div className="absolute right-0 mt-2 w-64 max-h-124 bg-white border rounded shadow-lg z-50 flex flex-col">
-                  <div className="p-3 border-b flex justify-between items-center">
+                <div className="absolute right-0 mt-2 w-64 max-h-124 bg-white border rounded shadow-lg z-50 flex flex-col p-3">
+                  <div className="p-1 border-b flex justify-between items-center">
                     <strong>Colunas</strong>
                     <div className="flex gap-1">
                       <button onClick={selectAllTemp} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Tudo</button>
                       <button onClick={clearAllTemp} className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Limpar</button>
                     </div>
                   </div>
-
-                  <div className="p-3 overflow-auto flex-1">
+ 
+                  <div className="p-2 overflow-auto flex-1">
                     <div className="grid gap-2">
                       {availableColumns.length === 0 && <div className="text-xs text-gray-500">Sem colunas disponíveis</div>}
                       {availableColumns.map((col) => (
@@ -738,14 +654,14 @@ export default function FurnasTable({
                       ))}
                     </div>
                   </div>
-
-                  <div className="p-3 border-t flex justify-end gap-2 bg-white">
+ 
+                  <div className="p-2 border-t flex justify-end gap-2 bg-white">
                     <button
                       onClick={() => {
                         setTempSelectedColumns({ ...selectedColumns });
                         setColumnsOpen(false);
                       }}
-                      className="px-2 py-1 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer"
+                      className="px-3 py-1 border rounded"
                     >
                       Cancelar
                     </button>
@@ -754,7 +670,7 @@ export default function FurnasTable({
                         setSelectedColumns({ ...tempSelectedColumns });
                         setColumnsOpen(false);
                       }}
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-transform duration-200 hover:scale-105 cursor-pointer"
+                      className="px-3 py-1 bg-blue-600 text-white rounded"
                     >
                       Aplicar
                     </button>
@@ -762,33 +678,37 @@ export default function FurnasTable({
                 </div>
               )}
             </div>
-
-            {(view === "online" || view === "ambos") && (
-              <>
-                <button onClick={() => exportCSV("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Exportar CSV</button>
-                <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Abrir Online</button>
-              </>
-            )}
+ 
+            <button onClick={() => exportCSV("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Exportar CSV</button>
+            <button onClick={() => openTableInNewTab("online")} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Abrir Online</button>
           </div>
         </div>
       </div>
-
+ 
       {loading && <p>Carregando...</p>}
       {error && <p className="text-red-600">{error}</p>}
-
+ 
       <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "calc(100vh - 200px)", border: "1px solid #ddd", borderRadius: 6, paddingBottom: 16 }}>
         {(view === "online" || view === "ambos") && displayOnline.length > 0 && visibleColumns.length > 0 && (
           <div style={{ minWidth: calcMinWidth(visibleColumns.length) }}>
             <Table>
-              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>Online</TableCaption>
+              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                Online
+                {knownTotalForView && ` de ${knownTotalForView} totais`}
+              </TableCaption>
               <TableHeader>
                 <TableRow>{renderHeaderCells(visibleColumns)}</TableRow>
               </TableHeader>
               <TableBody>
                 {displayOnline.map((row, rIdx) => (
-                  <TableRow key={String((row as any).idsima ?? rIdx)} className={rowClass(rIdx)}>
+                  <TableRow key={`online-${page}-${rIdx}-${String(row.datahora)}`} className={rowClass(rIdx)}>
                     {visibleColumns.map((col, idx) => (
-                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>{renderValue((row as Record<string, unknown>)[col])}</TableCell>
+                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>
+                        {col === "datahora" && row[col]
+                          ? new Date(String(row[col])).toLocaleString('pt-BR')
+                          : renderValue(row[col])
+                        }
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -796,22 +716,69 @@ export default function FurnasTable({
             </Table>
           </div>
         )}
-
+ 
+        {(view === "offline" || view === "ambos") && displayOffline.length > 0 && visibleColumns.length > 0 && (
+          <div style={{ minWidth: calcMinWidth(visibleColumns.length), marginTop: 20 }}>
+            <Table>
+              <TableCaption style={{ textAlign: "left", padding: "6px 10px", color: "#666" }}>
+                Offline - Mostrando {displayOffline.length} registros
+                {totalOffline && ` de ${totalOffline} totais`}
+              </TableCaption>
+              <TableHeader>
+                <TableRow>{renderHeaderCells(visibleColumns)}</TableRow>
+              </TableHeader>
+              <TableBody>
+                {displayOffline.map((row, rIdx) => (
+                  <TableRow key={`offline-${page}-${rIdx}-${String(row.datahora)}`} className={rowClass(rIdx)}>
+                    {visibleColumns.map((col, idx) => (
+                      <TableCell key={idx} style={{ padding: "8px 10px", whiteSpace: "nowrap", borderTop: "1px solid #eee" }}>
+                        {col === "datahora" && row[col]
+                          ? new Date(String(row[col])).toLocaleString('pt-BR')
+                          : renderValue(row[col])
+                        }
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+ 
         {((view === "online" && displayOnline.length > 0) || (view === "offline" && displayOffline.length > 0) || (view === "ambos" && (displayOnline.length > 0 || displayOffline.length > 0))) && visibleColumns.length === 0 && (
           <div className="p-4 text-sm text-gray-600">Nenhuma coluna selecionada — selecione colunas em <strong>Coluna</strong>.</div>
         )}
+ 
+        {!loading && displayOnline.length === 0 && displayOffline.length === 0 && (
+          <div className="p-4 text-sm text-gray-600">Nenhum registro encontrado para o ponto selecionado.</div>
+        )}
       </div>
-
+ 
+      {/* CORREÇÃO: Controles de paginação melhorados */}
       <div className="mt-2 flex items-center justify-between">
         <div>
           Página {page}
+          {totalPagesForView && ` de ${totalPagesForView}`}
+          {knownTotalForView && ` (Total: ${knownTotalForView} registros)`}
         </div>
-
+ 
         <div className="space-x-2 flex items-center">
-          <button disabled={page <= 1} onClick={handlePrev} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Anterior</button>
-
-          <button disabled={!hasNext} onClick={handleNext} className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer">Próxima</button>
-
+          <button
+            disabled={page <= 1}
+            onClick={handlePrev}
+            className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer"
+          >
+            Anterior
+          </button>
+ 
+          <button
+            disabled={!hasNext.current}
+            onClick={handleNext}
+            className="px-3 py-2 border rounded hover:bg-gray-200 transition-transform duration-200 hover:scale-105 cursor-pointer"
+          >
+            Próxima
+          </button>
+ 
           <div className="inline-flex items-center gap-2">
             <label className="text-sm">Ir p/ página:</label>
             <input

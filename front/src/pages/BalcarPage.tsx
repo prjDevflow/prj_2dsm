@@ -1,18 +1,34 @@
-// src/pages/SimaPage.tsx
-import Sidebar from "../components/Sidebar";
-import Map from "../components/Map"; // se quiser mostrar um mapa só nessa página
+import { useState } from "react";
+import Map from "../components/Map";
+import BalcarDrawer from "../components/BalcarDrawer";
  
-export default function SimaPage() {
+export default function BalcarPage() {
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [selectedPonto, setSelectedPonto] = useState<any>(null);
+ 
   return (
     <div className="flex gap-4">
-      {/* Sidebar específico pra SIMA */}
-      <Sidebar logoSrc="../imagens/Logo-2.png" variant="balcar" />
+     
  
-      {/* Conteúdo principal da página */}
-      <main className="flex-1 p-6">
-        <h1 className="text-2xl font-bold mb-4">Conteúdo Balcar</h1>
-        <Map type={"furnas"} /* props caso precise */ />
-        {/* demais componentes específicos da página */}
+      <main className="flex-1 relative">
+        <h1 className="text-2xl font-bold mb-4">Balcar</h1>
+ 
+        <Map
+          type="balcar"
+          instituicao="INPE"
+          onMarkerClick={(ponto) => {
+            console.log("PONTO BALCAR CLICADO:", ponto);
+            setSelectedPonto(ponto);
+            setOpenDrawer(true);
+          }}
+        />
+ 
+        <BalcarDrawer
+          open={openDrawer}
+          onOpenChange={setOpenDrawer}
+          selectedPonto={selectedPonto}
+          setSelectedPonto={setSelectedPonto}
+        />
       </main>
     </div>
   );

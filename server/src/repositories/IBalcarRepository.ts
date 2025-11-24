@@ -3,8 +3,8 @@ export interface IBalcarRepository {
     instituicao: string | undefined
   }): Promise<{ id: string; rotulo: string; latitude: number; longitude: number; instituicao:string}[]>;
  
-
-
+ 
+ 
   getDataById(params: {
     idreservatorio: number | undefined;
     limit?: number;

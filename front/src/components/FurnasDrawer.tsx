@@ -1,6 +1,5 @@
 // src/components/FurnasDrawer.tsx
 import React from "react";
-import CalendarPicker from "@/components/CalendarPicker";
 import FurnasTable from "@/components/FurnasTable";
 
 import {
@@ -10,7 +9,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 
 type PontoColeta = {
   id: number | string;
@@ -37,9 +35,7 @@ const FurnasDrawer: React.FC<Props> = ({
   open,
   onOpenChange,
   selectedPonto,
-  setSelectedPonto,
   range,
-  setRange,
   apiBase = "http://localhost:3001/furnas",
 }) => {
   React.useEffect(() => {
@@ -58,12 +54,6 @@ const FurnasDrawer: React.FC<Props> = ({
             </span>
 
             <div className="mt-4 p-2 border rounded-md bg-white">
-              <CalendarPicker
-                value={range}
-                onChange={(r) => setRange(r)}
-                showApply={true}
-                onApply={(r) => setRange(r)}
-              />
 
               <div className="mt-4">
                 <FurnasTable
@@ -80,28 +70,6 @@ const FurnasDrawer: React.FC<Props> = ({
         </DrawerHeader>
 
         <DrawerFooter>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                console.log("Fechar Drawer Furnas", { range, selectedPonto });
-                onOpenChange(false);
-              }}
-            >
-              Ok
-            </Button>
-
-            {setSelectedPonto && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setSelectedPonto(null);
-                  onOpenChange(false);
-                }}
-              >
-                Limpar seleção
-              </Button>
-            )}
-          </div>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
