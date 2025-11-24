@@ -1,80 +1,65 @@
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  //   CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
-
 import {
   Select,
   SelectContent,
-  //   SelectGroup,
   SelectItem,
-  //   SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
-export const description = "A multiple line chart";
+import * as React from "react";
+import { type DateRange } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
 
-// const chartData = [
-//   { month: "January", desktop: 186, mobile: 80 },
-//   { month: "February", desktop: 305, mobile: 200 },
-//   { month: "March", desktop: 237, mobile: 120 },
-//   { month: "April", desktop: 73, mobile: 190 },
-//   { month: "May", desktop: 209, mobile: 130 },
-//   { month: "June", desktop: 214, mobile: 140 },
-// ];
-
+// CONFIG DINÂMICO PARA SHADCN
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "#5675ffff",
+  value1: {
+    label: "Valor principal",
+    color: "#5675ff",
   },
-  mobile: {
-    label: "Mobile",
-    color: "#ffa723ff",
+  value2: {
+    label: "Valor secundário",
+    color: "#ffa723",
   },
 } satisfies ChartConfig;
 
 export function ChartLineMultiple() {
   const [station, setStation] = useState<string | null>(null);
   const [dataType, setDataType] = useState<string | null>(null);
-  const [chartData, setChartData] = useState<{ date: string; value: number }[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: new Date(2025, 5, 12),
+    to: new Date(2025, 6, 15),
+  });
 
   useEffect(() => {
     if (!station || !dataType) return;
 
     const fetchData = async () => {
       setLoading(true);
+
       try {
         const query = new URLSearchParams({
           rotulo: station,
           type: dataType,
         }).toString();
 
-        const res = await fetch(`https://prj-2dsm.onrender.com/graphics?${query}`);
-        // if (!res.ok) throw new Error("Erro ao buscar dados");
+        const res = await axios.get(`http://localhost:3001/graphics?${query}`);
 
-        const data = await res.json();
+        // Ajustar formato para o gráfico
+        const parsed = res.data.data.registers.map((item: any) => ({
+          timestamp: item.timestamp,
+          value1: item.value1,
+          value2: item.value2 ?? null,
+        }));
 
-        console.log(data);
-
-        // Ajuste os dados conforme o formato da API
-        // const parsed = data.map((item: any) => ({
-        //   date: item.date,
-        //   value: item.value,
-        // }));
-
-        setChartData(data);
+        setChartData(parsed);
       } catch (err) {
         console.error("Erro ao buscar dados", err);
       } finally {
@@ -86,13 +71,25 @@ export function ChartLineMultiple() {
   }, [station, dataType]);
 
   return (
-    <Card className="py-4 flex flex-col gap-0 !pb-0">
+    <Card className="h-full py-4 flex flex-col gap-0 !pb-0">
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4">
           <CardTitle>Gráfico - SIMA</CardTitle>
           <CardDescription>Selecione uma estação e o tipo de dado que deseja obter</CardDescription>
         </div>
+
         <div className="flex gap-4 px-6 py-4">
+          {/* SELECT ESTACAO */}
+          <Calendar
+            mode="range"
+            defaultMonth={dateRange?.from}
+            selected={dateRange}
+            onSelect={setDateRange}
+            numberOfMonths={1}
+            className="rounded-lg border shadow-sm"
+          />
+
+          {/* SELECT ESTACAO */}
           <Select onValueChange={setStation}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Estação" />
@@ -116,7 +113,7 @@ export function ChartLineMultiple() {
               <SelectItem value="Xingó">Xingó</SelectItem>
               <SelectItem value="Segredo">Segredo</SelectItem>
               <SelectItem value="Três Marias">Três Marias</SelectItem>
-              <SelectItem value="Mamirauá">Mamira</SelectItem>
+              <SelectItem value="Mamira">Mamira</SelectItem>
               <SelectItem value="Furnas - Embrapa">Furnas - Embrapa</SelectItem>
               <SelectItem value="Furnas 1">Furnas 1</SelectItem>
               <SelectItem value="Curuai">Curuai</SelectItem>
@@ -130,28 +127,37 @@ export function ChartLineMultiple() {
             </SelectContent>
           </Select>
 
+          {/* SELECT TIPO DE DADO — com tipos corretos das procedures */}
           <Select onValueChange={setDataType}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Tipo de dado" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-100">
               <SelectItem value="carbono">Carbono</SelectItem>
-              <SelectItem value="temperatura">Temperatura</SelectItem>
-              <SelectItem value="oxigênio Dissolvido">Oxigênio Dissolvido</SelectItem>
-              <SelectItem value="ph">PH</SelectItem>
+              <SelectItem value="temperatura_2m">Temperatura 2m</SelectItem>
+              <SelectItem value="temperatura_5m">Temperatura 5m</SelectItem>
+              <SelectItem value="temperatura_20m">Temperatura 20m</SelectItem>
+              <SelectItem value="temperatura_40m">Temperatura 40m</SelectItem>
+              <SelectItem value="temperatura_ar">Temperatura do ar</SelectItem>
+              <SelectItem value="temperatura_sonda">Temperatura (sonda)</SelectItem>
+              <SelectItem value="oxigenio_dissolvido">Oxigênio dissolvido</SelectItem>
+              <SelectItem value="ph">pH</SelectItem>
               <SelectItem value="clorofila">Clorofila</SelectItem>
-              <SelectItem value="nutrientes">Nutrientes</SelectItem>
-              <SelectItem value="Condutividade">Condutividade</SelectItem>
-              <SelectItem value="Turbidez">Turbidez</SelectItem>
-              <SelectItem value="Radiação">Radiação</SelectItem>
-              <SelectItem value="Vento">Vento</SelectItem>
-              <SelectItem value="Correntes">Correntes</SelectItem>
-              <SelectItem value="Precipitação">Precipitação</SelectItem>
-              <SelectItem value="Qualidade da Água">Qualidade da Água</SelectItem>
+              <SelectItem value="nutrientes_amonia">Nutrientes Amônia</SelectItem>
+              <SelectItem value="nutrientes_do2">Nutrientes Dióxido de Nitrogénio</SelectItem>
+              <SelectItem value="condutividade">Condutividade</SelectItem>
+              <SelectItem value="turbidez">Turbidez</SelectItem>
+              <SelectItem value="radiacao_incidencia">Radiação - Incidência</SelectItem>
+              <SelectItem value="radiacao_reflexao">Radiação - Reflexão</SelectItem>
+              <SelectItem value="vento">Vento</SelectItem>
+              <SelectItem value="correntes_norte">Correntes Norte</SelectItem>
+              <SelectItem value="correntes_leste">Correntes Leste</SelectItem>
+              <SelectItem value="precipitacao">Precipitação</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </CardHeader>
+
       <CardContent className="p-6 relative">
         {loading && (
           <section className="absolute z-10 bg-zinc-900/80 text-zinc-100 flex justify-center items-center h-full w-full top-0 left-0">
@@ -160,44 +166,61 @@ export function ChartLineMultiple() {
         )}
 
         {!station || !dataType ? (
-          <div className="flex justify-center items-center h-[400px] text-zinc-500">
+          <div className="flex justify-center items-center h-[500px] text-zinc-500">
             <p>Selecione uma estação e um tipo de dado</p>
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="aspect-auto h-[400px] w-full">
+          <ChartContainer config={chartConfig} className="aspect-auto h-[500px] w-full">
             <LineChart data={chartData} margin={{ left: 12, right: 12 }}>
               <CartesianGrid vertical={false} />
               <XAxis
-                dataKey="date"
+                dataKey="timestamp"
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
                 tickFormatter={(value) =>
-                  new Date(value).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })
+                  new Date(value).toLocaleDateString("pt-BR", {
+                    month: "short",
+                    day: "numeric",
+                  })
                 }
               />
+
               <ChartTooltip
                 content={
                   <ChartTooltipContent
                     className="w-[150px]"
-                    nameKey="value"
+                    nameKey="value1"
                     labelFormatter={(value) =>
                       new Date(value).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
                         month: "short",
-                        day: "numeric",
                         year: "numeric",
                       })
                     }
                   />
                 }
               />
+
+              {/* Linha principal */}
               <Line
-                dataKey="value"
+                dataKey="value1"
                 type="monotone"
-                stroke="var(--color-value)"
+                stroke="var(--color-value1)"
                 strokeWidth={2}
                 dot={false}
               />
+
+              {/* Linha secundária, se existir */}
+              {chartData.some((d) => d.value2 !== null) && (
+                <Line
+                  dataKey="value2"
+                  type="monotone"
+                  stroke="var(--color-value2)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              )}
             </LineChart>
           </ChartContainer>
         )}
