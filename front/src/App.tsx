@@ -25,7 +25,7 @@ const AppLayout = () => {
         <main
           style={{
             // paddingTop: "1rem",
-            paddingBottom: "72px",
+            // paddingBottom: "72px",
             flex: 1,
           }}
           className="max-h-full"

@@ -11,7 +11,7 @@ export default function BalcarPage() {
      
  
       <main className="flex-1 relative">
-        <h1 className="text-2xl font-bold mb-4">Balcar</h1>
+        {/* <h1 className="text-2xl font-bold mb-4">Balcar</h1> */}
  
         <Map
           type="balcar"

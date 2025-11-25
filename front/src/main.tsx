@@ -29,6 +29,7 @@ const routes = createBrowserRouter([
       { path: "balcar", element: <BalcarPage /> },
       { path: "furnas", element: <InstituicaoPage /> },
       { path: "furnas/:instituicao", element: <FurnasMapPage /> },
+      { path: "graficos", element: <GraphicsPage /> },
       { path: "sobre", element: <AboutPage /> }, // <- rota adicionada
     ],
   },

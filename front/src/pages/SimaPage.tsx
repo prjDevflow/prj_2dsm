@@ -58,7 +58,7 @@ export default function SimaPage(): JSX.Element {
       )}
 
       <main className={`flex-1 ${isDrawerOpen ? "overflow-hidden" : ""}`}>
-        {!isDrawerOpen && (
+        {/* {!isDrawerOpen && (
           <header className="flex items-center justify-between mb-10">
             <h1 className="text-2xl font-bold">SIMA</h1>
             <div className="text-sm text-gray-600">
@@ -67,7 +67,7 @@ export default function SimaPage(): JSX.Element {
                 : "Clique em um ponto no mapa para ver a tabela"}
             </div>
           </header>
-        )}
+        )} */}
 
         <section className="">
           <SimaMap onMarkerClick={handleMarkerClick} />

@@ -4,21 +4,22 @@ import styled from "styled-components";
 
 const Page = styled.div`
   height: 100%;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 24px;
   padding: 2rem;
 `;
 
 const PageHeader = styled.header`
-  margin-top: 200px;
+  // margin-top: 200px;
   width: 100%;
-  max-width: 960px;
   text-align: center;
+
 `;
 
 const PageTitle = styled.h1`
-  margin: 0;
   font-size: 32px;
   font-weight: 700;
   color: #0b1220;

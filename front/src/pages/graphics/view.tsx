@@ -12,9 +12,9 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-import * as React from "react";
-import { type DateRange } from "react-day-picker";
-import { Calendar } from "@/components/ui/calendar";
+// import * as React from "react";
+// import { type DateRange } from "react-day-picker";
+// import { Calendar } from "@/components/ui/calendar";
 
 // CONFIG DINÂMICO PARA SHADCN
 const chartConfig = {
@@ -33,10 +33,10 @@ export function ChartLineMultiple() {
   const [dataType, setDataType] = useState<string | null>(null);
   const [chartData, setChartData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: new Date(2025, 5, 12),
-    to: new Date(2025, 6, 15),
-  });
+  // const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+  //   from: new Date(2025, 5, 12),
+  //   to: new Date(2025, 6, 15),
+  // });
 
   useEffect(() => {
     if (!station || !dataType) return;
@@ -80,14 +80,14 @@ export function ChartLineMultiple() {
 
         <div className="flex gap-4 px-6 py-4">
           {/* SELECT ESTACAO */}
-          <Calendar
+          {/* <Calendar
             mode="range"
             defaultMonth={dateRange?.from}
             selected={dateRange}
             onSelect={setDateRange}
             numberOfMonths={1}
             className="rounded-lg border shadow-sm"
-          />
+          /> */}
 
           {/* SELECT ESTACAO */}
           <Select onValueChange={setStation}>
