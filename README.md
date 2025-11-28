@@ -335,6 +335,23 @@ A plataforma integra dados de duas fontes principais:
 
 ---
 
+# 🧪 Testes Unitários
+
+Aqui estão os arquivos Excel utilizados para os testes unitários do projeto:
+
+### 📂 Arquivos Disponíveis
+
+- 📘 **Teste Unitário — Modelo**  
+  [Clique para abrir](https://github.com/prjDevflow/prj_2dsm/blob/main/docs/testes_unitarios/Teste%20unitario%20modelo%20.xlsx)
+
+- 📗 **Teste Unitário — Versão 1**  
+  [Clique para abrir](https://github.com/prjDevflow/prj_2dsm/blob/main/docs/testes_unitarios/Teste%20unitario%20v1.xlsx)
+
+- 📙 **Teste Unitário — Versão 2**  
+  [Clique para abrir](https://github.com/prjDevflow/prj_2dsm/blob/main/docs/testes_unitarios/Teste%20unitario%20v2.xlsx)
+
+---
+
 # 🎨 Design
 
 ## Protótipos do Sistema
