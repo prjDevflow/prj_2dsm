@@ -333,6 +333,23 @@ A plataforma integra dados de duas fontes principais:
 ## Diagrama de Classes
 <img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/DevflowDiagramaDeClasse.png" />
 
+## Diagramas de Sequencias
+
+### Carregamento do Painel Interativo
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/Diagrama_Sequencia01.png" />
+
+### Visualização da Tabela Dinâmica
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/Diagrama_Sequencia02.png" />
+
+### Exportação CSV
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/Diagrama_Sequencia03.png" />
+
+### Mapa Interativo
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/Diagrama_Sequencia04.png" />
+
+### Gráficos Temporais
+<img width="487" height="299" alt="Diagrama de Casos de Uso" src="https://github.com/prjDevflow/prj_2dsm/blob/main/docs/Imagens/Diagrama_Sequencia05.png" />
+
 ---
 
 # 🧪 Testes Unitários
